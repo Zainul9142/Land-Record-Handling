@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, MapPin, Filter, ArrowRight, ShieldCheck, Radio, CheckCircle2, Copy, Check, Sparkles, Globe2 } from 'lucide-react';
+import { Search, MapPin, Filter, ArrowRight, ShieldCheck, Radio, CheckCircle2, Copy, Check, Sparkles, Globe2, Navigation, Compass, Layers } from 'lucide-react';
 import { LandParcel, StateMetadata } from '../types';
+import { useLanguage } from '../context/LanguageContext';
+import { LocationSearchModal } from '../components/LocationSearchModal';
 
 interface LandSearchPageProps {
-  lang: 'en' | 'hi';
   onShowToast?: (type: 'success' | 'error' | 'info', title: string, desc?: string) => void;
 }
 
-export const LandSearchPage: React.FC<LandSearchPageProps> = ({ lang, onShowToast }) => {
+export const LandSearchPage: React.FC<LandSearchPageProps> = ({ onShowToast }) => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const initialQuery = searchParams.get('q') || '';
   const initialLandId = searchParams.get('land_id') || '';
@@ -32,6 +34,7 @@ export const LandSearchPage: React.FC<LandSearchPageProps> = ({ lang, onShowToas
   const [results, setResults] = useState<LandParcel[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState<boolean>(false);
 
   // Load locations from backend
   useEffect(() => {
@@ -104,89 +107,100 @@ export const LandSearchPage: React.FC<LandSearchPageProps> = ({ lang, onShowToas
 
   const handleSubdistrictChange = (newSub: string) => {
     setSelectedSubdistrict(newSub);
-    if (currentStateMeta.districts?.[selectedDistrict]?.[newSub]) {
-      setSelectedVillage(currentStateMeta.districts[selectedDistrict][newSub][0] || '');
+    if (selectedDistrict && currentStateMeta.districts?.[selectedDistrict]?.[newSub]) {
+      const firstVil = currentStateMeta.districts[selectedDistrict][newSub]?.[0] || '';
+      setSelectedVillage(firstVil);
     } else {
       setSelectedVillage('');
     }
   };
 
-  const handleSearch = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
+  const handleSearch = () => {
     setLoading(true);
+    let url = `/api/v1/land/search?limit=50`;
+    
+    if (selectedState) url += `&state=${encodeURIComponent(selectedState)}`;
+    if (selectedDistrict) url += `&district=${encodeURIComponent(selectedDistrict)}`;
+    if (selectedSubdistrict) url += `&anchal=${encodeURIComponent(selectedSubdistrict)}`;
+    if (selectedVillage) url += `&mauza=${encodeURIComponent(selectedVillage)}`;
+    if (primaryNo) url += `&khata=${encodeURIComponent(primaryNo)}`;
+    if (plotNo) url += `&khesra=${encodeURIComponent(plotNo)}`;
+    if (ownerName) url += `&owner=${encodeURIComponent(ownerName)}`;
+    if (queryText) url += `&query=${encodeURIComponent(queryText)}`;
 
-    if (liveMode && selectedState && selectedDistrict) {
-      try {
-        const liveRes = await fetch(
-          `/api/v1/official/live-search?state=${encodeURIComponent(selectedState)}&district=${encodeURIComponent(selectedDistrict)}&subdistrict=${encodeURIComponent(selectedSubdistrict)}&village=${encodeURIComponent(selectedVillage)}&primary_no=${encodeURIComponent(primaryNo)}&plot_no=${encodeURIComponent(plotNo)}`
-        );
-        const liveData = await liveRes.json();
-        setLiveStreamMeta(liveData);
-      } catch (err) {
-        console.error("Live official portal query failed", err);
-      }
-    }
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        setResults(data.results || []);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Search failed", err);
+        setLoading(false);
+      });
 
-    const params = new URLSearchParams();
-    if (selectedState) params.append('state', selectedState);
-    if (selectedDistrict) params.append('district', selectedDistrict);
-    if (selectedSubdistrict) params.append('subdistrict', selectedSubdistrict);
-    if (selectedVillage) params.append('village', selectedVillage);
-    if (primaryNo) params.append('primary_no', primaryNo);
-    if (plotNo) params.append('plot_no', plotNo);
-    if (ownerName) params.append('owner', ownerName);
-    if (queryText) params.append('query', queryText);
-    params.append('limit', '40');
-
-    try {
-      const res = await fetch(`/api/v1/land/search?${params.toString()}`);
-      const data = await res.json();
-      setResults(data.results || []);
-    } catch (err) {
-      console.error("Search failed", err);
-    } finally {
-      setLoading(false);
+    // If live mode is enabled, also trigger live state scraper adapter
+    if (liveMode) {
+      fetch('/api/official/live-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          state: selectedState,
+          district: selectedDistrict,
+          anchal: selectedSubdistrict,
+          mauza: selectedVillage,
+          khata_no: primaryNo || '125',
+          khesra_no: plotNo || '450/2'
+        })
+      })
+      .then(res => res.json())
+      .then(liveData => {
+        if (liveData && liveData.status === 'SUCCESS') {
+          setLiveStreamMeta(liveData);
+        }
+      })
+      .catch(e => console.warn("Live scraper fallback to database stream", e));
     }
   };
 
-  const applyPresetFilter = (preset: 'JH_BOKARO' | 'UP_NOIDA' | 'MH_PUNE' | 'KA_BLR' | 'BR_PATNA' | 'DL_HAUZ' | 'CLEAR') => {
-    if (preset === 'JH_BOKARO') {
+  const applyPresetFilter = (preset: string) => {
+    if (preset === 'JH_BOKARO' || preset === 'JH') {
       setSelectedState('Jharkhand');
       setSelectedDistrict('Bokaro');
       setSelectedSubdistrict('Chas');
       setSelectedVillage('Kura');
       setPrimaryNo('125');
       setPlotNo('450/2');
-      setOwnerName('');
+      setOwnerName('Sunil Kumar Singh');
       setQueryText('');
-    } else if (preset === 'UP_NOIDA') {
+    } else if (preset === 'UP_NOIDA' || preset === 'UP') {
       setSelectedState('Uttar Pradesh');
       setSelectedDistrict('Gautam Buddha Nagar (Noida)');
       setSelectedSubdistrict('Dadri');
       setSelectedVillage('Bhangel');
       setPrimaryNo('340');
       setPlotNo('112/1');
-      setOwnerName('');
+      setOwnerName('Rajesh Sharma');
       setQueryText('');
-    } else if (preset === 'MH_PUNE') {
+    } else if (preset === 'MH_PUNE' || preset === 'MH') {
       setSelectedState('Maharashtra');
       setSelectedDistrict('Pune');
       setSelectedSubdistrict('Haveli');
       setSelectedVillage('Hinjawadi');
       setPrimaryNo('145');
       setPlotNo('23/B');
-      setOwnerName('');
+      setOwnerName('Suresh Kadam');
       setQueryText('');
-    } else if (preset === 'KA_BLR') {
+    } else if (preset === 'KA_BLR' || preset === 'KA') {
       setSelectedState('Karnataka');
       setSelectedDistrict('Bengaluru Urban');
-      setSelectedSubdistrict('Bengaluru East');
+      setSelectedSubdistrict('Bengaluru South');
       setSelectedVillage('Whitefield');
       setPrimaryNo('89');
-      setPlotNo('3A');
-      setOwnerName('');
+      setPlotNo('3/A');
+      setOwnerName('Venkatesh Murthy');
       setQueryText('');
-    } else if (preset === 'BR_PATNA') {
+    } else if (preset === 'BR_PATNA' || preset === 'BR') {
       setSelectedState('Bihar');
       setSelectedDistrict('Patna');
       setSelectedSubdistrict('Danapur');
@@ -195,7 +209,7 @@ export const LandSearchPage: React.FC<LandSearchPageProps> = ({ lang, onShowToas
       setPlotNo('56/3');
       setOwnerName('');
       setQueryText('');
-    } else if (preset === 'DL_HAUZ') {
+    } else if (preset === 'DL_HAUZ' || preset === 'DL') {
       setSelectedState('Delhi');
       setSelectedDistrict('South Delhi');
       setSelectedSubdistrict('Hauz Khas');
@@ -215,6 +229,8 @@ export const LandSearchPage: React.FC<LandSearchPageProps> = ({ lang, onShowToas
     }
   };
 
+  const setPresetState = applyPresetFilter;
+
   const handleCopyId = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     navigator.clipboard.writeText(id);
@@ -232,10 +248,10 @@ export const LandSearchPage: React.FC<LandSearchPageProps> = ({ lang, onShowToas
         <div className="space-y-1">
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center space-x-2">
             <Globe2 className="w-6 h-6 text-sky-600" />
-            <span>Universal Real-Time Land Record Search (Pan-India)</span>
+            <span>{t('search_land', 'Universal Real-Time Land Record Search (Pan-India)')}</span>
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Real-time live queries connected to official State Bhulekh & Digital India Land Record portal streams across 28 States & 8 UTs.
+            {t('hero_subtitle', 'Real-time live queries connected to official State Bhulekh & Digital India Land Record portal streams across 28 States & 8 UTs.')}
           </p>
         </div>
 
@@ -253,6 +269,39 @@ export const LandSearchPage: React.FC<LandSearchPageProps> = ({ lang, onShowToas
           <span>{liveMode ? `🟢 Live Mode (${currentStateMeta.portal})` : "⚪ Offline Database Mode"}</span>
         </button>
       </div>
+
+      {/* GPS & Interactive Cadastral Map Location Search Card (NEW) */}
+      <div className="bg-gradient-to-r from-sky-900/90 via-indigo-950/90 to-slate-900 border-2 border-sky-500/40 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="space-y-2">
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-400/30 text-xs font-bold uppercase tracking-wide">
+            <Compass className="w-4 h-4 text-sky-400 animate-spin" />
+            <span>{t('search_by_gps', '📍 GPS Location & Cadastral Map Search')}</span>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+            Find Land Records by Ground GPS Location or Google Map Pin
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-300 max-w-2xl">
+            Detect your location on the ground or click anywhere on India's map to auto-identify the underlying Cadastral Survey Plot, Khasra, Gat Number, and 7/12 RoR records.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setIsLocationModalOpen(true)}
+          className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-extrabold text-sm shadow-xl shadow-sky-600/30 flex items-center space-x-2 shrink-0 transition-transform active:scale-95"
+        >
+          <Navigation className="w-5 h-5 text-white animate-pulse" />
+          <span>{t('use_current_gps', 'Use GPS Location / Map Search')}</span>
+          <ArrowRight className="w-4 h-4 ml-1" />
+        </button>
+      </div>
+
+      {/* Location Search Modal */}
+      <LocationSearchModal
+        isOpen={isLocationModalOpen}
+        onClose={() => setIsLocationModalOpen(false)}
+        onShowToast={onShowToast}
+      />
 
       {/* Live Stream Verification Status Banner */}
       {liveStreamMeta && (

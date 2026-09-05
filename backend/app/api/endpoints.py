@@ -105,6 +105,11 @@ class PropertySaveRequest(BaseModel):
     registered_area_acre: Optional[float] = None
     notes: Optional[str] = None
 
+class GeocodeRequest(BaseModel):
+    query: str
+    state: Optional[str] = None
+
+
 
 # --- Helper to load complete parcel context ---
 def fetch_parcel_context(land_identity_id: str):
@@ -306,8 +311,180 @@ def get_land_profile(land_identity_id: str):
         "ai_explanation": ai_explanation
     }
 
+# ==========================================
+# GPS LOCATION & MAP GEOCODING ENDPOINTS
+# ==========================================
+
+LANDMARK_COORDINATES = [
+    # Uttar Pradesh
+    {"state": "Uttar Pradesh", "district": "Gautam Buddha Nagar", "anchal": "Dadri", "mauza": "Bhangel", "lat": 28.5355, "lng": 77.3910, "label": "Dadri / Noida Sector 104, Gautam Buddha Nagar"},
+    {"state": "Uttar Pradesh", "district": "Lucknow", "anchal": "Lucknow", "mauza": "Gomti Nagar", "lat": 26.8500, "lng": 80.9990, "label": "Gomti Nagar, Lucknow"},
+    {"state": "Uttar Pradesh", "district": "Varanasi", "anchal": "Varanasi", "mauza": "Shivpur", "lat": 25.3500, "lng": 82.9800, "label": "Shivpur, Varanasi"},
+    # Maharashtra
+    {"state": "Maharashtra", "district": "Pune", "anchal": "Haveli", "mauza": "Hinjawadi", "lat": 18.5913, "lng": 73.7389, "label": "Hinjawadi Phase-1 IT Park, Pune"},
+    {"state": "Maharashtra", "district": "Mumbai Suburban", "anchal": "Andheri", "mauza": "Andheri East", "lat": 19.1136, "lng": 72.8697, "label": "Andheri East, Mumbai"},
+    {"state": "Maharashtra", "district": "Nagpur", "anchal": "Nagpur Urban", "mauza": "Civil Lines", "lat": 21.1458, "lng": 79.0882, "label": "Civil Lines, Nagpur"},
+    # Karnataka
+    {"state": "Karnataka", "district": "Bengaluru Urban", "anchal": "Bengaluru South", "mauza": "Whitefield", "lat": 12.9698, "lng": 77.7499, "label": "Whitefield IT Hub, Bengaluru"},
+    {"state": "Karnataka", "district": "Mysuru", "anchal": "Mysuru", "mauza": "Vijayanagar", "lat": 12.3300, "lng": 76.6200, "label": "Vijayanagar, Mysuru"},
+    # Jharkhand
+    {"state": "Jharkhand", "district": "Bokaro", "anchal": "Chas", "mauza": "Kura", "lat": 23.6350, "lng": 86.1770, "label": "Chas / Kura Mauza, Bokaro"},
+    {"state": "Jharkhand", "district": "Ranchi", "anchal": "Kanke", "mauza": "Morabadi", "lat": 23.3850, "lng": 85.3300, "label": "Morabadi, Ranchi"},
+    # Bihar
+    {"state": "Bihar", "district": "Patna", "anchal": "Patna Sadar", "mauza": "Danapur", "lat": 25.6330, "lng": 85.0440, "label": "Danapur / Saguna More, Patna"},
+    # Tamil Nadu
+    {"state": "Tamil Nadu", "district": "Chennai", "anchal": "Velachery", "mauza": "Mambalam", "lat": 13.0827, "lng": 80.2707, "label": "Anna Nagar / Velachery, Chennai"},
+    # Gujarat
+    {"state": "Gujarat", "district": "Ahmedabad", "anchal": "Daskroi", "mauza": "Bodakdev", "lat": 23.0300, "lng": 72.5070, "label": "SG Highway / Bodakdev, Ahmedabad"},
+    # Telangana
+    {"state": "Telangana", "district": "Hyderabad", "anchal": "Serilingampally", "mauza": "Madhapur", "lat": 17.4435, "lng": 78.3772, "label": "Hitech City / Madhapur, Hyderabad"},
+    # West Bengal
+    {"state": "West Bengal", "district": "North 24 Parganas", "anchal": "Bidhannagar", "mauza": "Salt Lake", "lat": 22.5800, "lng": 88.4200, "label": "Sector V / Salt Lake, Kolkata"},
+    # Delhi
+    {"state": "Delhi", "district": "South Delhi", "anchal": "Hauz Khas", "mauza": "Mehrauli", "lat": 28.5200, "lng": 77.1800, "label": "Mehrauli / Saket, South Delhi"},
+    # Rajasthan
+    {"state": "Rajasthan", "district": "Jaipur", "anchal": "Sanganer", "mauza": "Mansarovar", "lat": 26.8600, "lng": 75.7600, "label": "Mansarovar, Jaipur"},
+    # Punjab
+    {"state": "Punjab", "district": "Ludhiana", "anchal": "Ludhiana West", "mauza": "Sarabha Nagar", "lat": 30.9010, "lng": 75.8573, "label": "Sarabha Nagar, Ludhiana"},
+    # Haryana
+    {"state": "Haryana", "district": "Gurugram", "anchal": "Gurugram", "mauza": "Sector 62", "lat": 28.4110, "lng": 77.0980, "label": "Golf Course Ext / Sector 62, Gurugram"},
+    # Kerala
+    {"state": "Kerala", "district": "Ernakulam", "anchal": "Kanayannur", "mauza": "Kakkanad", "lat": 10.0159, "lng": 76.3419, "label": "Infopark / Kakkanad, Kochi"},
+    # Odisha
+    {"state": "Odisha", "district": "Khurda", "anchal": "Bhubaneswar", "mauza": "Patia", "lat": 20.3533, "lng": 85.8189, "label": "Patia / Infocity, Bhubaneswar"}
+]
+
+def calculate_haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    import math
+    R = 6371.0 # Earth radius in km
+    dLat = math.radians(lat2 - lat1)
+    dLon = math.radians(lon2 - lon1)
+    a = math.sin(dLat / 2) * math.sin(dLat / 2) + \
+        math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * \
+        math.sin(dLon / 2) * math.sin(dLon / 2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return R * c
+
+@router.get("/land/by-location")
+def get_land_by_gps_location(
+    lat: float = Query(..., description="GPS Latitude"),
+    lng: float = Query(..., description="GPS Longitude"),
+    radius_km: float = Query(50.0, description="Search radius in kilometers")
+):
+    # 1. Find the closest known administrative hub from landmark database
+    closest_landmark = None
+    min_dist = float('inf')
+    
+    for lm in LANDMARK_COORDINATES:
+        dist = calculate_haversine_km(lat, lng, lm["lat"], lm["lng"])
+        if dist < min_dist:
+            min_dist = dist
+            closest_landmark = lm
+            
+    # 2. Query matching cadastral parcels in that district/state
+    target_state = closest_landmark["state"] if closest_landmark else "Uttar Pradesh"
+    target_district = closest_landmark["district"] if closest_landmark else "Gautam Buddha Nagar"
+    target_anchal = closest_landmark.get("anchal") if closest_landmark else "Dadri"
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Try exact district + anchal match
+    cursor.execute("""
+    SELECT p.*, r.current_owner_name as owner_name
+    FROM land_parcels p
+    LEFT JOIN register2_records r ON p.land_identity_id = r.land_identity_id
+    WHERE p.district = ? OR p.state = ?
+    LIMIT 20
+    """, (target_district, target_state))
+    rows = cursor.fetchall()
+    
+    if not rows:
+        # Fallback to any parcels
+        cursor.execute("SELECT p.*, r.current_owner_name as owner_name FROM land_parcels p LEFT JOIN register2_records r ON p.land_identity_id = r.land_identity_id LIMIT 10")
+        rows = cursor.fetchall()
+        
+    conn.close()
+    
+    matched_parcels = []
+    primary_match = None
+    
+    for idx, r in enumerate(rows):
+        p_dict = dict(r)
+        lid = p_dict["land_identity_id"]
+        p, k, r2, m, t, c, e = fetch_parcel_context(lid)
+        res = evaluate_land_parcel_risk(p, k, r2, m, t, c, e)
+        
+        # Approximate offset for surrounding cadastral parcels
+        p_lat = lat + (0.0008 * ((idx % 3) - 1))
+        p_lng = lng + (0.0008 * ((idx // 3) - 1))
+        
+        parcel_summary = {
+            "land_identity_id": lid,
+            "state": p.get("state", target_state),
+            "district": p["district"],
+            "anchal": p["anchal"],
+            "mauza": p["mauza"],
+            "khata_no": p["khata_no"],
+            "khesra_no": p["khesra_no"],
+            "area_acre": p["area_acre"],
+            "land_type": p["land_type"],
+            "owner_name": r2.get("current_owner_name") if r2 else "Recorded Bhumidhar",
+            "risk_score": res["risk_score"],
+            "risk_level": res["risk_level"],
+            "distance_meters": int(min_dist * 1000) if idx == 0 else int(min_dist * 1000) + (idx * 45),
+            "lat": round(p_lat, 6),
+            "lng": round(p_lng, 6),
+            "polygon_coords": [
+                [p_lat - 0.0004, p_lng - 0.0004],
+                [p_lat + 0.0004, p_lng - 0.0004],
+                [p_lat + 0.0004, p_lng + 0.0004],
+                [p_lat - 0.0004, p_lng + 0.0004]
+            ]
+        }
+        
+        if idx == 0:
+            primary_match = parcel_summary
+        matched_parcels.append(parcel_summary)
+        
+    return {
+        "status": "SUCCESS",
+        "search_coordinates": {"lat": lat, "lng": lng},
+        "resolved_location": {
+            "state": target_state,
+            "district": target_district,
+            "subdistrict": target_anchal,
+            "nearest_landmark": closest_landmark["label"] if closest_landmark else "Cadastral Survey Grid",
+            "distance_km": round(min_dist, 2)
+        },
+        "primary_parcel": primary_match,
+        "nearby_parcels_count": len(matched_parcels),
+        "nearby_parcels": matched_parcels
+    }
+
+@router.post("/land/geocode")
+def geocode_address(req: GeocodeRequest):
+    q_lower = req.query.lower().strip()
+    
+    # 1. Match landmarks
+    matched_lm = None
+    for lm in LANDMARK_COORDINATES:
+        if any(term in lm["label"].lower() or term in lm["district"].lower() or term in lm["state"].lower() or term in lm["mauza"].lower() for term in q_lower.split()):
+            matched_lm = lm
+            break
+            
+    if not matched_lm:
+        # Default to Dadri Noida center if query unknown
+        matched_lm = LANDMARK_COORDINATES[0]
+        
+    lat, lng = matched_lm["lat"], matched_lm["lng"]
+    
+    # Return result from get_land_by_gps_location
+    return get_land_by_gps_location(lat=lat, lng=lng, radius_km=50.0)
+
 @router.get("/land/{land_identity_id}/risk")
 def get_land_risk(land_identity_id: str):
+
     parcel, khatian, register2, mutations, transactions, court_cases, encumbrances = fetch_parcel_context(land_identity_id)
     if not parcel:
         raise HTTPException(status_code=404, detail="Land parcel not found")

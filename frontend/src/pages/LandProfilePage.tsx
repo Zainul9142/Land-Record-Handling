@@ -8,16 +8,19 @@ import { StatusIndicator } from '../components/StatusIndicator';
 import { LandMap } from '../components/LandMap';
 import { LandMap3D } from '../components/LandMap3D';
 import { AIAssistant } from '../components/AIAssistant';
+import { useLanguage } from '../context/LanguageContext';
 
 interface LandProfilePageProps {
-  lang: 'en' | 'hi';
+  lang?: string;
   onShowToast?: (type: 'success' | 'error' | 'info', title: string, desc?: string) => void;
 }
 
-export const LandProfilePage: React.FC<LandProfilePageProps> = ({ lang, onShowToast }) => {
+export const LandProfilePage: React.FC<LandProfilePageProps> = ({ onShowToast }) => {
   const { landIdentityId } = useParams<{ landIdentityId: string }>();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  const { t, lang } = useLanguage();
+  const isEn = lang === 'en';
   const [data, setData] = useState<LandProfileResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<'findings' | 'records' | 'map' | 'map3d' | 'ai'>('findings');

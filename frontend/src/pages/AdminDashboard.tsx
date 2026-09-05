@@ -5,10 +5,10 @@ import { RiskBadge } from '../components/RiskBadge';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 interface AdminDashboardProps {
-  userRole: string;
+  userRole?: string;
 }
 
-export const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
+export const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole = 'REVENUE_OFFICER' }) => {
   const [metrics, setMetrics] = useState<any>(null);
   const [cases, setCases] = useState<OfficerCase[]>([]);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);

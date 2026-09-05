@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShieldCheck, Search, FileCheck, AlertTriangle, ArrowRight, CheckCircle2, Layers, Cpu, QrCode, Globe2, MapPin, Sparkles } from 'lucide-react';
+import { ShieldCheck, Search, FileCheck, AlertTriangle, ArrowRight, CheckCircle2, Layers, Cpu, QrCode, Globe2, MapPin, Sparkles, Navigation, FolderLock } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface HomePageProps {
-  lang: 'en' | 'hi';
+  lang?: string;
 }
 
-export const HomePage: React.FC<HomePageProps> = ({ lang }) => {
+export const HomePage: React.FC<HomePageProps> = () => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
+  const { t, lang } = useLanguage();
   const isEn = lang === 'en';
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,22 +42,12 @@ export const HomePage: React.FC<HomePageProps> = ({ lang }) => {
           <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-semibold">
             <Globe2 className="w-4 h-4 text-sky-400" />
             <span>
-              {isEn 
-                ? "Digital India Land Records Modernization Programme (DILRMP) • Pan-India AI Layer" 
-                : "डिजिटल इंडिया भूमि रिकॉर्ड आधुनिकीकरण कार्यक्रम • अखिल भारतीय एआई परत"}
+              {t('national_layer', 'Digital India Land Records Modernization Programme (DILRMP) • 28 States & 8 UTs National Layer')}
             </span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
-            {isEn ? (
-              <>
-                Verify Land Records Across India. <span className="bg-gradient-to-r from-sky-400 to-emerald-400 bg-clip-text text-transparent">Detect Risk.</span> Protect Ownership.
-              </>
-            ) : (
-              <>
-                अखिल भारतीय भूमि रिकॉर्ड सत्यापित करें। <span className="bg-gradient-to-r from-sky-400 to-emerald-400 bg-clip-text text-transparent">जोखिम पहचानें।</span> स्वामित्व सुरक्षित करें।
-              </>
-            )}
+            {t('hero_title', 'Verify Land Records Across India. Detect Risk. Protect Ownership.')}
           </h1>
 
           <p className="text-base sm:text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">

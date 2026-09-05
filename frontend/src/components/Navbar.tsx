@@ -1,24 +1,28 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import { SupportedLanguage } from '../i18n/translations';
 import { 
   ShieldCheck, Search, Lock, Languages, UserCheck, Scale, 
   ShieldAlert, Menu, X, Globe2, FolderLock, Landmark, 
-  LogIn, LogOut, User as UserIcon 
+  LogIn, LogOut, User as UserIcon, ChevronDown 
 } from 'lucide-react';
 
 interface NavbarProps {
-  lang: 'en' | 'hi';
-  setLang: (l: 'en' | 'hi') => void;
-  userRole: string;
-  setUserRole: (role: string) => void;
+  lang?: string;
+  setLang?: (l: any) => void;
+  userRole?: string;
+  setUserRole?: (role: string) => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ lang, setLang, userRole, setUserRole }) => {
+export const Navbar: React.FC<NavbarProps> = () => {
   const location = useLocation();
-  const isEn = lang === 'en';
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const { user, isAuthenticated, isOfficial, logout } = useAuth();
+  const { lang, setLang, t, currentLangInfo, languages } = useLanguage();
+  const isEn = lang === 'en';
 
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
   const closeMobileMenu = () => setMobileMenuOpen(false);
@@ -30,19 +34,54 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, setLang, userRole, setUser
         <div className="flex items-center space-x-2 truncate">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
           <span className="truncate">
-            {isEn 
-              ? "Digital India Land Records Modernization Programme (DILRMP) • 28 States & 8 UTs National Layer" 
-              : "डिजिटल इंडिया भूमि रिकॉर्ड आधुनिकीकरण कार्यक्रम (DILRMP) • 28 राज्य एवं 8 केंद्र शासित प्रदेश"}
+            {t('national_layer', 'Digital India Land Records Modernization Programme (DILRMP) • 28 States & 8 UTs National Layer')}
           </span>
         </div>
         <div className="flex items-center space-x-3 shrink-0">
-          <button
-            onClick={() => setLang(isEn ? 'hi' : 'en')}
-            className="flex items-center space-x-1 hover:text-sky-400 transition-colors text-slate-300 font-medium"
-          >
-            <Languages className="w-3.5 h-3.5 text-sky-400" />
-            <span>{isEn ? "हिंदी (Hindi)" : "English"}</span>
-          </button>
+          
+          {/* 11 Indian Languages Dropdown Selector */}
+          <div className="relative">
+            <button
+              onClick={() => setLangDropdownOpen(!langDropdownOpen)}
+              className="flex items-center space-x-1.5 hover:text-sky-400 transition-colors text-slate-200 font-semibold bg-slate-900/90 border border-slate-700/80 px-2 py-0.5 rounded-lg text-xs"
+              title="Change Language across 11 Indian Languages"
+            >
+              <span>{currentLangInfo.flag}</span>
+              <span>{currentLangInfo.nativeName}</span>
+              <ChevronDown className="w-3 h-3 text-slate-400" />
+            </button>
+
+            {langDropdownOpen && (
+              <div 
+                className="absolute right-0 mt-1 w-56 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 py-1.5 divide-y divide-slate-800 max-h-80 overflow-y-auto"
+                onMouseLeave={() => setLangDropdownOpen(false)}
+              >
+                <div className="px-3 py-1 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                  Select Regional Language (11)
+                </div>
+                <div className="py-1">
+                  {languages.map((l) => (
+                    <button
+                      key={l.code}
+                      onClick={() => {
+                        setLang(l.code as SupportedLanguage);
+                        setLangDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-1.5 text-xs flex items-center justify-between hover:bg-slate-800 transition-colors ${
+                        lang === l.code ? 'bg-sky-950/80 text-sky-400 font-bold' : 'text-slate-300'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <span>{l.flag}</span>
+                        <span>{l.nativeName} ({l.name})</span>
+                      </div>
+                      {lang === l.code && <span className="text-sky-400">✓</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Quick Auth Info or Sign In */}
           {isAuthenticated && user ? (
