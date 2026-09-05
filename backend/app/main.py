@@ -29,6 +29,7 @@ def startup_event():
     seed_synthetic_dataset(10000)
 
 app.include_router(router, prefix="/api/v1")
+app.include_router(router, prefix="/api")
 
 if __name__ == "__main__":
     import uvicorn
