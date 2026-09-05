@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ShieldCheck, Download, Bot, MapPin, AlertCircle, FileText, CheckCircle2, QrCode, ArrowLeft, Box, Scale, ShieldAlert, Copy, Check } from 'lucide-react';
+import { ShieldCheck, Download, Bot, MapPin, AlertCircle, FileText, CheckCircle2, QrCode, ArrowLeft, Box, Scale, ShieldAlert, Copy, Check, Globe2 } from 'lucide-react';
 import { LandProfileResponse } from '../types';
 import { RiskBadge } from '../components/RiskBadge';
 import { StatusIndicator } from '../components/StatusIndicator';
@@ -80,7 +80,7 @@ export const LandProfilePage: React.FC<LandProfilePageProps> = ({ lang, onShowTo
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 text-center space-y-3">
         <div className="w-8 h-8 border-3 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-        <p className="text-sm text-slate-500 font-medium">Retrieving multi-source land records from Jharbhoomi engine...</p>
+        <p className="text-sm text-slate-500 font-medium">Retrieving multi-source land records from national DILRMP engine...</p>
       </div>
     );
   }
@@ -194,51 +194,56 @@ export const LandProfilePage: React.FC<LandProfilePageProps> = ({ lang, onShowTo
               <MapPin className="w-5 h-5 text-sky-600" />
               <span>Unified Land Profile Specifications</span>
             </h2>
-            <span className="text-xs font-semibold text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
-              {parcel.land_type}
-            </span>
+            <div className="flex items-center space-x-2">
+              <span className="text-xs font-bold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950 px-2 py-0.5 rounded border border-sky-200 dark:border-sky-800">
+                {parcel.state || "National DILRMP"}
+              </span>
+              <span className="text-xs font-semibold text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
+                {parcel.land_type}
+              </span>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+            <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-100 dark:border-slate-700/60">
+              <span className="text-slate-500 dark:text-slate-400 block text-[11px]">State (राज्य)</span>
+              <span className="font-bold text-slate-900 dark:text-white text-sm truncate block">{parcel.state}</span>
+            </div>
+
             <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-100 dark:border-slate-700/60">
               <span className="text-slate-500 dark:text-slate-400 block text-[11px]">District (ज़िला)</span>
               <span className="font-bold text-slate-900 dark:text-white text-sm">{parcel.district}</span>
             </div>
 
             <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-100 dark:border-slate-700/60">
-              <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Anchal (अंचल)</span>
+              <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Sub-district / Tehsil</span>
               <span className="font-bold text-slate-900 dark:text-white text-sm">{parcel.anchal}</span>
             </div>
 
             <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-100 dark:border-slate-700/60">
-              <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Halka / Mauza</span>
-              <span className="font-bold text-slate-900 dark:text-white text-sm">{parcel.halka} / {parcel.mauza}</span>
+              <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Village / Mauza</span>
+              <span className="font-bold text-slate-900 dark:text-white text-sm">{parcel.mauza}</span>
             </div>
 
             <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-100 dark:border-slate-700/60">
-              <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Total Area</span>
-              <span className="font-bold text-sky-600 dark:text-sky-400 text-sm">{parcel.area_acre} Acre</span>
-            </div>
-
-            <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-100 dark:border-slate-700/60">
-              <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Khata No (खाता सं.)</span>
+              <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Khata / Gata / Survey No</span>
               <span className="font-bold text-slate-900 dark:text-white text-sm">#{parcel.khata_no}</span>
             </div>
 
             <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-100 dark:border-slate-700/60">
-              <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Khesra No (खेसरा सं.)</span>
+              <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Plot / Khasra / Hissa No</span>
               <span className="font-bold text-slate-900 dark:text-white text-sm">#{parcel.khesra_no}</span>
             </div>
 
             <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-100 dark:border-slate-700/60">
-              <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Khatian Owner</span>
+              <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Recorded Base Owner</span>
               <span className="font-semibold text-slate-900 dark:text-white text-xs truncate block">
                 {records.khatian?.owner_name || "N/A"}
               </span>
             </div>
 
             <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-100 dark:border-slate-700/60">
-              <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Register-II Tenant</span>
+              <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Current Tenant / 7-12</span>
               <span className="font-semibold text-slate-900 dark:text-white text-xs truncate block">
                 {records.register2?.current_owner_name || "N/A"}
               </span>
@@ -386,15 +391,15 @@ export const LandProfilePage: React.FC<LandProfilePageProps> = ({ lang, onShowTo
         <div className="space-y-6 text-xs">
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
             <div className="p-4 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 font-bold text-slate-900 dark:text-white">
-              Primary Record Comparison (Khatian vs Register-II)
+              Primary Record Comparison (Baseline ROR vs Current Mutation Roll)
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
                     <th className="p-3">Attribute</th>
-                    <th className="p-3">Khatian / RoR (Authoritative Base)</th>
-                    <th className="p-3">Register-II (Current Tenant Roll)</th>
+                    <th className="p-3">Base Record of Rights (Khatian / Khatauni)</th>
+                    <th className="p-3">Current Tenant Register (Register-II / 7-12)</th>
                     <th className="p-3">Match Status</th>
                   </tr>
                 </thead>
@@ -434,7 +439,7 @@ export const LandProfilePage: React.FC<LandProfilePageProps> = ({ lang, onShowTo
       {activeTab === 'map' && (
         <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
           <h3 className="font-bold text-slate-900 dark:text-white text-base">
-            JharBhuNaksha Cadastral Parcel Polygon View
+            Cadastral Parcel Polygon View ({parcel.state})
           </h3>
           <LandMap
             polygonJson={parcel.polygon_json}

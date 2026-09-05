@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShieldCheck, Search, FileCheck, AlertTriangle, ArrowRight, CheckCircle2, Layers, Cpu, QrCode } from 'lucide-react';
+import { ShieldCheck, Search, FileCheck, AlertTriangle, ArrowRight, CheckCircle2, Layers, Cpu, QrCode, Globe2, MapPin, Sparkles } from 'lucide-react';
 
 interface HomePageProps {
   lang: 'en' | 'hi';
@@ -20,6 +20,15 @@ export const HomePage: React.FC<HomePageProps> = ({ lang }) => {
     }
   };
 
+  const stateDemos = [
+    { state: 'Jharkhand', dist: 'Bokaro', sub: 'Chas', id: 'JH-BOK-CHA-KURA-P125-PL450-2', label: 'Jharkhand (Bokaro / Chas)' },
+    { state: 'Uttar Pradesh', dist: 'Gautam Buddha Nagar (Noida)', sub: 'Dadri', id: 'UP-GAU-DAD-BHAN-P340-PL112-1', label: 'Uttar Pradesh (Noida / Dadri)' },
+    { state: 'Maharashtra', dist: 'Pune', sub: 'Haveli', id: 'MH-PUN-HAV-HINJ-P145-PL23-B', label: 'Maharashtra (Pune / Hinjawadi 7/12)' },
+    { state: 'Karnataka', dist: 'Bengaluru Urban', sub: 'Bengaluru East', id: 'KA-BEN-BEN-WHIT-P89-PL3A', label: 'Karnataka (Bengaluru / RTC Pahani)' },
+    { state: 'Bihar', dist: 'Patna', sub: 'Danapur', id: 'BR-PAT-DAN-KHAG-P201-PL56-3', label: 'Bihar (Patna / Danapur)' },
+    { state: 'Delhi', dist: 'South Delhi', sub: 'Hauz Khas', id: 'DL-SOU-HAU-MEHR-P56-PL12-A', label: 'Delhi (Hauz Khas / Mehrauli)' }
+  ];
+
   return (
     <div className="space-y-12 pb-16">
       {/* Hero Section */}
@@ -28,27 +37,31 @@ export const HomePage: React.FC<HomePageProps> = ({ lang }) => {
         <div className="absolute bottom-0 left-0 -mb-12 -ml-12 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="max-w-5xl mx-auto text-center space-y-6 relative z-10">
-          <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-semibold">
-            <ShieldCheck className="w-4 h-4 text-sky-400" />
-            <span>{isEn ? "SIH 2026 / Jharkhand Revenue & Land Reforms Innovation Layer" : "एसआईएच 2026 / झारखंड राजस्व नवाचार परत"}</span>
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-semibold">
+            <Globe2 className="w-4 h-4 text-sky-400" />
+            <span>
+              {isEn 
+                ? "Digital India Land Records Modernization Programme (DILRMP) • Pan-India AI Layer" 
+                : "डिजिटल इंडिया भूमि रिकॉर्ड आधुनिकीकरण कार्यक्रम • अखिल भारतीय एआई परत"}
+            </span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
             {isEn ? (
               <>
-                Verify Land Records. <span className="bg-gradient-to-r from-sky-400 to-emerald-400 bg-clip-text text-transparent">Detect Risk.</span> Protect Ownership.
+                Verify Land Records Across India. <span className="bg-gradient-to-r from-sky-400 to-emerald-400 bg-clip-text text-transparent">Detect Risk.</span> Protect Ownership.
               </>
             ) : (
               <>
-                भूमि रिकॉर्ड सत्यापित करें। <span className="bg-gradient-to-r from-sky-400 to-emerald-400 bg-clip-text text-transparent">जोखिम पहचानें।</span> स्वामित्व सुरक्षित करें।
+                अखिल भारतीय भूमि रिकॉर्ड सत्यापित करें। <span className="bg-gradient-to-r from-sky-400 to-emerald-400 bg-clip-text text-transparent">जोखिम पहचानें।</span> स्वामित्व सुरक्षित करें।
               </>
             )}
           </h1>
 
           <p className="text-base sm:text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">
             {isEn
-              ? "BhoomiShield sits as an intelligent verification layer above Jharbhoomi, JharBhuNaksha, and Registration services — creating a unified Land Identity, cross-record risk scoring, explainable evidence analysis, and QR-verifiable land reports."
-              : "भूमिशील्ड झारभूमि, झारभूनक्शा और निबंधन सेवाओं के ऊपर एक बुद्धिमान सत्यापन परत के रूप में काम करता है — एकीकृत भूमि पहचान, क्रॉस-रिकॉर्ड जोखिम विश्लेषण और क्यूआर सत्यापन योग्य रिपोर्ट प्रदान करता है।"}
+              ? "BhoomiShield serves as the unified national verification layer integrated with UP Bhulekh, Mahabhulekh, Bhoomi Karnataka, Jharbhoomi, BiharBhumi, Delhi DLRC, AnyROR Gujarat, and Patta Chitta Tamil Nadu — delivering instant risk scoring, 3D cadastral GIS, and QR-certified land reports."
+              : "भूमिशील्ड सभी राज्य भूलेख पोर्टलों (यूपी, महाराष्ट्र, कर्नाटक, झारखंड, बिहार, दिल्ली, गुजरात, तमिलनाडु) के साथ एकीकृत होकर अखिल भारतीय भूमि सत्यापन, 3डी कैडस्ट्रल नक्शा और क्यूआर कोड रिपोर्ट प्रदान करता है।"}
           </p>
 
           {/* Quick Universal Search Card */}
@@ -60,7 +73,7 @@ export const HomePage: React.FC<HomePageProps> = ({ lang }) => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={isEn ? "Enter Khata No, Khesra No, Owner Name, or Land Identity ID..." : "खाता सं., खेसरा सं., मालिक का नाम दर्ज करें..."}
+                  placeholder={isEn ? "Search by State, District, Khata/Gata/Survey No, or Owner Name..." : "राज्य, ज़िला, खाता/गाटा/सर्वे सं., या मालिक का नाम खोजें..."}
                   className="w-full pl-11 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
                 />
               </div>
@@ -68,49 +81,79 @@ export const HomePage: React.FC<HomePageProps> = ({ lang }) => {
                 type="submit"
                 className="w-full sm:w-auto px-6 py-3 bg-sky-600 hover:bg-sky-500 text-white font-semibold text-sm rounded-xl transition-all shadow-lg flex items-center justify-center space-x-2 shrink-0"
               >
-                <span>{isEn ? "Search Land" : "भूमि खोजें"}</span>
+                <span>{isEn ? "Search Pan-India" : "खोजें"}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>
 
-            <div className="mt-3 flex items-center justify-between text-xs text-slate-400 px-1">
-              <span>{isEn ? "Try Demo Parcel:" : "नमूना देखें:"}</span>
-              <button
-                onClick={() => navigate('/land/JH-BOK-CHA-KURA-K125-K450-2')}
-                className="font-mono text-sky-400 hover:underline flex items-center space-x-1"
-              >
-                <span>JH-BOK-CHA-KURA-K125-K450-2 (Bokaro Demo Case)</span>
-              </button>
+            {/* Quick State Presets */}
+            <div className="mt-3.5 pt-3 border-t border-slate-700/60 flex flex-wrap items-center justify-center gap-1.5 text-xs text-slate-300">
+              <span className="text-slate-400 font-semibold flex items-center space-x-1">
+                <Sparkles className="w-3 h-3 text-amber-400" />
+                <span>Explore Live State Cases:</span>
+              </span>
+              {stateDemos.map((s, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => navigate(`/land/${s.id}`)}
+                  className="px-2.5 py-1 bg-slate-900 hover:bg-sky-600/30 hover:border-sky-500/50 border border-slate-700 rounded-lg text-[11px] font-mono transition-colors text-sky-300"
+                >
+                  {s.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Demo Story Quick Callout Banner */}
+      {/* State Portals Integration Ribbon */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-slate-900 p-6 rounded-2xl border border-amber-500/30 flex flex-col md:flex-row items-center justify-between gap-6 shadow-md">
-          <div className="space-y-1.5">
-            <div className="flex items-center space-x-2 text-amber-600 font-bold text-sm">
-              <AlertTriangle className="w-5 h-5 text-amber-500" />
-              <span>{isEn ? "3-Minute Prototype Demo Scenario" : "3-मिनट का लाइव डेमो"}</span>
+        <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <div>
+              <h3 className="text-base font-bold text-white flex items-center space-x-2">
+                <Globe2 className="w-5 h-5 text-emerald-400" />
+                <span>Multi-State Land Record Portals Integration Network</span>
+              </h3>
+              <p className="text-xs text-slate-400">
+                Connected with official State Revenue Record Streams across India
+              </p>
             </div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-              {isEn ? "Citizen Land Purchase Case Study — Chas, Bokaro" : "बोकारो चास - नागरिक भूमि खरीद केस स्टडी"}
-            </h3>
-            <p className="text-xs text-slate-600 dark:text-slate-300 max-w-2xl">
-              {isEn
-                ? "Simulate a citizen verifying Khata #125, Khesra #450/2 in Bokaro. Experience instant Land Identity creation, owner mismatch detection (R001), active mutation analysis, grounded AI Q&A, and PDF generation with QR verification."
-                : "बोकारो में खाता #125, खेसरा #450/2 का सत्यापन करें। नाम बेमेल (R001), म्यूटेशन विश्लेषण, एआई प्रश्नोत्तर और क्यूआर कोड रिपोर्ट का अनुभव करें।"}
-            </p>
+            <Link
+              to="/search"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow transition-colors flex items-center space-x-1.5 shrink-0"
+            >
+              <span>Launch Pan-India Explorer</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
 
-          <Link
-            to="/land/JH-BOK-CHA-KURA-K125-K450-2"
-            className="px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs rounded-xl shadow-lg transition-colors flex items-center space-x-2 shrink-0"
-          >
-            <span>{isEn ? "Launch Demo Story" : "डेमो शुरू करें"}</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 text-xs">
+            <div className="bg-slate-800/70 p-3 rounded-xl border border-slate-700 text-center space-y-1">
+              <div className="font-bold text-sky-400">UP Bhulekh</div>
+              <div className="text-[10px] text-slate-400">Uttar Pradesh (Gata/Khatauni)</div>
+            </div>
+            <div className="bg-slate-800/70 p-3 rounded-xl border border-slate-700 text-center space-y-1">
+              <div className="font-bold text-emerald-400">Mahabhulekh 7/12</div>
+              <div className="text-[10px] text-slate-400">Maharashtra (Saat Bara)</div>
+            </div>
+            <div className="bg-slate-800/70 p-3 rounded-xl border border-slate-700 text-center space-y-1">
+              <div className="font-bold text-amber-400">Bhoomi RTC</div>
+              <div className="text-[10px] text-slate-400">Karnataka (Pahani/Survey)</div>
+            </div>
+            <div className="bg-slate-800/70 p-3 rounded-xl border border-slate-700 text-center space-y-1">
+              <div className="font-bold text-indigo-400">Jharbhoomi</div>
+              <div className="text-[10px] text-slate-400">Jharkhand (Khata/Khesra)</div>
+            </div>
+            <div className="bg-slate-800/70 p-3 rounded-xl border border-slate-700 text-center space-y-1">
+              <div className="font-bold text-rose-400">BiharBhumi</div>
+              <div className="text-[10px] text-slate-400">Bihar (DCLR/Jamabandi)</div>
+            </div>
+            <div className="bg-slate-800/70 p-3 rounded-xl border border-slate-700 text-center space-y-1">
+              <div className="font-bold text-teal-400">Patta Chitta</div>
+              <div className="text-[10px] text-slate-400">Tamil Nadu (e-Services)</div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -118,10 +161,10 @@ export const HomePage: React.FC<HomePageProps> = ({ lang }) => {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="text-center space-y-2">
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-            {isEn ? "Why BhoomiShield for Jharkhand?" : "झारखंड के लिए भूमिशील्ड क्यों?"}
+            {isEn ? "Why BhoomiShield for Pan-India Land Governance?" : "अखिल भारतीय स्तर पर भूमिशील्ड क्यों?"}
           </h2>
           <p className="text-sm text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
-            {isEn ? "Transforming fragmented record queries into one unified, explainable land intelligence layer." : "विखंडित रिकॉर्ड प्रश्नों को एकीकृत भूमि विश्लेषण में बदलना।"}
+            {isEn ? "Transforming fragmented state record queries into one unified, explainable national land intelligence layer." : "विखंडित राज्य रिकॉर्ड प्रश्नों को एकीकृत राष्ट्रीय भूमि विश्लेषण में बदलना।"}
           </p>
         </div>
 
@@ -130,9 +173,9 @@ export const HomePage: React.FC<HomePageProps> = ({ lang }) => {
             <div className="w-10 h-10 rounded-xl bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold">
               <Layers className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-slate-900 dark:text-white text-base">Unified Land Identity</h3>
+            <h3 className="font-bold text-slate-900 dark:text-white text-base">Standardized Land Identity</h3>
             <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Assigns a standardized canonical ID (`JH-BOK-CHS-MAU-K125-K450-2`) linking Khatian, Register-II, Mutation, Deeds, and Cadastral maps.
+              Standard DILRMP canonical ID (`UP-NOI-DAD-BHAN-P340-PL112-1`) cross-linking RORs, 7/12, Mutation timelines, and GIS boundaries.
             </p>
           </div>
 
@@ -142,7 +185,7 @@ export const HomePage: React.FC<HomePageProps> = ({ lang }) => {
             </div>
             <h3 className="font-bold text-slate-900 dark:text-white text-base">Deterministic Risk Engine</h3>
             <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Rules R001–R007 instantly flag owner mismatches, area variance, overdue mutations, unmutated deeds, and revenue court disputes with 0–100 scoring.
+              Rules R001–R008 flag owner mismatches, area variances, overdue mutation SLAs, unmutated deeds, and civil/revenue stay orders.
             </p>
           </div>
 
@@ -150,9 +193,9 @@ export const HomePage: React.FC<HomePageProps> = ({ lang }) => {
             <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
               <CheckCircle2 className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-slate-900 dark:text-white text-base">Grounded AI Explainer</h3>
+            <h3 className="font-bold text-slate-900 dark:text-white text-base">State-Aware AI Legal Advisor</h3>
             <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Explains complex legal record findings in simple language with 100% evidence citations back to verified digitized records.
+              Provides statutory guidance grounded in UP Revenue Code, MLRC Maharashtra, Karnataka PTCL, CNT/SPT Acts, RERA, and Central property laws.
             </p>
           </div>
 
@@ -162,7 +205,7 @@ export const HomePage: React.FC<HomePageProps> = ({ lang }) => {
             </div>
             <h3 className="font-bold text-slate-900 dark:text-white text-base">QR Report Verification</h3>
             <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Generates downloadable Land Verification Reports with embedded QR code pointing to a public anti-tamper verification URL (`/verify/BS-2026-XXXX`).
+              Generates downloadable Land Verification Reports with cryptographic SHA-256 signatures and QR verification links (`/verify/BS-2026-XXXX`).
             </p>
           </div>
         </div>
@@ -172,29 +215,29 @@ export const HomePage: React.FC<HomePageProps> = ({ lang }) => {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         <div className="bg-slate-900 rounded-3xl p-8 text-white border border-slate-800 shadow-xl space-y-6">
           <div className="text-center space-y-2">
-            <h2 className="text-2xl font-bold">Built for Jharkhand Ecosystem Stakeholders</h2>
-            <p className="text-xs text-slate-400">Serving Citizens, Buyers, Financial Institutions, and Revenue Officers</p>
+            <h2 className="text-2xl font-bold">Built for Indian Land Governance Stakeholders</h2>
+            <p className="text-xs text-slate-400">Serving Citizens, Buyers, Banks & NBFCs, Revenue Officers, and Legal Practitioners</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
             <div className="bg-slate-800/70 p-5 rounded-2xl border border-slate-700 space-y-2">
-              <div className="font-bold text-sky-400 text-sm">Citizen & Land Owner</div>
+              <div className="font-bold text-sky-400 text-sm">Citizens & Land Owners</div>
               <p className="text-slate-300 leading-relaxed">
-                Lookup land records, track pending mutation SLA progress, understand ownership consistency, and download a verifiable report before any deal.
+                Lookup digitized land records across any state, track pending Dakhil-Kharij / Mutation SLA deadlines, and detect unmutated transaction discrepancies.
               </p>
             </div>
 
             <div className="bg-slate-800/70 p-5 rounded-2xl border border-slate-700 space-y-2">
-              <div className="font-bold text-amber-400 text-sm">Prospective Buyer & Bank</div>
+              <div className="font-bold text-amber-400 text-sm">Prospective Buyers & Financial Institutions</div>
               <p className="text-slate-300 leading-relaxed">
-                Run "Check Before You Buy" risk analysis to spot unmutated deeds, active bank mortgages, area discrepancies, and court stay orders.
+                Run comprehensive due-diligence before signing agreements to spot active bank mortgage hypothecations, civil court stay orders, or tribal land transfer bans.
               </p>
             </div>
 
             <div className="bg-slate-800/70 p-5 rounded-2xl border border-slate-700 space-y-2">
-              <div className="font-bold text-emerald-400 text-sm">Revenue Officers (CO / LRDC)</div>
+              <div className="font-bold text-emerald-400 text-sm">Revenue Authorities (Tahsildars, CO, SDM, DC)</div>
               <p className="text-slate-300 leading-relaxed">
-                Monitor circle-wide risk distribution, investigate flagged cases with side-by-side evidence, submit decisions, and maintain audit logs.
+                Monitor circle-wide and district-wide risk distribution, inspect side-by-side digitized evidence, record review decisions, and maintain audit logs.
               </p>
             </div>
           </div>

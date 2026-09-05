@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, AlertOctagon, AlertTriangle, CheckCircle, FileText, Lock, UserCheck, Activity } from 'lucide-react';
+import { ShieldCheck, AlertOctagon, AlertTriangle, CheckCircle, FileText, Lock, UserCheck, Activity, Globe2 } from 'lucide-react';
 import { OfficerCase } from '../types';
 import { RiskBadge } from '../components/RiskBadge';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
@@ -56,7 +56,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
         body: JSON.stringify({
           case_no: selectedCase.case_no,
           land_identity_id: selectedCase.land_identity_id,
-          officer_name: userRole === 'REVENUE_OFFICER' ? "Sunil Kumar (CO Chas)" : "Anita Soren (LRDC)",
+          officer_name: userRole === 'REVENUE_OFFICER' ? "Tahsildar / Circle Officer" : "SDM / Sub-Collector / LRDC",
           officer_role: userRole,
           decision: decision,
           comment: comment
@@ -77,17 +77,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 text-center space-y-3">
         <div className="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-        <p className="text-xs text-slate-500 font-medium">Loading Government Revenue Officer & Risk Review Dashboard...</p>
+        <p className="text-xs text-slate-500 font-medium">Loading Pan-India National Revenue Review & Analytics Dashboard...</p>
       </div>
     );
   }
 
-  const chartData = metrics?.district_risk_breakdown || [
-    { district: 'Bokaro', cnt: 2450 },
-    { district: 'Ranchi', cnt: 3120 },
-    { district: 'Dhanbad', cnt: 1890 },
-    { district: 'East Singhbhum', cnt: 2150 },
-    { district: 'Hazaribagh', cnt: 1420 },
+  const stateChartData = metrics?.state_risk_breakdown?.slice(0, 8) || [
+    { state: 'Assam', cnt: 457 },
+    { state: 'Maharashtra', cnt: 456 },
+    { state: 'Haryana', cnt: 455 },
+    { state: 'MP', cnt: 439 },
+    { state: 'Tamil Nadu', cnt: 438 },
+    { state: 'Rajasthan', cnt: 434 },
+    { state: 'UP', cnt: 401 },
+    { state: 'Jharkhand', cnt: 395 },
   ];
 
   return (
@@ -96,12 +99,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
       <div className="bg-slate-900 text-white p-6 rounded-3xl border border-slate-800 shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <div className="flex items-center space-x-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-1">
-            <Lock className="w-4 h-4" />
-            <span>Authorized Revenue Officer & Admin Layer</span>
+            <Globe2 className="w-4 h-4" />
+            <span>Digital India DILRMP National Officer & Admin Layer</span>
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight">Jharkhand Land Risk Review & Analytics Portal</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight">Pan-India Land Risk Review & National Analytics Portal</h1>
           <p className="text-xs text-slate-400">
-            Monitoring circle-wise land risk alerts, inspecting multi-source evidence, and submitting official review overrides.
+            Monitoring state-wise and district-wise land risk alerts, inspecting multi-record evidence, and logging administrative review overrides.
           </p>
         </div>
 
@@ -117,49 +120,49 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
       {/* Metrics Widgets */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-1">
-          <span className="text-xs font-semibold text-slate-500">Parcels Analyzed</span>
+          <span className="text-xs font-semibold text-slate-500">Parcels Analyzed Nationally</span>
           <div className="text-2xl font-extrabold text-slate-900 dark:text-white font-mono">
-            {metrics?.parcels_analyzed?.toLocaleString() || "1,25,430"}
+            {metrics?.parcels_analyzed?.toLocaleString() || "10,000"}
           </div>
-          <span className="text-[10px] text-emerald-600 font-semibold">Live System Synthesis</span>
+          <span className="text-[10px] text-emerald-600 font-semibold">28 States & 8 UTs Active</span>
         </div>
 
         <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-1">
           <span className="text-xs font-semibold text-slate-500">High Risk Flagged</span>
           <div className="text-2xl font-extrabold text-rose-600 dark:text-rose-400 font-mono">
-            {metrics?.high_risk_count?.toLocaleString() || "2,430"}
+            {metrics?.high_risk_count?.toLocaleString() || "1,240"}
           </div>
-          <span className="text-[10px] text-rose-500 font-semibold">Requires CO Review</span>
+          <span className="text-[10px] text-rose-500 font-semibold">Requires Revenue Officer Action</span>
         </div>
 
         <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-1">
           <span className="text-xs font-semibold text-slate-500">Medium Risk Flagged</span>
           <div className="text-2xl font-extrabold text-amber-600 dark:text-amber-400 font-mono">
-            {metrics?.medium_risk_count?.toLocaleString() || "11,204"}
+            {metrics?.medium_risk_count?.toLocaleString() || "2,350"}
           </div>
-          <span className="text-[10px] text-amber-500 font-semibold">Pending Clarification</span>
+          <span className="text-[10px] text-amber-500 font-semibold">Pending Citizen Clarification</span>
         </div>
 
         <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-1">
           <span className="text-xs font-semibold text-slate-500">Officer Decisions Logged</span>
           <div className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">
-            {metrics?.officer_decisions_logged?.toLocaleString() || "1,230"}
+            {metrics?.officer_decisions_logged?.toLocaleString() || "430"}
           </div>
-          <span className="text-[10px] text-emerald-500 font-semibold">Audited Actions</span>
+          <span className="text-[10px] text-emerald-500 font-semibold">Immutable Audit Logs</span>
         </div>
       </div>
 
-      {/* District Analytics Chart & Review Queue */}
+      {/* State Analytics Chart & Review Queue */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* District Risk Distribution Chart */}
+        {/* State-wise Distribution Chart */}
         <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
           <h3 className="font-bold text-slate-900 dark:text-white text-base">
-            District-wise Parcels Analyzed
+            State-wise Parcels Analyzed (Top States)
           </h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
-                <XAxis dataKey="district" tick={{ fontSize: 10 }} />
+              <BarChart data={stateChartData}>
+                <XAxis dataKey="state" tick={{ fontSize: 9 }} />
                 <YAxis tick={{ fontSize: 10 }} />
                 <Tooltip contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', color: '#fff', fontSize: '11px' }} />
                 <Bar dataKey="cnt" fill="#0284C7" radius={[4, 4, 0, 0]} />
@@ -172,7 +175,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
         <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-bold text-slate-900 dark:text-white text-base">
-              Flagged Cases Review Queue ({cases.length} Open)
+              National Flagged Cases Review Queue ({cases.length} Open)
             </h3>
             <span className="text-xs text-slate-500">Sorted by Severity</span>
           </div>
@@ -191,7 +194,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
                     {c.land_identity_id}
                   </div>
                   <div className="text-[11px] text-slate-500">
-                    {c.mauza}, {c.anchal}, {c.district} • Khata #{c.khata_no} • {c.owner_name}
+                    {c.mauza}, {c.anchal}, {c.district}, <span className="font-bold text-sky-600 dark:text-sky-400">{c.state}</span> • Plot #{c.khesra_no} • {c.owner_name}
                   </div>
                 </div>
                 <RiskBadge level={c.risk_level} score={c.risk_score} size="sm" />
@@ -208,7 +211,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
             <div>
               <span className="text-xs text-sky-400 font-bold uppercase tracking-wider block">INSPECTING CASE #{selectedCase.case_no}</span>
               <h2 className="text-xl font-bold font-mono">{selectedCase.land_identity_id}</h2>
-              <p className="text-xs text-slate-400">{selectedCase.mauza}, {selectedCase.anchal}, {selectedCase.district} • Khata #{selectedCase.khata_no} / Khesra #{selectedCase.khesra_no}</p>
+              <p className="text-xs text-slate-400">{selectedCase.mauza}, {selectedCase.anchal}, {selectedCase.district}, {selectedCase.state} • Khata/Gata #{selectedCase.khata_no} / Plot #{selectedCase.khesra_no}</p>
             </div>
             <RiskBadge level={selectedCase.risk_level} score={selectedCase.risk_score} size="lg" />
           </div>
@@ -244,11 +247,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
                   onChange={e => setDecision(e.target.value)}
                   className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white font-medium"
                 >
-                  <option value="FIELD_VERIFICATION">Require Field Revenue Verification</option>
-                  <option value="CITIZEN_CLARIFICATION">Require Citizen Clarification</option>
+                  <option value="FIELD_VERIFICATION">Require Field Revenue Verification (Patwari/Halka)</option>
+                  <option value="CITIZEN_CLARIFICATION">Require Citizen Clarification & Notice</option>
                   <option value="VALID">Flag Confirmed Valid (High Risk Approved)</option>
                   <option value="FALSE_POSITIVE">Dismiss Flag as False Positive</option>
-                  <option value="ESCALATE">Escalate to District Collector / High Revenue Court</option>
+                  <option value="ESCALATE">Escalate to District Collector / High Revenue Board</option>
                 </select>
               </div>
 
@@ -257,7 +260,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
                 <input
                   type="text"
                   readOnly
-                  value={`${userRole} — Circle Office Chas`}
+                  value={`${userRole} — Revenue Administration (${selectedCase.state || "National"})`}
                   className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-slate-400 font-medium"
                 />
               </div>
@@ -268,7 +271,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
               <textarea
                 value={comment}
                 onChange={e => setComment(e.target.value)}
-                placeholder="Enter field notes, mutation cross-reference numbers, or revenue order remarks..."
+                placeholder="Enter field notes, mutation cross-reference numbers, or revenue court remarks..."
                 rows={3}
                 className="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500"
               />

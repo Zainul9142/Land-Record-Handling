@@ -11,8 +11,9 @@ from pydantic import BaseModel
 from app.db.database import get_db_connection
 from app.engine.risk_engine import evaluate_land_parcel_risk
 from app.engine.ai_explainer import generate_risk_explanation, answer_parcel_question
-from app.engine.official_scraper import fetch_live_official_records
+from app.engine.official_scraper import fetch_live_official_records, STATE_PORTALS
 from app.engine.legal_advisor import consult_legal_advisor
+from app.engine.data_generator import PAN_INDIA_DATA
 from app.services.pdf_service import generate_land_verification_pdf, REPORTS_DIR
 from app.services.complaint_service import generate_official_complaint_pdf, COMPLAINTS_DIR
 
@@ -36,12 +37,13 @@ class OfficerDecisionRequest(BaseModel):
 
 class LegalConsultRequest(BaseModel):
     question: str
+    state: Optional[str] = None
     land_identity_id: Optional[str] = None
 
 class ComplaintSubmitRequest(BaseModel):
     user_name: str
     user_mobile: str
-    target_authority: str # Circle Officer (CO), LRDC, District Collector (DC), Revenue Anti-Corruption
+    target_authority: str # Tahsildar, Circle Officer (CO), SDM, LRDC, District Collector (DC), Revenue Anti-Corruption
     land_identity_id: str
     subject: str
     complaint_text: str
@@ -91,44 +93,88 @@ def fetch_parcel_context(land_identity_id: str):
 
 @router.get("/health")
 def health_check():
-    return {"status": "ONLINE", "platform": "BhoomiShield", "version": "2.0", "state": "Jharkhand"}
+    return {
+        "status": "ONLINE",
+        "platform": "BhoomiShield Pan-India",
+        "version": "3.0",
+        "scope": "All India 28 States & 8 Union Territories",
+        "standard": "Digital India Land Records Modernization Programme (DILRMP)"
+    }
 
 @router.get("/official/live-search")
 def live_official_portal_search(
-    district: str,
-    anchal: str,
-    mauza: str,
+    state: Optional[str] = "Jharkhand",
+    district: Optional[str] = "Bokaro",
+    anchal: Optional[str] = "Chas",
+    subdistrict: Optional[str] = None,
+    mauza: Optional[str] = "Kura",
+    village: Optional[str] = None,
     khata: Optional[str] = None,
+    primary_no: Optional[str] = None,
     khesra: Optional[str] = None,
+    plot_no: Optional[str] = None,
     owner: Optional[str] = None
 ):
-    """Real-time Search Engine connected live to Official Land Record Portal endpoints."""
-    return fetch_live_official_records(district, anchal, mauza, khata, khesra, owner)
+    """Real-time Search Engine connected live to Official Land Record Portal endpoints across Indian States."""
+    sub_val = subdistrict or anchal or "Chas"
+    vil_val = village or mauza or "Kura"
+    p_val = primary_no or khata
+    pl_val = plot_no or khesra
+    return fetch_live_official_records(state, district, sub_val, vil_val, p_val, pl_val, owner)
 
 @router.get("/land/locations")
 def get_locations():
+    """
+    Returns Pan-India geographic hierarchy, state-specific portals, and localized field terminology.
+    """
+    # Build complete state map
+    states_dict = {}
+    for st_name, st_info in PAN_INDIA_DATA.items():
+        states_dict[st_name] = {
+            "portal": st_info["portal"],
+            "subdistrict_name": st_info["subdistrict_name"],
+            "primary_no_name": st_info["primary_no_name"],
+            "plot_no_name": st_info["plot_no_name"],
+            "record_type": st_info["record_type"],
+            "districts": {}
+        }
+        for dist_name, dist_info in st_info["districts"].items():
+            states_dict[st_name]["districts"][dist_name] = dist_info["subdistricts"]
+            
+    # Also fetch any dynamic districts in database
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT DISTINCT district, anchal, mauza FROM land_parcels LIMIT 500")
+    cursor.execute("SELECT DISTINCT state, district, anchal, mauza FROM land_parcels LIMIT 2000")
     rows = cursor.fetchall()
     conn.close()
     
-    loc_map = {}
+    db_loc_map = {}
     for r in rows:
+        st = r["state"] or "Jharkhand"
         d, a, m = r["district"], r["anchal"], r["mauza"]
-        if d not in loc_map: loc_map[d] = {}
-        if a not in loc_map[d]: loc_map[d][a] = []
-        if m not in loc_map[d][a]: loc_map[d][a].append(m)
-            
-    return {"districts": loc_map}
+        if st not in db_loc_map: db_loc_map[st] = {}
+        if d not in db_loc_map[st]: db_loc_map[st][d] = {}
+        if a not in db_loc_map[st][d]: db_loc_map[st][d][a] = []
+        if m not in db_loc_map[st][d][a]: db_loc_map[st][d][a].append(m)
+
+    return {
+        "states": list(states_dict.keys()),
+        "state_metadata": states_dict,
+        "db_locations": db_loc_map
+    }
 
 @router.get("/land/search")
 def search_land(
+    state: Optional[str] = None,
     district: Optional[str] = None,
     anchal: Optional[str] = None,
+    subdistrict: Optional[str] = None,
     mauza: Optional[str] = None,
+    village: Optional[str] = None,
     khata: Optional[str] = None,
+    primary_no: Optional[str] = None,
     khesra: Optional[str] = None,
+    plot_no: Optional[str] = None,
     owner: Optional[str] = None,
     query: Optional[str] = None,
     limit: int = 50
@@ -139,27 +185,40 @@ def search_land(
     sql = "SELECT p.*, r.current_owner_name as owner_name FROM land_parcels p LEFT JOIN register2_records r ON p.land_identity_id = r.land_identity_id WHERE 1=1"
     params = []
     
+    if state:
+        sql += " AND (p.state = ? OR p.state LIKE ?)"
+        params.extend([state, f"%{state}%"])
     if district:
         sql += " AND p.district = ?"
         params.append(district)
-    if anchal:
+    
+    sub_val = subdistrict or anchal
+    if sub_val:
         sql += " AND p.anchal = ?"
-        params.append(anchal)
-    if mauza:
+        params.append(sub_val)
+        
+    vil_val = village or mauza
+    if vil_val:
         sql += " AND p.mauza LIKE ?"
-        params.append(f"%{mauza}%")
-    if khata:
+        params.append(f"%{vil_val}%")
+        
+    p_val = primary_no or khata
+    if p_val:
         sql += " AND p.khata_no = ?"
-        params.append(khata)
-    if khesra:
+        params.append(p_val)
+        
+    pl_val = plot_no or khesra
+    if pl_val:
         sql += " AND p.khesra_no LIKE ?"
-        params.append(f"%{khesra}%")
+        params.append(f"%{pl_val}%")
+        
     if owner:
         sql += " AND (r.current_owner_name LIKE ? OR p.land_identity_id IN (SELECT land_identity_id FROM khatian_records WHERE owner_name LIKE ?))"
         params.extend([f"%{owner}%", f"%{owner}%"])
+        
     if query:
-        sql += " AND (p.land_identity_id LIKE ? OR r.current_owner_name LIKE ? OR p.khata_no = ? OR p.khesra_no = ?)"
-        params.extend([f"%{query}%", f"%{query}%", query, query])
+        sql += " AND (p.land_identity_id LIKE ? OR r.current_owner_name LIKE ? OR p.khata_no = ? OR p.khesra_no = ? OR p.state LIKE ? OR p.district LIKE ?)"
+        params.extend([f"%{query}%", f"%{query}%", query, query, f"%{query}%", f"%{query}%"])
         
     sql += " LIMIT ?"
     params.append(limit)
@@ -224,13 +283,15 @@ def ask_ai(req: AIQuestionRequest):
 @router.post("/legal-advisor/consult")
 def consult_legal_ai(req: LegalConsultRequest):
     risk_findings = []
+    st_val = req.state
     if req.land_identity_id:
         p, k, r2, m, t, c, e = fetch_parcel_context(req.land_identity_id)
         if p:
+            st_val = p.get("state")
             res = evaluate_land_parcel_risk(p, k, r2, m, t, c, e)
             risk_findings = res.get("findings", [])
             
-    return consult_legal_advisor(req.question, req.land_identity_id, risk_findings)
+    return consult_legal_advisor(req.question, state=st_val, land_identity_id=req.land_identity_id, risk_findings=risk_findings)
 
 # --- Authority Complaint Endpoints ---
 @router.post("/complaints/submit")
@@ -240,7 +301,7 @@ def submit_complaint(req: ComplaintSubmitRequest):
     
     cursor.execute("SELECT COUNT(*) FROM complaints")
     c_num = cursor.fetchone()[0] + 5001
-    complaint_id = f"JH-COMP-2026-{c_num}"
+    complaint_id = f"IND-COMP-2026-{c_num}"
     submitted_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S IST")
     
     pdf_path = generate_official_complaint_pdf(
@@ -362,7 +423,7 @@ def download_report(report_id: str):
 def verify_report_qr(report_id: str):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT r.*, p.district, p.anchal, p.mauza, p.khata_no, p.khesra_no, p.area_acre FROM verification_reports r JOIN land_parcels p ON r.land_identity_id = p.land_identity_id WHERE r.report_id = ?", (report_id,))
+    cursor.execute("SELECT r.*, p.state, p.district, p.anchal, p.mauza, p.khata_no, p.khesra_no, p.area_acre FROM verification_reports r JOIN land_parcels p ON r.land_identity_id = p.land_identity_id WHERE r.report_id = ?", (report_id,))
     row = cursor.fetchone()
     conn.close()
     
@@ -379,6 +440,7 @@ def verify_report_qr(report_id: str):
         "status": "VERIFIED",
         "report_id": rep["report_id"],
         "land_identity_id": rep["land_identity_id"],
+        "state": rep.get("state", "Jharkhand"),
         "district": rep["district"],
         "anchal": rep["anchal"],
         "mauza": rep["mauza"],
@@ -396,7 +458,7 @@ def verify_report_qr(report_id: str):
 def track_mutation(application_no: str):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT m.*, p.district, p.anchal, p.mauza, p.khata_no, p.khesra_no FROM mutations m JOIN land_parcels p ON m.land_identity_id = p.land_identity_id WHERE m.application_no = ?", (application_no,))
+    cursor.execute("SELECT m.*, p.state, p.district, p.anchal, p.mauza, p.khata_no, p.khesra_no FROM mutations m JOIN land_parcels p ON m.land_identity_id = p.land_identity_id WHERE m.application_no = ?", (application_no,))
     row = cursor.fetchone()
     conn.close()
     
@@ -424,6 +486,7 @@ def track_mutation(application_no: str):
         "applicant": m["applicant_name"],
         "buyer": m["buyer_name"],
         "seller": m["seller_name"],
+        "state": m.get("state", "National"),
         "district": m["district"],
         "anchal": m["anchal"],
         "status": m["status"],
@@ -443,7 +506,10 @@ def get_admin_dashboard():
     cursor.execute("SELECT COUNT(*) FROM land_parcels")
     total_parcels = cursor.fetchone()[0]
     
-    cursor.execute("SELECT district, COUNT(*) as cnt FROM land_parcels GROUP BY district")
+    cursor.execute("SELECT state, COUNT(*) as cnt FROM land_parcels GROUP BY state ORDER BY cnt DESC")
+    states_cnt = [dict(r) for r in cursor.fetchall()]
+
+    cursor.execute("SELECT district, COUNT(*) as cnt FROM land_parcels GROUP BY district ORDER BY cnt DESC LIMIT 10")
     districts_cnt = [dict(r) for r in cursor.fetchall()]
     
     cursor.execute("SELECT COUNT(*) FROM mutations WHERE status = 'PENDING'")
@@ -484,6 +550,7 @@ def get_admin_dashboard():
         "low_risk_count": int(low_cnt * extrapolate),
         "pending_reviews": pending_mutations,
         "officer_decisions_logged": total_reviews,
+        "state_risk_breakdown": states_cnt,
         "district_risk_breakdown": districts_cnt
     }
 
@@ -509,6 +576,7 @@ def get_flagged_cases(limit: int = 20):
             cases.append({
                 "case_no": f"CASE-{lid}",
                 "land_identity_id": lid,
+                "state": p.get("state", "National"),
                 "district": p["district"],
                 "anchal": p["anchal"],
                 "mauza": p["mauza"],
@@ -562,20 +630,3 @@ def get_audit_logs(limit: int = 50):
     logs = [dict(r) for r in cursor.fetchall()]
     conn.close()
     return {"count": len(logs), "logs": logs}
-
-@router.post("/auth/login")
-def login_user(req: LoginRequest):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE username = ?", (req.username,))
-    row = cursor.fetchone()
-    conn.close()
-    
-    if not row:
-        raise HTTPException(status_code=401, detail="User not found")
-        
-    u = dict(row)
-    return {
-        "token": f"mock-jwt-token-{u['id']}",
-        "user": u
-    }

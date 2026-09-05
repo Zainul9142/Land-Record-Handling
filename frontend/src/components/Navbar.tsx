@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShieldCheck, Search, Lock, Languages, UserCheck, Scale, ShieldAlert, Menu, X } from 'lucide-react';
+import { ShieldCheck, Search, Lock, Languages, UserCheck, Scale, ShieldAlert, Menu, X, Globe2 } from 'lucide-react';
 
 interface NavbarProps {
   lang: 'en' | 'hi';
@@ -23,7 +23,11 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, setLang, userRole, setUser
       <div className="bg-slate-950 px-4 py-1 text-xs border-b border-slate-800 text-slate-400 flex justify-between items-center">
         <div className="flex items-center space-x-2 truncate">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
-          <span className="truncate">{isEn ? "Government of Jharkhand • Revenue & Land Reforms Dept Layer" : "झारखंड सरकार • राजस्व एवं भूमि सुधार विभाग"}</span>
+          <span className="truncate">
+            {isEn 
+              ? "Digital India Land Records Modernization Programme (DILRMP) • 28 States & 8 UTs National Layer" 
+              : "डिजिटल इंडिया भूमि रिकॉर्ड आधुनिकीकरण कार्यक्रम (DILRMP) • 28 राज्य एवं 8 केंद्र शासित प्रदेश"}
+          </span>
         </div>
         <div className="flex items-center space-x-3 shrink-0">
           <button
@@ -42,8 +46,8 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, setLang, userRole, setUser
               className="bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500"
             >
               <option value="CITIZEN">Citizen / Buyer</option>
-              <option value="REVENUE_OFFICER">Circle Officer (CO Chas)</option>
-              <option value="REVIEW_OFFICER">LRDC Review Officer</option>
+              <option value="REVENUE_OFFICER">Circle Officer / Tahsildar</option>
+              <option value="REVIEW_OFFICER">SDM / LRDC / Sub-Collector</option>
               <option value="BANK_USER">Bank Institution User</option>
               <option value="ADMIN">System Administrator</option>
             </select>
@@ -60,12 +64,13 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, setLang, userRole, setUser
           <div>
             <div className="flex items-center space-x-2">
               <span className="font-bold text-xl tracking-tight text-white">BhoomiShield</span>
-              <span className="text-[10px] uppercase font-bold bg-sky-500/20 text-sky-400 px-1.5 py-0.5 rounded border border-sky-500/30">
-                {isEn ? "Jharkhand V2.0" : "झारखंड V2.0"}
+              <span className="text-[10px] uppercase font-bold bg-sky-500/20 text-sky-400 px-1.5 py-0.5 rounded border border-sky-500/30 flex items-center space-x-1">
+                <Globe2 className="w-2.5 h-2.5" />
+                <span>{isEn ? "Pan-India National V3.0" : "अखिल भारतीय V3.0"}</span>
               </span>
             </div>
             <span className="text-xs text-slate-400 block -mt-0.5">
-              {isEn ? "Real-time Land Record & Legal AI Intelligence" : "रियल-टाइम भूमि रिकॉर्ड एवं एआई कानूनी सलाहकार"}
+              {isEn ? "All India Real-time Land Records & Legal Risk AI" : "अखिल भारतीय रियल-टाइम भूमि रिकॉर्ड एवं एआई कानूनी सलाहकार"}
             </span>
           </div>
         </Link>
@@ -118,7 +123,7 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, setLang, userRole, setUser
               className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1.5 bg-emerald-800 hover:bg-emerald-700 text-white border border-emerald-500/40`}
             >
               <Lock className="w-4 h-4 text-emerald-300" />
-              <span>{isEn ? "Official Dashboard" : "अधिकारी डैशबोर्ड"}</span>
+              <span>{isEn ? "National Dashboard" : "राष्ट्रीय डैशबोर्ड"}</span>
             </Link>
           )}
         </nav>
@@ -146,8 +151,8 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, setLang, userRole, setUser
               className="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200"
             >
               <option value="CITIZEN">Citizen / Buyer</option>
-              <option value="REVENUE_OFFICER">Circle Officer (CO Chas)</option>
-              <option value="REVIEW_OFFICER">LRDC Review Officer</option>
+              <option value="REVENUE_OFFICER">Circle Officer / Tahsildar</option>
+              <option value="REVIEW_OFFICER">SDM / LRDC / Sub-Collector</option>
               <option value="BANK_USER">Bank Institution User</option>
               <option value="ADMIN">System Administrator</option>
             </select>
@@ -204,7 +209,7 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, setLang, userRole, setUser
               className={`block px-3 py-2.5 rounded-xl text-sm font-medium bg-emerald-800 text-white flex items-center space-x-2`}
             >
               <Lock className="w-4 h-4 text-emerald-300" />
-              <span>{isEn ? "Official Review Dashboard" : "अधिकारी डैशबोर्ड"}</span>
+              <span>{isEn ? "National Review Dashboard" : "राष्ट्रीय समीक्षा डैशबोर्ड"}</span>
             </Link>
           )}
         </div>

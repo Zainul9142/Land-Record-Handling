@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { FileText, Send, Download, CheckCircle2, ShieldAlert, Activity } from 'lucide-react';
+import { FileText, Send, Download, CheckCircle2, ShieldAlert, Globe2 } from 'lucide-react';
 
 interface GrievancePageProps {
   onShowToast?: (type: 'success' | 'error' | 'info', title: string, desc?: string) => void;
@@ -8,16 +8,17 @@ interface GrievancePageProps {
 
 export const GrievancePage: React.FC<GrievancePageProps> = ({ onShowToast }) => {
   const [searchParams] = useSearchParams();
-  const landIdParam = searchParams.get('land_id') || 'JH-BOK-CHA-KURA-K125-K450-2';
-  const subjectParam = searchParams.get('subject') || 'Overdue Mutation SLA Delay & Owner Mismatch';
+  const landIdParam = searchParams.get('land_id') || 'UP-GAU-DAD-BHAN-P340-PL112-1';
+  const subjectParam = searchParams.get('subject') || 'Overdue Mutation SLA Delay & Title Inconsistency';
 
-  const [userName, setUserName] = useState<string>('Ramesh Kumar Mahato');
+  const [userName, setUserName] = useState<string>('Rajesh Sharma');
   const [userMobile, setUserMobile] = useState<string>('9876543210');
-  const [targetAuthority, setTargetAuthority] = useState<string>('Circle Officer (CO Chas)');
+  const [selectedState, setSelectedState] = useState<string>('Uttar Pradesh');
+  const [targetAuthority, setTargetAuthority] = useState<string>('Tahsildar / Sub-Divisional Magistrate (SDM)');
   const [landIdentityId, setLandIdentityId] = useState<string>(landIdParam);
   const [subject, setSubject] = useState<string>(subjectParam);
   const [complaintText, setComplaintText] = useState<string>(
-    'The mutation application #JH-MUT-2026-10001 has been pending for 73 days, exceeding the statutory 30-day SLA. In addition, there is an unmutated sale deed discrepancy between recorded Khatian owner and Register-II tenant. Requesting urgent field revenue inspection and LRDC intervention.'
+    'The mutation application under Section 34/35 has been pending for 68 days, exceeding the statutory 30-day Right to Service SLA. Additionally, there is an unmutated registered sale deed discrepancy in the baseline revenue record. Requesting urgent field verification and administrative intervention.'
   );
 
   const [submitting, setSubmitting] = useState<boolean>(false);
@@ -39,7 +40,7 @@ export const GrievancePage: React.FC<GrievancePageProps> = ({ onShowToast }) => 
         body: JSON.stringify({
           user_name: userName,
           user_mobile: userMobile,
-          target_authority: targetAuthority,
+          target_authority: `${targetAuthority} (${selectedState})`,
           land_identity_id: landIdentityId,
           subject: subject,
           complaint_text: complaintText
@@ -65,14 +66,14 @@ export const GrievancePage: React.FC<GrievancePageProps> = ({ onShowToast }) => 
       {/* Header */}
       <div className="text-center space-y-2">
         <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-bold">
-          <ShieldAlert className="w-4 h-4 text-rose-500" />
-          <span>BhoomiShield Authority Grievance & Complaint Redressal</span>
+          <Globe2 className="w-4 h-4 text-rose-500" />
+          <span>Pan-India Revenue Authority Grievance & Redressal Framework</span>
         </div>
         <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">
-          File Official Land Revenue Complaint
+          File Official Land Revenue Grievance
         </h1>
         <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
-          Submit formal grievances regarding mutation SLA delays, owner record tampering, or unmutated deeds directly to Circle Officers (CO), LRDC, or District Collector.
+          Submit formal grievances regarding mutation SLA delays, title record tampering, unmutated deeds, or fraudulent alienation directly to Tahsildars, SDM, Circle Officers, LRDC, or District Collectors across any state.
         </p>
       </div>
 
@@ -99,7 +100,7 @@ export const GrievancePage: React.FC<GrievancePageProps> = ({ onShowToast }) => 
               className="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow flex items-center space-x-1.5"
             >
               <Download className="w-4 h-4" />
-              <span>Download Signed Complaint PDF</span>
+              <span>Download Certified Grievance Notice PDF</span>
             </a>
           </div>
         </div>
@@ -108,7 +109,7 @@ export const GrievancePage: React.FC<GrievancePageProps> = ({ onShowToast }) => 
       {/* Complaint Wizard Form */}
       <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-          <h3 className="font-bold text-slate-900 dark:text-white text-base">Grievance Submission Form</h3>
+          <h3 className="font-bold text-slate-900 dark:text-white text-base">Pan-India Grievance Submission Form</h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -134,20 +135,49 @@ export const GrievancePage: React.FC<GrievancePageProps> = ({ onShowToast }) => 
             </div>
 
             <div>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">State / UT (राज्य)</label>
+              <select
+                value={selectedState}
+                onChange={e => setSelectedState(e.target.value)}
+                className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 font-medium"
+              >
+                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                <option value="Maharashtra">Maharashtra</option>
+                <option value="Karnataka">Karnataka</option>
+                <option value="Jharkhand">Jharkhand</option>
+                <option value="Bihar">Bihar</option>
+                <option value="Delhi">Delhi</option>
+                <option value="Tamil Nadu">Tamil Nadu</option>
+                <option value="Gujarat">Gujarat</option>
+                <option value="West Bengal">West Bengal</option>
+                <option value="Rajasthan">Rajasthan</option>
+                <option value="Madhya Pradesh">Madhya Pradesh</option>
+                <option value="Telangana">Telangana</option>
+                <option value="Andhra Pradesh">Andhra Pradesh</option>
+                <option value="Punjab">Punjab</option>
+                <option value="Haryana">Haryana</option>
+                <option value="Odisha">Odisha</option>
+                <option value="Kerala">Kerala</option>
+              </select>
+            </div>
+
+            <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Target Revenue Authority</label>
               <select
                 value={targetAuthority}
                 onChange={e => setTargetAuthority(e.target.value)}
                 className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 font-medium"
               >
-                <option value="Circle Officer (CO Chas)">Circle Officer (CO Chas, Bokaro)</option>
-                <option value="Land Reforms Deputy Collector (LRDC)">Land Reforms Deputy Collector (LRDC Bokaro)</option>
-                <option value="District Collector (DC Bokaro)">District Collector (DC / Magistrate)</option>
-                <option value="Revenue Anti-Corruption Cell">Revenue Anti-Corruption Cell</option>
+                <option value="Tahsildar / Sub-Divisional Magistrate (SDM)">Tahsildar / Sub-Divisional Magistrate (SDM)</option>
+                <option value="Circle Officer (CO Chas / Anchal Adhikari)">Circle Officer (CO / Anchal Adhikari)</option>
+                <option value="Land Reforms Deputy Collector (LRDC / Sub-Collector)">Land Reforms Deputy Collector (LRDC / Sub-Collector)</option>
+                <option value="District Magistrate / District Collector (DM/DC)">District Magistrate / Collector (DM/DC)</option>
+                <option value="Revenue Divisional Officer (RDO)">Revenue Divisional Officer (RDO)</option>
+                <option value="State Revenue Board & Anti-Corruption Cell">State Revenue Board & Anti-Corruption Cell</option>
               </select>
             </div>
 
-            <div>
+            <div className="sm:col-span-2">
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Land Identity ID</label>
               <input
                 type="text"
@@ -187,7 +217,7 @@ export const GrievancePage: React.FC<GrievancePageProps> = ({ onShowToast }) => 
             className="w-full py-3.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl shadow-lg transition-colors flex items-center justify-center space-x-2 disabled:opacity-50"
           >
             <Send className="w-4 h-4" />
-            <span>{submitting ? "Submitting Official Grievance..." : "File Formal Complaint & Generate PDF"}</span>
+            <span>{submitting ? "Submitting Official Grievance..." : "File Formal Complaint & Generate Signed Notice"}</span>
           </button>
         </form>
       </div>

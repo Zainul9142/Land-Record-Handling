@@ -5,15 +5,24 @@ export interface LandParcel {
   land_identity_id: string;
   state: string;
   district: string;
-  anchal: string;
+  anchal: string; // Sub-district / Tehsil / Taluk / Mandal
   halka: string;
-  mauza: string;
-  khata_no: string;
-  khesra_no: string;
+  mauza: string; // Village / Mauza / Sector
+  khata_no: string; // Gata / Khata / Survey / Patta No
+  khesra_no: string; // Khasra / Plot / Hissa / Gat No
   area_acre: number;
   land_type: string;
   polygon_json?: string;
   owner_name?: string;
+}
+
+export interface StateMetadata {
+  portal: string;
+  subdistrict_name: string;
+  primary_no_name: string;
+  plot_no_name: string;
+  record_type: string;
+  districts: Record<string, Record<string, string[]>>;
 }
 
 export interface KhatianRecord {
@@ -126,6 +135,7 @@ export interface LandProfileResponse {
 export interface OfficerCase {
   case_no: string;
   land_identity_id: string;
+  state?: string;
   district: string;
   anchal: string;
   mauza: string;
