@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ShieldCheck, Download, Bot, MapPin, AlertCircle, FileText, CheckCircle2, QrCode, ArrowLeft, Box, Scale, ShieldAlert, Copy, Check, Globe2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { ShieldCheck, Download, Bot, MapPin, AlertCircle, FileText, CheckCircle2, QrCode, ArrowLeft, Box, Scale, ShieldAlert, Copy, Check, Globe2, FolderLock } from 'lucide-react';
 import { LandProfileResponse } from '../types';
 import { RiskBadge } from '../components/RiskBadge';
 import { StatusIndicator } from '../components/StatusIndicator';
@@ -16,10 +17,12 @@ interface LandProfilePageProps {
 export const LandProfilePage: React.FC<LandProfilePageProps> = ({ lang, onShowToast }) => {
   const { landIdentityId } = useParams<{ landIdentityId: string }>();
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [data, setData] = useState<LandProfileResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<'findings' | 'records' | 'map' | 'map3d' | 'ai'>('findings');
   const [copied, setCopied] = useState<boolean>(false);
+  const [savingVault, setSavingVault] = useState<boolean>(false);
 
   const [generatingReport, setGeneratingReport] = useState<boolean>(false);
   const [generatedReport, setGeneratedReport] = useState<{ report_id: string; download_url: string; verify_url: string; report_hash: string } | null>(null);
@@ -40,12 +43,44 @@ export const LandProfilePage: React.FC<LandProfilePageProps> = ({ lang, onShowTo
       });
   }, [landIdentityId]);
 
+  const handleSaveToVault = async () => {
+    if (!data?.parcel) return;
+    if (!user?.user_id) {
+      navigate('/login');
+      return;
+    }
+    setSavingVault(true);
+    try {
+      const res = await fetch('/api/vault/properties', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: user.user_id,
+          land_identity_id: data.parcel.land_identity_id,
+          property_nickname: `${data.parcel.mauza || data.parcel.district} Parcel (${data.parcel.khata_no})`,
+          ownership_status: 'BUYER_INQUIRY',
+          registered_area_acre: data.parcel.area_acre,
+          notes: `Saved from BhoomiShield Inspection on ${new Date().toLocaleDateString()}`
+        })
+      });
+      const resData = await res.json();
+      if (res.ok) {
+        if (onShowToast) onShowToast('success', 'Saved to My Bhoomi Vault!', resData.message);
+      } else {
+        if (onShowToast) onShowToast('error', 'Could not save to Vault', resData.detail);
+      }
+    } catch (err: any) {
+      if (onShowToast) onShowToast('error', 'Error', err.message);
+    } finally {
+      setSavingVault(false);
+    }
+  };
+
   const handleGenerateReport = async () => {
     if (!landIdentityId) return;
     setGeneratingReport(true);
-
     try {
-      const res = await fetch('/api/v1/reports/generate', {
+      const res = await fetch(`/api/reports/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ land_identity_id: landIdentityId })
@@ -125,6 +160,16 @@ export const LandProfilePage: React.FC<LandProfilePageProps> = ({ lang, onShowTo
         </div>
 
         <div className="flex items-center space-x-2 flex-wrap gap-y-2">
+          {/* Save to Vault Action Button */}
+          <button
+            onClick={handleSaveToVault}
+            disabled={savingVault}
+            className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-600/20 transition-all flex items-center space-x-1.5"
+          >
+            <FolderLock className="w-4 h-4" />
+            <span>{savingVault ? "Saving..." : "Save to Vault"}</span>
+          </button>
+
           <Link
             to={`/legal-advisor?land_id=${encodeURIComponent(parcel.land_identity_id)}`}
             className="px-3 py-2 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold rounded-xl shadow transition-colors flex items-center space-x-1.5"

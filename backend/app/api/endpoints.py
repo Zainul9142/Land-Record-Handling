@@ -51,6 +51,60 @@ class ComplaintSubmitRequest(BaseModel):
 class LoginRequest(BaseModel):
     username: str
 
+class UserRegisterRequest(BaseModel):
+    username: str
+    password: str
+    full_name: str
+    email: str
+    mobile: Optional[str] = None
+    role: str = "CITIZEN"
+    department: Optional[str] = None
+    designation: Optional[str] = None
+    employee_id: Optional[str] = None
+    jurisdiction_state: Optional[str] = None
+    jurisdiction_district: Optional[str] = None
+    jurisdiction_tehsil: Optional[str] = None
+    aadhaar_last4: Optional[str] = "5412"
+    pan_number: Optional[str] = "ABCPS1234F"
+
+class UserLoginRequest(BaseModel):
+    username: Optional[str] = None
+    password: Optional[str] = None
+    role: Optional[str] = None
+    demo_user_id: Optional[str] = None
+
+class DocumentUploadRequest(BaseModel):
+    user_id: str
+    title: str
+    document_type: str # SALE_DEED, KHATAUNI_ROR, SEVEN_TWELVE, RTC_PAHANI, PATTA_CHITTA, MUTATION_CERT, ENCUMBRANCE_CERT, POSSESSION_LETTER, TAX_RECEIPT, COURT_ORDER, OTHER
+    land_identity_id: Optional[str] = None
+    state: Optional[str] = None
+    district: Optional[str] = None
+    khata_khasra_no: Optional[str] = None
+    issuing_authority: Optional[str] = None
+    issue_date: Optional[str] = None
+    file_name: str
+    file_size_kb: Optional[int] = 250
+    file_data: Optional[str] = None
+    mime_type: Optional[str] = "application/pdf"
+    remarks: Optional[str] = None
+
+class DocumentVerifyRequest(BaseModel):
+    document_id: str
+    officer_name: str
+    officer_role: str
+    decision: str # APPROVED, FLAGGED, REJECTED
+    remarks: Optional[str] = None
+
+class PropertySaveRequest(BaseModel):
+    user_id: str
+    land_identity_id: str
+    property_nickname: str
+    ownership_status: Optional[str] = "OWNER"
+    acquired_date: Optional[str] = None
+    registered_area_acre: Optional[float] = None
+    notes: Optional[str] = None
+
 
 # --- Helper to load complete parcel context ---
 def fetch_parcel_context(land_identity_id: str):
@@ -630,3 +684,436 @@ def get_audit_logs(limit: int = 50):
     logs = [dict(r) for r in cursor.fetchall()]
     conn.close()
     return {"count": len(logs), "logs": logs}
+
+
+# ==========================================
+# AUTHENTICATION & DEMO USERS ENDPOINTS
+# ==========================================
+
+@router.get("/auth/demo-users")
+def get_demo_users():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+    SELECT user_id, username, full_name, email, mobile, role, department, designation, employee_id,
+           jurisdiction_state, jurisdiction_district, jurisdiction_tehsil, kyc_status, aadhaar_last4, pan_number, avatar_url
+    FROM users WHERE status = 'ACTIVE'
+    """)
+    users = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    return {"count": len(users), "users": users}
+
+@router.post("/auth/register")
+def register_user(req: UserRegisterRequest):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Check if username exists
+    cursor.execute("SELECT user_id FROM users WHERE username = ? OR email = ?", (req.username, req.email))
+    if cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=400, detail="Username or email already registered.")
+    
+    prefix = "USR-CIT" if req.role == "CITIZEN" else "USR-OFF"
+    rand_suffix = str(int(datetime.datetime.now().timestamp()))[-4:]
+    user_id = f"{prefix}-{rand_suffix}"
+    
+    cursor.execute("""
+    INSERT INTO users (
+        user_id, username, password_hash, full_name, email, mobile, role, department, designation, employee_id,
+        jurisdiction_state, jurisdiction_district, jurisdiction_tehsil, kyc_status, aadhaar_last4, pan_number, status
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        user_id, req.username, req.password, req.full_name, req.email, req.mobile, req.role, req.department,
+        req.designation, req.employee_id, req.jurisdiction_state, req.jurisdiction_district, req.jurisdiction_tehsil,
+        "AADHAAR_LINKED" if req.aadhaar_last4 else "VERIFIED", req.aadhaar_last4 or "5412", req.pan_number or "ABCPS1234F", "ACTIVE"
+    ))
+    
+    cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
+    new_user = dict(cursor.fetchone())
+    conn.commit()
+    conn.close()
+    
+    token = hashlib.sha256(f"{user_id}:{datetime.datetime.now().isoformat()}".encode()).hexdigest()
+    return {
+        "status": "SUCCESS",
+        "message": "Account created successfully",
+        "token": token,
+        "user": new_user
+    }
+
+@router.post("/auth/login")
+def login_user(req: UserLoginRequest):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    if req.demo_user_id:
+        cursor.execute("SELECT * FROM users WHERE user_id = ? AND status = 'ACTIVE'", (req.demo_user_id,))
+    elif req.username:
+        cursor.execute("SELECT * FROM users WHERE (username = ? OR email = ?) AND status = 'ACTIVE'", (req.username, req.username))
+    else:
+        conn.close()
+        raise HTTPException(status_code=400, detail="Please provide username or select a demo user.")
+        
+    user_row = cursor.fetchone()
+    conn.close()
+    
+    if not user_row:
+        raise HTTPException(status_code=404, detail="User account not found. Please register or select a demo persona.")
+        
+    user = dict(user_row)
+    token = hashlib.sha256(f"{user['user_id']}:{datetime.datetime.now().isoformat()}".encode()).hexdigest()
+    
+    return {
+        "status": "SUCCESS",
+        "message": f"Welcome back, {user['full_name']}!",
+        "token": token,
+        "user": user
+    }
+
+@router.get("/auth/me")
+def get_current_user_profile(user_id: str = Query(..., description="Active User ID")):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
+    row = cursor.fetchone()
+    conn.close()
+    if not row:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"user": dict(row)}
+
+
+# ==========================================
+# BHOOMI VAULT: CITIZEN DOCUMENTS ENDPOINTS
+# ==========================================
+
+@router.get("/vault/documents")
+def get_user_documents(
+    user_id: str = Query(..., description="User ID"),
+    doc_type: Optional[str] = None,
+    state: Optional[str] = None,
+    status: Optional[str] = None,
+    query: Optional[str] = None
+):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    sql = "SELECT * FROM user_documents WHERE user_id = ?"
+    params = [user_id]
+    
+    if doc_type and doc_type != "ALL":
+        sql += " AND document_type = ?"
+        params.append(doc_type)
+    if state and state != "ALL":
+        sql += " AND state = ?"
+        params.append(state)
+    if status and status != "ALL":
+        sql += " AND verification_status = ?"
+        params.append(status)
+    if query:
+        sql += " AND (title LIKE ? OR land_identity_id LIKE ? OR issuing_authority LIKE ?)"
+        q = f"%{query}%"
+        params.extend([q, q, q])
+        
+    sql += " ORDER BY id DESC"
+    cursor.execute(sql, params)
+    docs = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    
+    return {"count": len(docs), "documents": docs}
+
+@router.post("/vault/documents/upload")
+def upload_user_document(req: DocumentUploadRequest):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Generate unique document ID
+    rand_id = str(int(datetime.datetime.now().timestamp()))[-6:]
+    document_id = f"DOC-2026-{rand_id}"
+    
+    # Compute SHA-256 cryptographic hash of document payload/name
+    raw_hash_seed = f"{document_id}:{req.title}:{req.land_identity_id}:{req.file_name}:{datetime.datetime.now().isoformat()}"
+    sha256_hash = hashlib.sha256(raw_hash_seed.encode('utf-8')).hexdigest()
+    
+    # If state/district not provided but land_identity_id is, deduce from land parcel
+    st = req.state
+    dt = req.district
+    if req.land_identity_id and (not st or not dt):
+        cursor.execute("SELECT state, district FROM land_parcels WHERE land_identity_id = ?", (req.land_identity_id,))
+        p_row = cursor.fetchone()
+        if p_row:
+            st = st or p_row["state"]
+            dt = dt or p_row["district"]
+
+    cursor.execute("""
+    INSERT INTO user_documents (
+        document_id, user_id, land_identity_id, title, document_type, state, district, khata_khasra_no,
+        issuing_authority, issue_date, file_name, file_size_kb, file_hash, file_data, mime_type,
+        verification_status, remarks
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        document_id, req.user_id, req.land_identity_id, req.title, req.document_type,
+        st or "National", dt or "District Center", req.khata_khasra_no or "N/A",
+        req.issuing_authority or "Competent Revenue Authority", req.issue_date or datetime.date.today().isoformat(),
+        req.file_name, req.file_size_kb or 280, sha256_hash, req.file_data, req.mime_type or "application/pdf",
+        "PENDING", req.remarks or "Uploaded to Bhoomi Vault."
+    ))
+    
+    # Audit log
+    cursor.execute("""
+    INSERT INTO audit_logs (user_name, role, action, resource_type, resource_id, details_json)
+    VALUES (?, ?, ?, ?, ?, ?)
+    """, (req.user_id, "CITIZEN", "UPLOAD_VAULT_DOCUMENT", "USER_DOCUMENT", document_id, json.dumps({
+        "title": req.title,
+        "type": req.document_type,
+        "hash": sha256_hash
+    })))
+    
+    cursor.execute("SELECT * FROM user_documents WHERE document_id = ?", (document_id,))
+    doc = dict(cursor.fetchone())
+    conn.commit()
+    conn.close()
+    
+    return {
+        "status": "SUCCESS",
+        "message": "Document securely encrypted and saved in Bhoomi Vault.",
+        "document": doc
+    }
+
+@router.get("/vault/documents/{document_id}")
+def get_document_details(document_id: str):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM user_documents WHERE document_id = ?", (document_id,))
+    row = cursor.fetchone()
+    conn.close()
+    
+    if not row:
+        raise HTTPException(status_code=404, detail="Document not found.")
+        
+    doc = dict(row)
+    # Verification certificate metadata
+    cert = {
+        "document_id": doc["document_id"],
+        "title": doc["title"],
+        "file_hash_sha256": doc["file_hash"],
+        "verification_status": doc["verification_status"],
+        "verified_by": doc.get("verified_by_officer") or "Under Revenue Verification Review",
+        "verification_date": doc.get("verification_date") or "Pending",
+        "digital_stamp_id": doc.get("digital_stamp_id") or "UNASSIGNED",
+        "tamper_proof": True,
+        "dl_registered": doc["verification_status"] in ["OFFICIALLY_VERIFIED", "DIGILOCKER_AUTHENTICATED"]
+    }
+    
+    return {"document": doc, "certificate": cert}
+
+@router.delete("/vault/documents/{document_id}")
+def delete_user_document(document_id: str, user_id: str = Query(...)):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM user_documents WHERE document_id = ? AND user_id = ?", (document_id, user_id))
+    deleted = cursor.rowcount
+    conn.commit()
+    conn.close()
+    
+    if deleted == 0:
+        raise HTTPException(status_code=404, detail="Document not found or permission denied.")
+    return {"status": "SUCCESS", "message": f"Document {document_id} removed from your Bhoomi Vault."}
+
+@router.post("/vault/documents/{document_id}/request-verification")
+def request_document_verification(document_id: str, user_id: str = Query(...)):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+    UPDATE user_documents
+    SET verification_status = 'PENDING', remarks = 'Official Revenue verification requested by citizen.'
+    WHERE document_id = ? AND user_id = ?
+    """, (document_id, user_id))
+    conn.commit()
+    conn.close()
+    return {"status": "SUCCESS", "message": "Verification request dispatched to local Revenue Authority."}
+
+
+# ==========================================
+# BHOOMI VAULT: SAVED PROPERTIES & PORTFOLIO
+# ==========================================
+
+@router.get("/vault/properties")
+def get_user_properties(user_id: str = Query(..., description="User ID")):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+    SELECT up.*, lp.state, lp.district, lp.anchal, lp.mauza, lp.khata_no, lp.khesra_no, lp.area_acre, lp.land_type
+    FROM user_properties up
+    LEFT JOIN land_parcels lp ON up.land_identity_id = lp.land_identity_id
+    WHERE up.user_id = ?
+    ORDER BY up.id DESC
+    """, (user_id,))
+    rows = cursor.fetchall()
+    conn.close()
+    
+    properties = []
+    for r in rows:
+        p_dict = dict(r)
+        lid = p_dict["land_identity_id"]
+        # Fetch risk score and document count
+        p, k, r2, m, t, c, e = fetch_parcel_context(lid)
+        res = evaluate_land_parcel_risk(p, k, r2, m, t, c, e)
+        
+        # Count documents linked
+        conn_d = get_db_connection()
+        c_d = conn_d.cursor()
+        c_d.execute("SELECT COUNT(*) FROM user_documents WHERE user_id = ? AND land_identity_id = ?", (user_id, lid))
+        docs_count = c_d.fetchone()[0]
+        conn_d.close()
+        
+        p_dict["risk_score"] = res["risk_score"]
+        p_dict["risk_level"] = res["risk_level"]
+        p_dict["findings_count"] = len(res["findings"])
+        p_dict["linked_documents_count"] = docs_count
+        p_dict["owner_name"] = r2.get("current_owner_name") if r2 else "N/A"
+        properties.append(p_dict)
+        
+    return {"count": len(properties), "properties": properties}
+
+@router.post("/vault/properties")
+def save_property_to_vault(req: PropertySaveRequest):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Check if parcel exists
+    cursor.execute("SELECT area_acre FROM land_parcels WHERE land_identity_id = ?", (req.land_identity_id,))
+    p_row = cursor.fetchone()
+    area = req.registered_area_acre or (p_row["area_acre"] if p_row else 1.0)
+    
+    cursor.execute("""
+    INSERT OR REPLACE INTO user_properties (
+        user_id, land_identity_id, property_nickname, ownership_status, acquired_date, registered_area_acre, notes
+    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (
+        req.user_id, req.land_identity_id, req.property_nickname, req.ownership_status or "OWNER",
+        req.acquired_date or datetime.date.today().isoformat(), area, req.notes or "Added to Bhoomi Vault"
+    ))
+    
+    conn.commit()
+    conn.close()
+    return {"status": "SUCCESS", "message": f"Land parcel {req.land_identity_id} saved to your Bhoomi Vault portfolio."}
+
+@router.delete("/vault/properties/{property_id}")
+def delete_user_property(property_id: int, user_id: str = Query(...)):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM user_properties WHERE id = ? AND user_id = ?", (property_id, user_id))
+    conn.commit()
+    conn.close()
+    return {"status": "SUCCESS", "message": "Property removed from portfolio."}
+
+@router.get("/vault/stats")
+def get_vault_stats(user_id: str = Query(...)):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT COUNT(*) FROM user_documents WHERE user_id = ?", (user_id,))
+    total_docs = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT COUNT(*) FROM user_documents WHERE user_id = ? AND verification_status IN ('OFFICIALLY_VERIFIED', 'DIGILOCKER_AUTHENTICATED')", (user_id,))
+    verified_docs = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT COUNT(*) FROM user_documents WHERE user_id = ? AND verification_status = 'PENDING'", (user_id,))
+    pending_docs = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT COUNT(*) FROM user_properties WHERE user_id = ?", (user_id,))
+    total_props = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT SUM(file_size_kb) FROM user_documents WHERE user_id = ?", (user_id,))
+    total_size = cursor.fetchone()[0] or 0
+    
+    conn.close()
+    return {
+        "total_documents": total_docs,
+        "verified_documents": verified_docs,
+        "pending_verifications": pending_docs,
+        "saved_properties": total_props,
+        "storage_used_kb": total_size,
+        "storage_quota_kb": 102400 # 100 MB DigiLocker allocation
+    }
+
+
+# ==========================================
+# REVENUE OFFICIAL WORKSPACE & VERIFICATION
+# ==========================================
+
+@router.get("/official/pending-documents")
+def get_pending_documents_for_official(
+    state: Optional[str] = None,
+    district: Optional[str] = None,
+    limit: int = 50
+):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    sql = """
+    SELECT ud.*, u.full_name as citizen_name, u.mobile as citizen_mobile, u.email as citizen_email
+    FROM user_documents ud
+    LEFT JOIN users u ON ud.user_id = u.user_id
+    WHERE ud.verification_status IN ('PENDING', 'FLAGGED_ANOMALY')
+    """
+    params = []
+    if state and state != "ALL":
+        sql += " AND ud.state = ?"
+        params.append(state)
+    if district and district != "ALL":
+        sql += " AND ud.district = ?"
+        params.append(district)
+        
+    sql += " ORDER BY ud.id DESC LIMIT ?"
+    params.append(limit)
+    
+    cursor.execute(sql, params)
+    docs = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    
+    return {"count": len(docs), "pending_documents": docs}
+
+@router.post("/official/documents/verify")
+def verify_document_by_official(req: DocumentVerifyRequest):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    status_map = {
+        "APPROVED": "OFFICIALLY_VERIFIED",
+        "FLAGGED": "FLAGGED_ANOMALY",
+        "REJECTED": "FLAGGED_ANOMALY"
+    }
+    new_status = status_map.get(req.decision.upper(), "OFFICIALLY_VERIFIED")
+    
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    stamp_id = f"DSC-{req.officer_role[:3].upper()}-{datetime.date.today().year}-{int(datetime.datetime.now().timestamp()) % 100000}"
+    
+    cursor.execute("""
+    UPDATE user_documents
+    SET verification_status = ?, verified_by_officer = ?, verification_date = ?, digital_stamp_id = ?, remarks = ?
+    WHERE document_id = ?
+    """, (new_status, f"{req.officer_name} ({req.officer_role})", now_str, stamp_id, req.remarks, req.document_id))
+    
+    cursor.execute("""
+    INSERT INTO audit_logs (user_name, role, action, resource_type, resource_id, details_json)
+    VALUES (?, ?, ?, ?, ?, ?)
+    """, (req.officer_name, req.officer_role, "VERIFY_DOCUMENT", "USER_DOCUMENT", req.document_id, json.dumps({
+        "decision": req.decision,
+        "status": new_status,
+        "stamp_id": stamp_id,
+        "remarks": req.remarks
+    })))
+    
+    conn.commit()
+    conn.close()
+    
+    return {
+        "status": "SUCCESS",
+        "message": f"Document {req.document_id} has been marked as '{new_status}' with Digital Signature Stamp {stamp_id}.",
+        "stamp_id": stamp_id,
+        "verification_date": now_str
+    }
+

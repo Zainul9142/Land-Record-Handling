@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShieldCheck, Search, Lock, Languages, UserCheck, Scale, ShieldAlert, Menu, X, Globe2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { 
+  ShieldCheck, Search, Lock, Languages, UserCheck, Scale, 
+  ShieldAlert, Menu, X, Globe2, FolderLock, Landmark, 
+  LogIn, LogOut, User as UserIcon 
+} from 'lucide-react';
 
 interface NavbarProps {
   lang: 'en' | 'hi';
@@ -13,6 +18,7 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, setLang, userRole, setUser
   const location = useLocation();
   const isEn = lang === 'en';
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, isAuthenticated, isOfficial, logout } = useAuth();
 
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
   const closeMobileMenu = () => setMobileMenuOpen(false);
@@ -38,20 +44,37 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, setLang, userRole, setUser
             <span>{isEn ? "हिंदी (Hindi)" : "English"}</span>
           </button>
 
-          <div className="hidden sm:flex items-center space-x-1 text-slate-300">
-            <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <select
-              value={userRole}
-              onChange={(e) => setUserRole(e.target.value)}
-              className="bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500"
+          {/* Quick Auth Info or Sign In */}
+          {isAuthenticated && user ? (
+            <div className="hidden sm:flex items-center space-x-2 bg-slate-900/80 px-2 py-0.5 rounded border border-slate-800 text-slate-300">
+              <img
+                src={user.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=40'}
+                alt={user.full_name}
+                className="w-4 h-4 rounded-full object-cover"
+              />
+              <span className="text-[11px] font-bold text-white max-w-[120px] truncate">{user.full_name}</span>
+              <span className={`text-[9px] font-bold px-1 rounded uppercase ${
+                isOfficial ? 'bg-emerald-950 text-emerald-400' : 'bg-sky-950 text-sky-400'
+              }`}>
+                {isOfficial ? 'Official' : 'Citizen'}
+              </span>
+              <button
+                onClick={logout}
+                title="Sign Out"
+                className="text-slate-400 hover:text-rose-400 ml-1"
+              >
+                <LogOut className="w-3 h-3" />
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              className="hidden sm:flex items-center space-x-1 text-sky-400 hover:text-sky-300 font-semibold"
             >
-              <option value="CITIZEN">Citizen / Buyer</option>
-              <option value="REVENUE_OFFICER">Circle Officer / Tahsildar</option>
-              <option value="REVIEW_OFFICER">SDM / LRDC / Sub-Collector</option>
-              <option value="BANK_USER">Bank Institution User</option>
-              <option value="ADMIN">System Administrator</option>
-            </select>
-          </div>
+              <LogIn className="w-3.5 h-3.5" />
+              <span>{isEn ? "Sign In / Register" : "लॉग इन / रजिस्टर"}</span>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -87,6 +110,30 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, setLang, userRole, setUser
             <span>{isEn ? "Search Land" : "भूमि खोजें"}</span>
           </Link>
 
+          {/* User Section - Bhoomi Vault */}
+          <Link
+            to="/vault"
+            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1.5 ${
+              location.pathname === '/vault' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+            }`}
+          >
+            <FolderLock className="w-4 h-4 text-indigo-400" />
+            <span>{isEn ? "My Bhoomi Vault" : "मेरी भूमि वॉल्ट"}</span>
+          </Link>
+
+          {/* Official Workspace Link */}
+          {isOfficial && (
+            <Link
+              to="/official"
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1.5 ${
+                location.pathname === '/official' ? 'bg-emerald-700 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <Landmark className="w-4 h-4 text-emerald-400" />
+              <span>{isEn ? "Official Desk" : "राजस्व डेस्क"}</span>
+            </Link>
+          )}
+
           <Link
             to="/legal-advisor"
             className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1.5 ${
@@ -104,7 +151,7 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, setLang, userRole, setUser
             }`}
           >
             <ShieldAlert className="w-4 h-4 text-rose-400" />
-            <span>{isEn ? "File Complaint" : "शिकायत दर्ज करें"}</span>
+            <span>{isEn ? "Grievance" : "शिकायत दर्ज करें"}</span>
           </Link>
 
           <Link
@@ -114,16 +161,26 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, setLang, userRole, setUser
             }`}
           >
             <ShieldCheck className="w-4 h-4 text-amber-400" />
-            <span>{isEn ? "Check Before Buy" : "खरीदने से पहले जांचें"}</span>
+            <span>{isEn ? "Check Buy" : "जांचें"}</span>
           </Link>
 
-          {(userRole === 'REVENUE_OFFICER' || userRole === 'REVIEW_OFFICER' || userRole === 'ADMIN') && (
+          {/* Auth Button */}
+          {!isAuthenticated ? (
             <Link
-              to="/admin"
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1.5 bg-emerald-800 hover:bg-emerald-700 text-white border border-emerald-500/40`}
+              to="/login"
+              className="ml-2 px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-sm font-bold flex items-center space-x-1.5 shadow-md shadow-sky-600/20"
             >
-              <Lock className="w-4 h-4 text-emerald-300" />
-              <span>{isEn ? "National Dashboard" : "राष्ट्रीय डैशबोर्ड"}</span>
+              <LogIn className="w-4 h-4" />
+              <span>{isEn ? "Login" : "लॉग इन"}</span>
+            </Link>
+          ) : (
+            <Link
+              to="/login"
+              className="ml-2 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center space-x-1"
+              title="Switch Persona / Accounts"
+            >
+              <UserIcon className="w-3.5 h-3.5 text-sky-400" />
+              <span>Switch</span>
             </Link>
           )}
         </nav>
@@ -144,18 +201,16 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, setLang, userRole, setUser
       {mobileMenuOpen && (
         <div className="md:hidden bg-slate-950 border-t border-slate-800 px-4 pt-2 pb-4 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="py-2 border-b border-slate-800 flex items-center justify-between text-xs text-slate-300">
-            <span className="font-semibold text-slate-400">User Role:</span>
-            <select
-              value={userRole}
-              onChange={(e) => setUserRole(e.target.value)}
-              className="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200"
-            >
-              <option value="CITIZEN">Citizen / Buyer</option>
-              <option value="REVENUE_OFFICER">Circle Officer / Tahsildar</option>
-              <option value="REVIEW_OFFICER">SDM / LRDC / Sub-Collector</option>
-              <option value="BANK_USER">Bank Institution User</option>
-              <option value="ADMIN">System Administrator</option>
-            </select>
+            {isAuthenticated && user ? (
+              <div className="flex items-center space-x-2">
+                <span className="font-semibold text-white">{user.full_name}</span>
+                <span className="text-[10px] text-sky-400 font-bold">({user.role})</span>
+              </div>
+            ) : (
+              <Link to="/login" onClick={closeMobileMenu} className="text-sky-400 font-bold">
+                Sign In to Bhoomi Vault →
+              </Link>
+            )}
           </div>
 
           <Link
@@ -168,6 +223,30 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, setLang, userRole, setUser
             <Search className="w-4 h-4 text-sky-400" />
             <span>{isEn ? "Search Land Records" : "भूमि खोजें"}</span>
           </Link>
+
+          <Link
+            to="/vault"
+            onClick={closeMobileMenu}
+            className={`block px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center space-x-2 ${
+              location.pathname === '/vault' ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800'
+            }`}
+          >
+            <FolderLock className="w-4 h-4 text-indigo-400" />
+            <span>{isEn ? "My Bhoomi Vault & Documents" : "मेरी भूमि वॉल्ट एवं दस्तावेज"}</span>
+          </Link>
+
+          {isOfficial && (
+            <Link
+              to="/official"
+              onClick={closeMobileMenu}
+              className={`block px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center space-x-2 ${
+                location.pathname === '/official' ? 'bg-emerald-700 text-white' : 'text-slate-300 hover:bg-slate-800'
+              }`}
+            >
+              <Landmark className="w-4 h-4 text-emerald-400" />
+              <span>{isEn ? "Revenue Official Desk" : "राजस्व अधिकारी डेस्क"}</span>
+            </Link>
+          )}
 
           <Link
             to="/legal-advisor"
@@ -192,28 +271,16 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, setLang, userRole, setUser
           </Link>
 
           <Link
-            to="/check-buy"
+            to="/login"
             onClick={closeMobileMenu}
-            className={`block px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center space-x-2 ${
-              location.pathname === '/check-buy' ? 'bg-amber-600 text-white' : 'text-slate-300 hover:bg-slate-800'
-            }`}
+            className="block px-3 py-2.5 rounded-xl text-sm font-medium bg-slate-800 text-sky-400 flex items-center space-x-2"
           >
-            <ShieldCheck className="w-4 h-4 text-amber-400" />
-            <span>{isEn ? "Check Before Buy" : "खरीदने से पहले जांचें"}</span>
+            <LogIn className="w-4 h-4" />
+            <span>{isAuthenticated ? 'Switch Account / Login' : 'Login / Register'}</span>
           </Link>
-
-          {(userRole === 'REVENUE_OFFICER' || userRole === 'REVIEW_OFFICER' || userRole === 'ADMIN') && (
-            <Link
-              to="/admin"
-              onClick={closeMobileMenu}
-              className={`block px-3 py-2.5 rounded-xl text-sm font-medium bg-emerald-800 text-white flex items-center space-x-2`}
-            >
-              <Lock className="w-4 h-4 text-emerald-300" />
-              <span>{isEn ? "National Review Dashboard" : "राष्ट्रीय समीक्षा डैशबोर्ड"}</span>
-            </Link>
-          )}
         </div>
       )}
     </header>
   );
 };
+

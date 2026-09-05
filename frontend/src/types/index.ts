@@ -147,3 +147,106 @@ export interface OfficerCase {
   findings: RiskFinding[];
   evidence_sources: Record<string, any>;
 }
+
+export type UserRole = 'CITIZEN' | 'REVENUE_OFFICER' | 'REVIEW_OFFICER' | 'DISTRICT_COLLECTOR' | 'VIGILANCE_OFFICER' | 'ADMIN' | 'BANK_USER';
+
+export interface User {
+  user_id: string;
+  username: string;
+  full_name: string;
+  email: string;
+  mobile?: string;
+  role: UserRole;
+  department?: string;
+  designation?: string;
+  employee_id?: string;
+  jurisdiction_state?: string;
+  jurisdiction_district?: string;
+  jurisdiction_tehsil?: string;
+  kyc_status: 'PENDING' | 'VERIFIED' | 'AADHAAR_LINKED';
+  aadhaar_last4?: string;
+  pan_number?: string;
+  avatar_url?: string;
+}
+
+export type DocumentType =
+  | 'SALE_DEED'
+  | 'KHATAUNI_ROR'
+  | 'SEVEN_TWELVE'
+  | 'RTC_PAHANI'
+  | 'PATTA_CHITTA'
+  | 'MUTATION_CERT'
+  | 'ENCUMBRANCE_CERT'
+  | 'POSSESSION_LETTER'
+  | 'TAX_RECEIPT'
+  | 'COURT_ORDER'
+  | 'OTHER';
+
+export type VerificationStatus =
+  | 'PENDING'
+  | 'OFFICIALLY_VERIFIED'
+  | 'FLAGGED_ANOMALY'
+  | 'DIGILOCKER_AUTHENTICATED';
+
+export interface UserDocument {
+  id: number;
+  document_id: string;
+  user_id: string;
+  land_identity_id?: string;
+  title: string;
+  document_type: DocumentType;
+  state?: string;
+  district?: string;
+  khata_khasra_no?: string;
+  issuing_authority?: string;
+  issue_date?: string;
+  file_name: string;
+  file_size_kb: number;
+  file_hash: string;
+  file_data?: string;
+  mime_type?: string;
+  verification_status: VerificationStatus;
+  verified_by_officer?: string;
+  verification_date?: string;
+  digital_stamp_id?: string;
+  remarks?: string;
+  created_at?: string;
+  citizen_name?: string;
+  citizen_mobile?: string;
+  citizen_email?: string;
+}
+
+export interface UserProperty {
+  id: number;
+  user_id: string;
+  land_identity_id: string;
+  property_nickname: string;
+  ownership_status: 'OWNER' | 'BUYER_INQUIRY' | 'FAMILY_INHERITANCE' | 'WATCHLIST';
+  acquired_date?: string;
+  registered_area_acre?: number;
+  notes?: string;
+  created_at?: string;
+  state?: string;
+  district?: string;
+  anchal?: string;
+  mauza?: string;
+  khata_no?: string;
+  khesra_no?: string;
+  area_acre?: number;
+  land_type?: string;
+  risk_score?: number;
+  risk_level?: RiskLevel;
+  findings_count?: number;
+  linked_documents_count?: number;
+  owner_name?: string;
+}
+
+export interface VaultStats {
+  total_documents: number;
+  verified_documents: number;
+  pending_verifications: number;
+  saved_properties: number;
+  storage_used_kb: number;
+  storage_quota_kb: number;
+}
+
