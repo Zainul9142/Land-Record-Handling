@@ -50,12 +50,6 @@ export const HomePage: React.FC<HomePageProps> = () => {
             {t('hero_title', 'Verify Land Records Across India. Detect Risk. Protect Ownership.')}
           </h1>
 
-          <p className="text-base sm:text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">
-            {isEn
-              ? "BhoomiShield serves as the unified national verification layer integrated with UP Bhulekh, Mahabhulekh, Bhoomi Karnataka, Jharbhoomi, BiharBhumi, Delhi DLRC, AnyROR Gujarat, and Patta Chitta Tamil Nadu — delivering instant risk scoring, 3D cadastral GIS, and QR-certified land reports."
-              : "भूमिशील्ड सभी राज्य भूलेख पोर्टलों (यूपी, महाराष्ट्र, कर्नाटक, झारखंड, बिहार, दिल्ली, गुजरात, तमिलनाडु) के साथ एकीकृत होकर अखिल भारतीय भूमि सत्यापन, 3डी कैडस्ट्रल नक्शा और क्यूआर कोड रिपोर्ट प्रदान करता है।"}
-          </p>
-
           {/* Quick Universal Search Card */}
           <div className="max-w-2xl mx-auto bg-slate-800/90 backdrop-blur-md p-3 sm:p-4 rounded-2xl border border-slate-700 shadow-2xl">
             <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row items-center gap-2">

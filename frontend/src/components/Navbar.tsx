@@ -32,13 +32,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
     <>
       <header className="sticky top-0 z-40 bg-slate-900 text-white shadow-md border-b border-slate-800">
         {/* Top Govt Bar */}
-        <div className="bg-slate-950 px-4 py-1 text-xs border-b border-slate-800 text-slate-400 flex justify-between items-center">
-          <div className="flex items-center space-x-2 truncate">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
-            <span className="truncate">
-              {t('national_layer', 'Digital India Land Records Modernization Programme (DILRMP) • 28 States & 8 UTs National Layer')}
-            </span>
-          </div>
+        <div className="bg-slate-950 px-4 py-1 text-xs border-b border-slate-800 text-slate-400 flex justify-end items-center">
           
           <div className="flex items-center space-x-3 shrink-0">
             {/* 11 Indian Languages Dropdown Selector */}
