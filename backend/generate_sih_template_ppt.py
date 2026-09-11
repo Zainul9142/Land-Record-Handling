@@ -14,10 +14,10 @@ def build_sih_presentation():
 
     # Official Colors
     COLOR_WHITE = RGBColor(255, 255, 255)
-    COLOR_DARK_TEXT = RGBColor(15, 23, 42)       # Slate 900
-    COLOR_NAVY = RGBColor(15, 61, 107)           # SIH Navy
-    COLOR_BLUE_HEADER = RGBColor(0, 86, 150)     # Header Blue
-    COLOR_FOOTER_BLUE = RGBColor(30, 96, 145)    # SIH Template Footer Blue
+    COLOR_DARK_TEXT = RGBColor(15, 23, 42)       # Charcoal/Slate 900
+    COLOR_NAVY = RGBColor(15, 61, 107)           # SIH Header Navy
+    COLOR_BLUE_SUB = RGBColor(0, 86, 150)        # Vibrant Blue (❖ Proposed Solution)
+    COLOR_FOOTER_BLUE = RGBColor(30, 96, 145)    # Official Template Footer Blue
     COLOR_CARD_BG = RGBColor(248, 250, 252)      # Slate 50
     COLOR_CARD_BORDER = RGBColor(203, 213, 225)  # Slate 300
     COLOR_ACCENT_BLUE = RGBColor(37, 99, 235)    # Blue 600
@@ -26,9 +26,10 @@ def build_sih_presentation():
     COLOR_MUTED = RGBColor(71, 85, 105)          # Slate 600
 
     logo_path = r"d:\SIH\1\backend\extracted_assets\sih_logo_clean.png"
-    if not os.path.exists(logo_path):
-        logo_path = r"d:\SIH\1\backend\extracted_assets\page_1_img_1_Im35.jpg"
+    bulb_path = r"d:\SIH\1\backend\extracted_assets\brain_bulb_clean_final.png"
+
     has_logo = os.path.exists(logo_path)
+    has_bulb = os.path.exists(bulb_path)
 
     def set_white_bg(slide):
         bg = slide.background
@@ -60,7 +61,7 @@ def build_sih_presentation():
         p_o2.alignment = PP_ALIGN.CENTER
 
         # 2. Top Center Slide Title
-        t_box = slide.shapes.add_textbox(Inches(2.3), Inches(0.3), Inches(8.8), Inches(0.9))
+        t_box = slide.shapes.add_textbox(Inches(2.3), Inches(0.25), Inches(8.7), Inches(0.95))
         tf_t = t_box.text_frame
         tf_t.word_wrap = True
         p_t = tf_t.paragraphs[0]
@@ -72,9 +73,9 @@ def build_sih_presentation():
 
         # 3. Top Right SIH Logo
         if has_logo:
-            slide.shapes.add_picture(logo_path, Inches(11.2), Inches(0.2), width=Inches(1.7))
+            slide.shapes.add_picture(logo_path, Inches(11.2), Inches(0.2), width=Inches(1.75))
 
-        # 4. Bottom Footer Strip
+        # 4. Bottom Footer Strip across width
         footer = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0), Inches(7.0), Inches(13.333), Inches(0.5))
         footer.fill.solid()
         footer.fill.fore_color.rgb = COLOR_FOOTER_BLUE
@@ -88,24 +89,24 @@ def build_sih_presentation():
         p_f.alignment = PP_ALIGN.CENTER
 
     # ==========================================
-    # SLIDE 1: TITLE PAGE
+    # SLIDE 1: TITLE PAGE (Exact Match to SIH Template)
     # ==========================================
     slide1 = prs.slides.add_slide(blank_layout)
     set_white_bg(slide1)
 
     # Top SIH Header
-    header_box = slide1.shapes.add_textbox(Inches(0.8), Inches(0.35), Inches(10.0), Inches(0.8))
+    header_box = slide1.shapes.add_textbox(Inches(0.8), Inches(0.35), Inches(9.5), Inches(0.8))
     p_h = header_box.text_frame.paragraphs[0]
     p_h.text = "SMART INDIA HACKATHON 2026"
     p_h.font.bold = True
-    p_h.font.size = Pt(30)
+    p_h.font.size = Pt(32)
     p_h.font.color.rgb = COLOR_NAVY
 
     # Top Right SIH Logo
     if has_logo:
-        slide1.shapes.add_picture(logo_path, Inches(11.1), Inches(0.2), width=Inches(1.8))
+        slide1.shapes.add_picture(logo_path, Inches(11.0), Inches(0.2), width=Inches(1.9))
 
-    # Sub-header: TITLE PAGE
+    # Centered: TITLE PAGE
     sub_box = slide1.shapes.add_textbox(Inches(0.8), Inches(1.15), Inches(11.7), Inches(0.5))
     p_sub = sub_box.text_frame.paragraphs[0]
     p_sub.text = "TITLE PAGE"
@@ -114,27 +115,18 @@ def build_sih_presentation():
     p_sub.font.color.rgb = COLOR_DARK_TEXT
     p_sub.alignment = PP_ALIGN.CENTER
 
-    # Main Left Card
-    left_card = slide1.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(1.75), Inches(7.5), Inches(5.3))
-    left_card.fill.solid()
-    left_card.fill.fore_color.rgb = COLOR_CARD_BG
-    left_card.line.color.rgb = COLOR_CARD_BORDER
-    left_card.line.width = Pt(1.5)
-
-    tf1 = left_card.text_frame
+    # Main Left Box with Exact Template Pointers
+    left_box = slide1.shapes.add_textbox(Inches(0.8), Inches(1.8), Inches(7.6), Inches(5.2))
+    tf1 = left_box.text_frame
     tf1.word_wrap = True
-    tf1.margin_left = Inches(0.3)
-    tf1.margin_right = Inches(0.3)
-    tf1.margin_top = Inches(0.3)
 
     fields = [
         ("• Problem Statement ID – ", "SIH26014", COLOR_AMBER),
-        ("• Problem Statement Title – ", "BhoomiShield: AI-Powered Pan-India Land Record Governance, Cadastral GIS & Multi-Jurisdictional Fraud Prevention Engine", COLOR_NAVY),
-        ("• Theme – ", "Smart Governance / Digital India / Land Administration Modernization", COLOR_DARK_TEXT),
-        ("• PS Category – ", "Software", COLOR_ACCENT_BLUE),
-        ("• Team ID / Leader Roll No – ", "2404921540161", COLOR_DARK_TEXT),
-        ("• Team Name (Registered on portal) – ", "TEAM AGNI", COLOR_AMBER),
-        ("• Team Leader – ", "Priyanshu kumar yadav", COLOR_DARK_TEXT)
+        ("• Problem Statement Title- ", "BhoomiShield: Pan-India AI Land Record Governance, Cadastral GIS Mapping & Multi-Jurisdictional Fraud Prevention Engine", COLOR_NAVY),
+        ("• Theme- ", "Smart Governance / Digital India / Land Administration Modernization", COLOR_DARK_TEXT),
+        ("• PS Category- Software/Hardware ", "Software", COLOR_ACCENT_BLUE),
+        ("• Team ID- ", "2404921540161", COLOR_DARK_TEXT),
+        ("• Team Name (Registered on portal) ", "TEAM AGNI (Leader: Priyanshu kumar yadav)", COLOR_AMBER)
     ]
 
     for idx, (lbl, val, col) in enumerate(fields):
@@ -142,60 +134,22 @@ def build_sih_presentation():
         run1 = p.add_run()
         run1.text = lbl
         run1.font.bold = True
-        run1.font.size = Pt(13)
+        run1.font.size = Pt(13.5)
         run1.font.color.rgb = COLOR_DARK_TEXT
 
         run2 = p.add_run()
         run2.text = val
         run2.font.bold = True
-        run2.font.size = Pt(13)
+        run2.font.size = Pt(13.5)
         run2.font.color.rgb = col
-        p.space_after = Pt(10)
+        p.space_after = Pt(12)
 
-    # Right Card: Solution Highlights & Features Summary
-    right_card = slide1.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(8.5), Inches(1.75), Inches(4.0), Inches(5.3))
-    right_card.fill.solid()
-    right_card.fill.fore_color.rgb = RGBColor(238, 246, 255)
-    right_card.line.color.rgb = COLOR_ACCENT_BLUE
-    right_card.line.width = Pt(1.5)
-
-    tf_r = right_card.text_frame
-    tf_r.word_wrap = True
-    tf_r.margin_left = Inches(0.25)
-    tf_r.margin_right = Inches(0.25)
-    tf_r.margin_top = Inches(0.25)
-
-    p_rt = tf_r.paragraphs[0]
-    p_rt.text = "PROPOSED INNOVATION"
-    p_rt.font.bold = True
-    p_rt.font.size = Pt(13.5)
-    p_rt.font.color.rgb = COLOR_NAVY
-    p_rt.alignment = PP_ALIGN.CENTER
-    p_rt.space_after = Pt(8)
-
-    highlights = [
-        ("🌐 Pan-India Live Ingestion", "28 States & 8 UTs land registry integration (Khatiyan, RoR, 7/12, Patta)."),
-        ("🗺️ Cadastral GIS & GPS Search", "Satellite parcel mapping, Ray-Casting Point-in-Polygon boundary detection."),
-        ("🛡️ 7-Rule AI Risk Engine", "Deterministic 0-100 scoring for owner mismatch, area variance & court stays."),
-        ("🔐 Citizen Bhoomi Vault", "SHA-256 cryptographic document store & tamper-proof QR audit reports."),
-        ("🗣️ 11-Language Multimodal AI", "Voice/Text legal guidance in Hindi, Bengali, Tamil, Telugu, Marathi, etc.")
-    ]
-
-    for title, desc in highlights:
-        p_ht = tf_r.add_paragraph()
-        p_ht.text = title
-        p_ht.font.bold = True
-        p_ht.font.size = Pt(10.5)
-        p_ht.font.color.rgb = COLOR_ACCENT_BLUE
-        
-        p_hd = tf_r.add_paragraph()
-        p_hd.text = desc
-        p_hd.font.size = Pt(9.5)
-        p_hd.font.color.rgb = COLOR_DARK_TEXT
-        p_hd.space_after = Pt(6)
+    # Right Side Graphic: Clean Brain Bulb Artwork
+    if has_bulb:
+        slide1.shapes.add_picture(bulb_path, Inches(8.8), Inches(1.7), width=Inches(3.6))
 
     # ==========================================
-    # SLIDE 2: IDEA TITLE
+    # SLIDE 2: IDEA TITLE & PROPOSED SOLUTION
     # ==========================================
     slide2 = prs.slides.add_slide(blank_layout)
     set_white_bg(slide2)
@@ -206,10 +160,10 @@ def build_sih_presentation():
     p_s2.text = "❖ Proposed Solution (Describe your Idea/Solution/Prototype)"
     p_s2.font.bold = True
     p_s2.font.size = Pt(15)
-    p_s2.font.color.rgb = COLOR_BLUE_HEADER
+    p_s2.font.color.rgb = COLOR_BLUE_SUB
 
     s2_cards = [
-        ("• Detailed Explanation of the Proposed Solution", COLOR_NAVY, [
+        ("• Detailed Explanation of Proposed Solution", COLOR_NAVY, [
             "Unified Pan-India Aggregation: Standardizes fragmented state land data (Khatian, RoR, Register-II, Jamabandi, Deeds, Mutation logs) into an interoperable ULPIN canonical schema.",
             "Interactive Cadastral GIS & Location Search: Instant 1-click parcel lookup by GPS coordinates, satellite boundary polygons, Khata/Plot number, or owner name.",
             "Bhoomi Vault & Authority Portal: Secure citizen repository for land deeds and tax receipts paired with real-time revenue officer mutation & dispute dashboards."
@@ -219,7 +173,7 @@ def build_sih_presentation():
             "Prevents Fraudulent Resales: Instantly flags unmutated deeds, pending bank mortgages, and active civil court stay orders before financial transaction.",
             "Protects Tribal & Protected Land: Enforces statutory tenancy regulations (e.g. CNT/SPT Act, UP Revenue Code §98, Karnataka PTCL) preventing illegal land alienation."
         ]),
-        ("• Innovation and Uniqueness of the Solution", COLOR_EMERALD, [
+        ("• Innovation and Uniqueness of Solution", COLOR_EMERALD, [
             "Deterministic 0–100 AI Risk Engine: Heuristic rule-based scoring (R001–R007) ensuring transparent, fully explainable risk factors with zero hallucination.",
             "Multilingual Voice Legal Assistant: Conversational legal aid and dispute drafting in 11 Indian regional languages for high rural accessibility.",
             "Cryptographic SHA-256 Audit Trail: Generates QR-coded official Land Health Certificates verifying textual & spatial consistency across state archives."
@@ -287,9 +241,9 @@ def build_sih_presentation():
     tf_s3_l.margin_top = Inches(0.2)
 
     p_tech_hdr = tf_s3_l.paragraphs[0]
-    p_tech_hdr.text = "• Technologies to be used"
+    p_tech_hdr.text = "• Technologies to be used (e.g. languages, frameworks, hardware)"
     p_tech_hdr.font.bold = True
-    p_tech_hdr.font.size = Pt(13)
+    p_tech_hdr.font.size = Pt(12)
     p_tech_hdr.font.color.rgb = COLOR_NAVY
     p_tech_hdr.space_after = Pt(6)
 
@@ -329,9 +283,9 @@ def build_sih_presentation():
     tf_s3_r.margin_top = Inches(0.2)
 
     p_meth_hdr = tf_s3_r.paragraphs[0]
-    p_meth_hdr.text = "• Methodology & Process for Implementation"
+    p_meth_hdr.text = "• Methodology & Process for Implementation (Working Prototype)"
     p_meth_hdr.font.bold = True
-    p_meth_hdr.font.size = Pt(13)
+    p_meth_hdr.font.size = Pt(12)
     p_meth_hdr.font.color.rgb = COLOR_AMBER
     p_meth_hdr.space_after = Pt(6)
 
@@ -364,7 +318,7 @@ def build_sih_presentation():
     add_common_template_elements(slide4, 4, "FEASIBILITY AND VIABILITY")
 
     s4_sections = [
-        ("• Analysis of Feasibility", COLOR_NAVY, [
+        ("• Analysis of the Feasibility of the Idea", COLOR_NAVY, [
             "Technical Feasibility: Fully functional working prototype deployed with 10,000+ parcels across Jharkhand, UP, Maharashtra, and pan-India states with sub-150ms query latency.",
             "Operational Feasibility: Non-invasive architecture that operates as an analytical intelligence layer over existing state databases without requiring costly database re-engineering.",
             "Financial Viability: Built on high-performance open-source stack (FastAPI, React, SQLite/PostgreSQL, Leaflet) minimizing infrastructure and licensing overhead."
@@ -402,7 +356,7 @@ def build_sih_presentation():
         p_h.font.color.rgb = hdr_color
         p_h.space_after = Pt(8)
 
-        for pt in pts:
+        for pt in points:
             p_pt = tf.add_paragraph()
             parts = pt.split(":", 1)
             if len(parts) == 2:
@@ -564,7 +518,7 @@ def build_sih_presentation():
 
     output_path = r"d:\SIH\1\BhoomiShield_SIH2026_TEAM_AGNI.pptx"
     prs.save(output_path)
-    print(f"Successfully regenerated SIH 2026 presentation at: {output_path}")
+    print(f"Successfully generated SIH 2026 PPTX presentation at: {output_path}")
 
 if __name__ == "__main__":
     build_sih_presentation()

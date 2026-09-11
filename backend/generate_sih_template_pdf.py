@@ -9,7 +9,6 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 def generate_sih_pdf():
     pdf_path = r"d:\SIH\1\BhoomiShield_SIH2026_TEAM_AGNI.pdf"
     
-    # Standard 16:9 widescreen dimensions in points (960 x 540 pt)
     PAGE_WIDTH = 960
     PAGE_HEIGHT = 540
     
@@ -27,9 +26,10 @@ def generate_sih_pdf():
     ACCENT_BLUE = colors.HexColor("#2563EB")
     
     logo_path = r"d:\SIH\1\backend\extracted_assets\sih_logo_clean.png"
-    if not os.path.exists(logo_path):
-        logo_path = r"d:\SIH\1\backend\extracted_assets\page_1_img_1_Im35.jpg"
+    bulb_path = r"d:\SIH\1\backend\extracted_assets\brain_bulb_clean_final.png"
+
     has_logo = os.path.exists(logo_path)
+    has_bulb = os.path.exists(bulb_path)
 
     styles = getSampleStyleSheet()
 
@@ -72,11 +72,12 @@ def generate_sih_pdf():
         c.drawCentredString(PAGE_WIDTH / 2, 13, f"@SIH Idea submission- Template {slide_num}")
 
     # ==========================================
-    # SLIDE 1: TITLE PAGE
+    # SLIDE 1: TITLE PAGE (Exact Match to SIH Template)
     # ==========================================
     c.setFillColor(colors.white)
     c.rect(0, 0, PAGE_WIDTH, PAGE_HEIGHT, fill=1, stroke=0)
 
+    # Top SIH Header
     c.setFillColor(NAVY)
     c.setFont("Helvetica-Bold", 26)
     c.drawString(60, PAGE_HEIGHT - 55, "SMART INDIA HACKATHON 2026")
@@ -88,73 +89,40 @@ def generate_sih_pdf():
     c.setFont("Helvetica-Bold", 18)
     c.drawCentredString(PAGE_WIDTH / 2, PAGE_HEIGHT - 95, "TITLE PAGE")
 
-    # Left Box
-    c.setFillColor(CARD_BG)
-    c.setStrokeColor(CARD_BORDER)
-    c.setLineWidth(1.5)
-    c.roundRect(50, 45, 520, 375, 10, fill=1, stroke=1)
-
+    # Left Fields
     fields = [
         ("• Problem Statement ID – ", "SIH26014", AMBER),
-        ("• Problem Statement Title – ", "BhoomiShield: Pan-India AI Land Record Governance, Cadastral GIS Mapping & Multi-Jurisdictional Fraud Prevention Engine", NAVY),
-        ("• Theme – ", "Smart Governance / Digital India / Land Administration Modernization", DARK_TEXT),
-        ("• PS Category – ", "Software", ACCENT_BLUE),
-        ("• Team ID / Leader Roll No – ", "2404921540161", DARK_TEXT),
-        ("• Team Name (Registered on portal) – ", "TEAM AGNI", AMBER),
-        ("• Team Leader – ", "Priyanshu kumar yadav", DARK_TEXT)
+        ("• Problem Statement Title- ", "BhoomiShield: Pan-India AI Land Record Governance, Cadastral GIS Mapping & Multi-Jurisdictional Fraud Prevention Engine", NAVY),
+        ("• Theme- ", "Smart Governance / Digital India / Land Administration Modernization", DARK_TEXT),
+        ("• PS Category- Software/Hardware ", "Software", ACCENT_BLUE),
+        ("• Team ID- ", "2404921540161", DARK_TEXT),
+        ("• Team Name (Registered on portal) ", "TEAM AGNI (Leader: Priyanshu kumar yadav)", AMBER)
     ]
 
-    y_pos = PAGE_HEIGHT - 130
+    y_pos = PAGE_HEIGHT - 145
     for lbl, val, col in fields:
         p_style = ParagraphStyle(
             'FieldStyle',
             fontName='Helvetica-Bold',
-            fontSize=10.5,
-            leading=14,
+            fontSize=11,
+            leading=15,
             textColor=DARK_TEXT
         )
         val_hex = col.hexval() if hasattr(col, 'hexval') else '#0F172A'
         html_text = f"<b>{lbl}</b><font color='{val_hex}'><b>{val}</b></font>"
         p = Paragraph(html_text, p_style)
-        w, h = p.wrap(490, 100)
-        p.drawOn(c, 65, y_pos - h)
-        y_pos -= (h + 12)
+        w, h = p.wrap(480, 100)
+        p.drawOn(c, 60, y_pos - h)
+        y_pos -= (h + 16)
 
-    # Right Box: Proposed Innovation
-    c.setFillColor(colors.HexColor("#EEF6FF"))
-    c.setStrokeColor(ACCENT_BLUE)
-    c.setLineWidth(1.5)
-    c.roundRect(590, 45, 320, 375, 10, fill=1, stroke=1)
-
-    c.setFillColor(NAVY)
-    c.setFont("Helvetica-Bold", 13)
-    c.drawCentredString(750, PAGE_HEIGHT - 135, "PROPOSED INNOVATION")
-
-    highlights = [
-        ("🌐 Pan-India Live Ingestion", "28 States & 8 UTs land registry integration (Khatiyan, RoR, 7/12, Patta)."),
-        ("🗺️ Cadastral GIS & GPS Search", "Satellite parcel mapping, Ray-Casting Point-in-Polygon boundary detection."),
-        ("🛡️ 7-Rule AI Risk Engine", "Deterministic 0-100 scoring for owner mismatch, area variance & court stays."),
-        ("🔐 Citizen Bhoomi Vault", "SHA-256 cryptographic document store & tamper-proof QR audit reports."),
-        ("🗣️ 11-Language Multimodal AI", "Voice/Text legal guidance in Hindi, Bengali, Tamil, Telugu, Marathi, etc.")
-    ]
-
-    y_h = PAGE_HEIGHT - 165
-    for title, desc in highlights:
-        c.setFillColor(ACCENT_BLUE)
-        c.setFont("Helvetica-Bold", 9.5)
-        c.drawString(605, y_h, title)
-        
-        c.setFillColor(DARK_TEXT)
-        c.setFont("Helvetica", 8.5)
-        p_desc = Paragraph(desc, ParagraphStyle('Desc', fontName='Helvetica', fontSize=8.5, leading=11, textColor=DARK_TEXT))
-        w_d, h_d = p_desc.wrap(290, 50)
-        p_desc.drawOn(c, 605, y_h - h_d - 3)
-        y_h -= (h_d + 16)
+    # Right Graphic: Clean Brain Bulb Artwork
+    if has_bulb:
+        c.drawImage(bulb_path, 600, 70, width=280, height=380, preserveAspectRatio=True, mask='auto')
 
     c.showPage()
 
     # ==========================================
-    # SLIDE 2: IDEA TITLE
+    # SLIDE 2: IDEA TITLE & PROPOSED SOLUTION
     # ==========================================
     draw_common_header_footer(2, "BHOOMISHIELD: PAN-INDIA LAND RECORD AI & GOVERNANCE PLATFORM")
     
@@ -163,7 +131,7 @@ def generate_sih_pdf():
     c.drawString(40, PAGE_HEIGHT - 105, "❖ Proposed Solution (Describe your Idea/Solution/Prototype)")
 
     s2_cards = [
-        ("• Detailed Explanation of the Proposed Solution", NAVY, [
+        ("• Detailed Explanation of Proposed Solution", NAVY, [
             ("Unified Pan-India Aggregation", "Standardizes fragmented state land data (Khatian, RoR, Register-II, Jamabandi, Deeds, Mutation logs) into an interoperable ULPIN canonical schema."),
             ("Interactive Cadastral GIS & Location Search", "Instant 1-click parcel lookup by GPS coordinates, satellite boundary polygons, Khata/Plot number, or owner name."),
             ("Bhoomi Vault & Authority Portal", "Secure citizen repository for land deeds and tax receipts paired with real-time revenue officer mutation & dispute dashboards.")
@@ -173,7 +141,7 @@ def generate_sih_pdf():
             ("Prevents Fraudulent Resales", "Instantly flags unmutated deeds, pending bank mortgages, and active civil court stay orders before financial transaction."),
             ("Protects Tribal & Protected Land", "Enforces statutory tenancy regulations (e.g. CNT/SPT Act, UP Revenue Code §98, Karnataka PTCL) preventing illegal land alienation.")
         ]),
-        ("• Innovation and Uniqueness of the Solution", EMERALD, [
+        ("• Innovation and Uniqueness of Solution", EMERALD, [
             ("Deterministic 0–100 AI Risk Engine", "Heuristic rule-based scoring (R001–R007) ensuring transparent, fully explainable risk factors with zero hallucination."),
             ("Multilingual Voice Legal Assistant", "Conversational legal aid and dispute drafting in 11 Indian regional languages for high rural accessibility."),
             ("Cryptographic SHA-256 Audit Trail", "Generates QR-coded official Land Health Certificates verifying textual & spatial consistency across state archives.")
@@ -187,8 +155,6 @@ def generate_sih_pdf():
         c.setLineWidth(1.5)
         c.roundRect(x_card, 45, 285, 375, 8, fill=1, stroke=1)
 
-        c.setFillColor(hdr_col)
-        c.setFont("Helvetica-Bold", 9.5)
         p_hdr = Paragraph(f"<b>{hdr_text}</b>", ParagraphStyle('Hdr', fontName='Helvetica-Bold', fontSize=9.5, leading=12, textColor=hdr_col))
         w_h, h_h = p_hdr.wrap(265, 40)
         p_hdr.drawOn(c, x_card + 10, PAGE_HEIGHT - 130 - h_h)
@@ -214,8 +180,8 @@ def generate_sih_pdf():
     c.roundRect(40, 45, 425, 395, 8, fill=1, stroke=1)
 
     c.setFillColor(NAVY)
-    c.setFont("Helvetica-Bold", 11)
-    c.drawString(55, PAGE_HEIGHT - 115, "• Technologies to be used")
+    c.setFont("Helvetica-Bold", 10.5)
+    c.drawString(55, PAGE_HEIGHT - 115, "• Technologies to be used (languages, frameworks, hardware)")
 
     tech_stack = [
         ("Frontend Application", "React 18, TypeScript, Vite, Tailwind CSS, Lucide Icons, Mobile Responsive PWA architecture."),
@@ -240,8 +206,8 @@ def generate_sih_pdf():
     c.roundRect(485, 45, 435, 395, 8, fill=1, stroke=1)
 
     c.setFillColor(AMBER)
-    c.setFont("Helvetica-Bold", 11)
-    c.drawString(500, PAGE_HEIGHT - 115, "• Methodology & Process for Implementation")
+    c.setFont("Helvetica-Bold", 10.5)
+    c.drawString(500, PAGE_HEIGHT - 115, "• Methodology & Process for Implementation (Working Prototype)")
 
     method_steps = [
         ("Step 1: Multi-State Ingestion Pipeline", "State land portals (e.g. Jharbhoomi, Bhulekh UP, Mahabhumi, BanglarBhumi) ingested into canonical schema matching ULPIN standard."),

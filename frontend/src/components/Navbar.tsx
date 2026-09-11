@@ -6,7 +6,7 @@ import { SupportedLanguage } from '../i18n/translations';
 import { 
   ShieldCheck, Search, Lock, Languages, UserCheck, Scale, 
   ShieldAlert, Menu, X, Globe2, FolderLock, Landmark, 
-  LogIn, LogOut, User as UserIcon, ChevronDown 
+  LogIn, LogOut, User as UserIcon, ChevronDown, Calculator, Database 
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -194,13 +194,23 @@ export const Navbar: React.FC<NavbarProps> = () => {
           </Link>
 
           <Link
-            to="/check-buy"
+            to="/valuation"
             className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1.5 ${
-              location.pathname === '/check-buy' ? 'bg-amber-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              location.pathname === '/valuation' ? 'bg-amber-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'
             }`}
           >
-            <ShieldCheck className="w-4 h-4 text-amber-400" />
-            <span>{isEn ? "Check Buy" : "जांचें"}</span>
+            <Calculator className="w-4 h-4 text-amber-400" />
+            <span>{isEn ? "Valuation & Duty" : "मूल्यांकन व स्टाम्प"}</span>
+          </Link>
+
+          <Link
+            to="/admin"
+            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1.5 ${
+              location.pathname === '/admin' ? 'bg-purple-700 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+            }`}
+          >
+            <Database className="w-4 h-4 text-purple-400" />
+            <span>{isEn ? "DB & Admin" : "डेटाबेस व एडमिन"}</span>
           </Link>
 
           {/* Auth Button */}
@@ -307,6 +317,28 @@ export const Navbar: React.FC<NavbarProps> = () => {
           >
             <ShieldAlert className="w-4 h-4 text-rose-400" />
             <span>{isEn ? "File Grievance Complaint" : "शिकायत दर्ज करें"}</span>
+          </Link>
+
+          <Link
+            to="/valuation"
+            onClick={closeMobileMenu}
+            className={`block px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center space-x-2 ${
+              location.pathname === '/valuation' ? 'bg-amber-600 text-white' : 'text-slate-300 hover:bg-slate-800'
+            }`}
+          >
+            <Calculator className="w-4 h-4 text-amber-400" />
+            <span>{isEn ? "Land Valuation & Stamp Duty" : "भूमि मूल्यांकन एवं स्टाम्प शुल्क"}</span>
+          </Link>
+
+          <Link
+            to="/admin"
+            onClick={closeMobileMenu}
+            className={`block px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center space-x-2 ${
+              location.pathname === '/admin' ? 'bg-purple-700 text-white' : 'text-slate-300 hover:bg-slate-800'
+            }`}
+          >
+            <Database className="w-4 h-4 text-purple-400" />
+            <span>{isEn ? "SQLite DB & User Admin" : "डेटाबेस व यूजर एडमिन"}</span>
           </Link>
 
           <Link

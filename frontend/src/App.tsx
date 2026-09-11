@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { Navbar } from './components/Navbar';
@@ -16,6 +16,7 @@ import { GrievancePage } from './pages/GrievancePage';
 import { AuthPage } from './pages/AuthPage';
 import { UserVaultPage } from './pages/UserVaultPage';
 import { OfficialWorkspacePage } from './pages/OfficialWorkspacePage';
+import { ValuationCalculatorPage } from './pages/ValuationCalculatorPage';
 import { ToastContainer, ToastMessage } from './components/Toast';
 
 export const App: React.FC = () => {
@@ -44,15 +45,18 @@ export const App: React.FC = () => {
                 <Route path="/land/:landIdentityId" element={<LandProfilePage onShowToast={showToast} />} />
                 <Route path="/login" element={<AuthPage onShowToast={showToast} />} />
                 <Route path="/register" element={<AuthPage onShowToast={showToast} />} />
+                <Route path="/auth" element={<AuthPage onShowToast={showToast} />} />
                 <Route path="/vault" element={<UserVaultPage onShowToast={showToast} />} />
                 <Route path="/official" element={<OfficialWorkspacePage onShowToast={showToast} />} />
                 <Route path="/legal-advisor" element={<LegalAdvisorPage onShowToast={showToast} />} />
                 <Route path="/complaints" element={<GrievancePage onShowToast={showToast} />} />
+                <Route path="/valuation" element={<ValuationCalculatorPage onShowToast={showToast} />} />
                 <Route path="/check-buy" element={<CheckBeforeYouBuy />} />
                 <Route path="/track-mutation" element={<MutationTrackerPage />} />
                 <Route path="/track-mutation/:appNo" element={<MutationTrackerPage />} />
                 <Route path="/verify/:reportId" element={<ReportVerificationPage />} />
-                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin" element={<AdminDashboard onShowToast={showToast} />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </main>
 

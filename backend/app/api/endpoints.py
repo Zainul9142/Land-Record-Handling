@@ -14,12 +14,25 @@ from app.engine.ai_explainer import generate_risk_explanation, answer_parcel_que
 from app.engine.official_scraper import fetch_live_official_records, STATE_PORTALS
 from app.engine.legal_advisor import consult_legal_advisor
 from app.engine.data_generator import PAN_INDIA_DATA
+from app.engine.valuation_calculator import calculate_land_valuation_and_duties, STATE_STAMP_DUTY_RULES
+from app.engine.lineage_analyzer import analyze_parcel_title_chain
+from app.engine.encroachment_scanner import scan_parcel_encroachment_buffers
 from app.services.pdf_service import generate_land_verification_pdf, REPORTS_DIR
 from app.services.complaint_service import generate_official_complaint_pdf, COMPLAINTS_DIR
 
 router = APIRouter()
 
 # --- Pydantic Schemas ---
+class ValuationRequest(BaseModel):
+    state: str = "Jharkhand"
+    district: Optional[str] = "Bokaro"
+    land_type: str = "Agricultural"
+    area_acre: float = 1.0
+    area_sqft: Optional[float] = None
+    buyer_gender: str = "Male"
+    is_urban: bool = False
+    declared_value_inr: Optional[float] = None
+
 class AIQuestionRequest(BaseModel):
     land_identity_id: str
     question: str
@@ -1293,4 +1306,486 @@ def verify_document_by_official(req: DocumentVerifyRequest):
         "stamp_id": stamp_id,
         "verification_date": now_str
     }
+
+
+# ==========================================
+# LAND VALUATION & STAMP DUTY CALCULATOR
+# ==========================================
+
+@router.post("/valuation/calculate")
+def calculate_valuation_and_stamp_duty(req: ValuationRequest):
+    """
+    Calculates Government Circle Rate Valuation, Stamp Duty, Registration Fee,
+    and applicable Female / Rural concessions.
+    """
+    try:
+        res = calculate_land_valuation_and_duties(
+            state=req.state,
+            district=req.district or "Default",
+            land_type=req.land_type,
+            area_acre=req.area_acre,
+            area_sqft=req.area_sqft,
+            buyer_gender=req.buyer_gender,
+            is_urban=req.is_urban,
+            declared_value_inr=req.declared_value_inr
+        )
+        return res
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Valuation calculation failed: {str(e)}")
+
+@router.get("/valuation/state-rules")
+def get_state_stamp_duty_rules():
+    """
+    Returns the statutory baseline stamp duty and registration fee percentages across all states.
+    """
+    return {"states": STATE_STAMP_DUTY_RULES}
+
+
+# ==========================================
+# AI TITLE CHAIN & LINEAGE GRAPH ANALYZER
+# ==========================================
+
+@router.get("/parcels/{land_identity_id}/lineage")
+def get_parcel_title_lineage(land_identity_id: str):
+    """
+    Reconstructs 4-tier title lineage graph (CS Survey -> Deeds -> Mutation -> Encumbrance),
+    detecting broken chains and title defects.
+    """
+    parcel, khatian, register2, mutations, transactions, court_cases, encumbrances = fetch_parcel_context(land_identity_id)
+    if not parcel:
+        raise HTTPException(status_code=404, detail="Land parcel not found")
+        
+    parcel_dict = dict(parcel)
+    parcel_dict["khatian"] = khatian
+    parcel_dict["register2"] = register2
+    parcel_dict["mutations"] = mutations
+    parcel_dict["transactions"] = transactions
+    parcel_dict["court_cases"] = court_cases
+    parcel_dict["encumbrances"] = encumbrances
+    
+    lineage_res = analyze_parcel_title_chain(parcel_dict)
+    return lineage_res
+
+
+# ==========================================
+# BUFFER ZONE & ENCROACHMENT SCANNER
+# ==========================================
+
+@router.get("/parcels/{land_identity_id}/encroachment-scan")
+def get_parcel_encroachment_scan(land_identity_id: str):
+    """
+    Evaluates parcel proximity to statutory eco-sensitive, hydrological,
+    and infrastructure prohibited buffer zones.
+    """
+    parcel, khatian, register2, mutations, transactions, court_cases, encumbrances = fetch_parcel_context(land_identity_id)
+    if not parcel:
+        raise HTTPException(status_code=404, detail="Land parcel not found")
+        
+    parcel_dict = dict(parcel)
+    parcel_dict["khatian"] = khatian
+    parcel_dict["register2"] = register2
+    parcel_dict["mutations"] = mutations
+    parcel_dict["transactions"] = transactions
+    parcel_dict["court_cases"] = court_cases
+    parcel_dict["encumbrances"] = encumbrances
+    
+    encroach_res = scan_parcel_encroachment_buffers(parcel_dict)
+    return encroach_res
+
+
+# ==========================================
+# ADMIN DATABASE EXPORT & SNAPSHOT ENDPOINTS
+# ==========================================
+
+@router.get("/admin/database/export")
+def export_database_summary():
+    """
+    Exports summary statistics, table counts, and schema info for administrative audits.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    tables = [
+        "users", "user_documents", "land_parcels", "khatian_records", 
+        "register2_records", "mutations", "transactions", "court_cases", 
+        "encumbrances", "complaints", "verification_reports", "officer_reviews", "audit_logs"
+    ]
+    
+    counts = {}
+    for tbl in tables:
+        try:
+            cursor.execute(f"SELECT COUNT(*) FROM {tbl}")
+            counts[tbl] = cursor.fetchone()[0]
+        except Exception:
+            counts[tbl] = 0
+            
+    # Recent users
+    cursor.execute("SELECT user_id, username, full_name, email, role, kyc_status, created_at FROM users ORDER BY id DESC LIMIT 10")
+    recent_users = [dict(r) for r in cursor.fetchall()]
+    
+    # Recent documents
+    cursor.execute("SELECT document_id, user_id, title, document_type, state, verification_status, created_at FROM user_documents ORDER BY id DESC LIMIT 10")
+    recent_docs = [dict(r) for r in cursor.fetchall()]
+    
+    conn.close()
+    
+    return {
+        "status": "SUCCESS",
+        "exported_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S IST"),
+        "database_file": "bhoomishield.db",
+        "table_record_counts": counts,
+        "recent_registered_users": recent_users,
+        "recent_vault_documents": recent_docs
+    }
+
+@router.get("/admin/database/download")
+def download_database_file():
+    """
+    Provides administrative download of the primary SQLite database file for offline backup.
+    """
+    from app.db.database import DB_PATH
+    if not os.path.exists(DB_PATH):
+        raise HTTPException(status_code=404, detail="Database file not found on disk")
+    return FileResponse(path=str(DB_PATH), media_type="application/x-sqlite3", filename="bhoomishield_backup.db")
+
+
+# ==========================================
+# ADMIN: SQLITE USER & DATABASE MANAGEMENT
+# ==========================================
+
+class AdminAddUserRequest(BaseModel):
+    username: str
+    password: str = "password123"
+    full_name: str
+    email: str
+    mobile: Optional[str] = "+91 98765 43210"
+    role: str = "CITIZEN"  # CITIZEN, REVENUE_OFFICER, DISTRICT_COLLECTOR, REVIEW_OFFICER, VIGILANCE_OFFICER, ADMIN
+    department: Optional[str] = "General Public"
+    designation: Optional[str] = "Landowner & Citizen"
+    employee_id: Optional[str] = None
+    jurisdiction_state: Optional[str] = "Uttar Pradesh"
+    jurisdiction_district: Optional[str] = "Gautam Buddha Nagar"
+    jurisdiction_tehsil: Optional[str] = "Dadri"
+    kyc_status: Optional[str] = "VERIFIED"
+    aadhaar_last4: Optional[str] = "5412"
+    pan_number: Optional[str] = "ABCPS1234F"
+    avatar_url: Optional[str] = None
+
+class AdminUpdateUserRequest(BaseModel):
+    full_name: Optional[str] = None
+    email: Optional[str] = None
+    mobile: Optional[str] = None
+    role: Optional[str] = None
+    department: Optional[str] = None
+    designation: Optional[str] = None
+    employee_id: Optional[str] = None
+    jurisdiction_state: Optional[str] = None
+    jurisdiction_district: Optional[str] = None
+    jurisdiction_tehsil: Optional[str] = None
+    kyc_status: Optional[str] = None
+    aadhaar_last4: Optional[str] = None
+    pan_number: Optional[str] = None
+    password: Optional[str] = None
+
+class AdminSQLQueryRequest(BaseModel):
+    query: str
+
+@router.get("/admin/users")
+def get_all_users_for_admin(
+    role: Optional[str] = None,
+    search: Optional[str] = None,
+    limit: int = 100
+):
+    """
+    Fetch all users from SQLite database with filtering for administrator inspection.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    sql = "SELECT id, user_id, username, full_name, email, mobile, role, department, designation, employee_id, jurisdiction_state, jurisdiction_district, jurisdiction_tehsil, kyc_status, aadhaar_last4, pan_number, avatar_url, status, created_at FROM users WHERE 1=1"
+    params = []
+    
+    if role and role != "ALL":
+        sql += " AND role = ?"
+        params.append(role)
+        
+    if search:
+        sql += " AND (full_name LIKE ? OR username LIKE ? OR email LIKE ? OR jurisdiction_state LIKE ? OR jurisdiction_district LIKE ? OR employee_id LIKE ?)"
+        term = f"%{search}%"
+        params.extend([term, term, term, term, term, term])
+        
+    sql += " ORDER BY id DESC LIMIT ?"
+    params.append(limit)
+    
+    cursor.execute(sql, params)
+    users = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    
+    return {"count": len(users), "users": users}
+
+@router.post("/admin/users")
+def add_user_by_admin(req: AdminAddUserRequest):
+    """
+    Administrator endpoint to dynamically add any user as a Revenue Officer, District Collector, or Citizen into SQLite.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Check if username or email exists
+    cursor.execute("SELECT user_id FROM users WHERE username = ? OR email = ?", (req.username, req.email))
+    if cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=400, detail="Username or Email already exists in the database.")
+        
+    role_prefix = "OFF" if req.role in ["REVENUE_OFFICER", "DISTRICT_COLLECTOR", "REVIEW_OFFICER", "VIGILANCE_OFFICER"] else ("ADM" if req.role == "ADMIN" else "CIT")
+    user_id = f"USR-{role_prefix}-{int(datetime.datetime.now().timestamp()) % 100000}"
+    pwd_hash = hashlib.sha256(req.password.encode('utf-8')).hexdigest()
+    
+    avatar = req.avatar_url or (
+        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150" if req.role != "CITIZEN"
+        else "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150"
+    )
+    
+    cursor.execute("""
+    INSERT INTO users (
+        user_id, username, password_hash, full_name, email, mobile, role,
+        department, designation, employee_id, jurisdiction_state, jurisdiction_district, jurisdiction_tehsil,
+        kyc_status, aadhaar_last4, pan_number, avatar_url, status
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVE')
+    """, (
+        user_id, req.username, pwd_hash, req.full_name, req.email, req.mobile, req.role,
+        req.department or ("Revenue & Land Reforms" if req.role != "CITIZEN" else "General Public"),
+        req.designation or ("Tahsildar / Circle Officer" if req.role != "CITIZEN" else "Landowner & Citizen"),
+        req.employee_id, req.jurisdiction_state, req.jurisdiction_district, req.jurisdiction_tehsil,
+        req.kyc_status or "VERIFIED", req.aadhaar_last4 or "5412", req.pan_number or "ABCPS1234F",
+        avatar
+    ))
+    
+    # Audit log
+    cursor.execute("""
+    INSERT INTO audit_logs (user_name, role, action, resource_type, resource_id, details_json)
+    VALUES (?, ?, ?, ?, ?, ?)
+    """, ("Administrator", "ADMIN", "CREATE_USER", "USER", user_id, json.dumps({
+        "username": req.username,
+        "role": req.role,
+        "full_name": req.full_name,
+        "jurisdiction": f"{req.jurisdiction_district}, {req.jurisdiction_state}"
+    })))
+    
+    conn.commit()
+    
+    cursor.execute("SELECT id, user_id, username, full_name, email, mobile, role, department, designation, employee_id, jurisdiction_state, jurisdiction_district, jurisdiction_tehsil, kyc_status, aadhaar_last4, pan_number, avatar_url, status, created_at FROM users WHERE user_id = ?", (user_id,))
+    new_user = dict(cursor.fetchone())
+    conn.close()
+    
+    return {
+        "status": "SUCCESS",
+        "message": f"User {req.full_name} ({req.role}) successfully created and registered into SQLite database.",
+        "user": new_user
+    }
+
+@router.put("/admin/users/{user_id}")
+def update_user_by_admin(user_id: str, req: AdminUpdateUserRequest):
+    """
+    Administrator endpoint to promote/demote or modify an existing user's role and details.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
+    existing = cursor.fetchone()
+    if not existing:
+        conn.close()
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    updates = []
+    params = []
+    
+    if req.full_name is not None:
+        updates.append("full_name = ?")
+        params.append(req.full_name)
+    if req.email is not None:
+        updates.append("email = ?")
+        params.append(req.email)
+    if req.mobile is not None:
+        updates.append("mobile = ?")
+        params.append(req.mobile)
+    if req.role is not None:
+        updates.append("role = ?")
+        params.append(req.role)
+    if req.department is not None:
+        updates.append("department = ?")
+        params.append(req.department)
+    if req.designation is not None:
+        updates.append("designation = ?")
+        params.append(req.designation)
+    if req.employee_id is not None:
+        updates.append("employee_id = ?")
+        params.append(req.employee_id)
+    if req.jurisdiction_state is not None:
+        updates.append("jurisdiction_state = ?")
+        params.append(req.jurisdiction_state)
+    if req.jurisdiction_district is not None:
+        updates.append("jurisdiction_district = ?")
+        params.append(req.jurisdiction_district)
+    if req.jurisdiction_tehsil is not None:
+        updates.append("jurisdiction_tehsil = ?")
+        params.append(req.jurisdiction_tehsil)
+    if req.kyc_status is not None:
+        updates.append("kyc_status = ?")
+        params.append(req.kyc_status)
+    if req.aadhaar_last4 is not None:
+        updates.append("aadhaar_last4 = ?")
+        params.append(req.aadhaar_last4)
+    if req.pan_number is not None:
+        updates.append("pan_number = ?")
+        params.append(req.pan_number)
+    if req.password is not None and req.password.strip():
+        updates.append("password_hash = ?")
+        params.append(hashlib.sha256(req.password.strip().encode('utf-8')).hexdigest())
+        
+    if updates:
+        sql = f"UPDATE users SET {', '.join(updates)} WHERE user_id = ?"
+        params.append(user_id)
+        cursor.execute(sql, params)
+        
+        cursor.execute("""
+        INSERT INTO audit_logs (user_name, role, action, resource_type, resource_id, details_json)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """, ("Administrator", "ADMIN", "UPDATE_USER", "USER", user_id, json.dumps({
+            "updated_fields": list(req.dict(exclude_unset=True).keys())
+        })))
+        
+        conn.commit()
+        
+    cursor.execute("SELECT id, user_id, username, full_name, email, mobile, role, department, designation, employee_id, jurisdiction_state, jurisdiction_district, jurisdiction_tehsil, kyc_status, aadhaar_last4, pan_number, avatar_url, status, created_at FROM users WHERE user_id = ?", (user_id,))
+    updated_user = dict(cursor.fetchone())
+    conn.close()
+    
+    return {
+        "status": "SUCCESS",
+        "message": f"User {user_id} profile and permissions updated successfully in SQLite.",
+        "user": updated_user
+    }
+
+@router.delete("/admin/users/{user_id}")
+def delete_user_by_admin(user_id: str):
+    """
+    Administrator endpoint to delete a user from SQLite database.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("DELETE FROM users WHERE user_id = ?", (user_id,))
+    deleted = cursor.rowcount
+    
+    cursor.execute("""
+    INSERT INTO audit_logs (user_name, role, action, resource_type, resource_id, details_json)
+    VALUES (?, ?, ?, ?, ?, ?)
+    """, ("Administrator", "ADMIN", "DELETE_USER", "USER", user_id, json.dumps({"status": "DELETED"})))
+    
+    conn.commit()
+    conn.close()
+    
+    if deleted == 0:
+        raise HTTPException(status_code=404, detail="User not found.")
+        
+    return {"status": "SUCCESS", "message": f"User {user_id} removed from SQLite database."}
+
+@router.post("/admin/sql/query")
+def execute_admin_sql_query(req: AdminSQLQueryRequest):
+    """
+    Direct SQL Query Studio for administrator to query or manipulate SQLite data.
+    """
+    clean_q = req.query.strip()
+    if not clean_q:
+        raise HTTPException(status_code=400, detail="Empty query provided.")
+        
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    is_select = clean_q.upper().startswith("SELECT") or clean_q.upper().startswith("PRAGMA") or clean_q.upper().startswith("EXPLAIN")
+    
+    try:
+        start_t = datetime.datetime.now()
+        cursor.execute(clean_q)
+        
+        if is_select:
+            rows = cursor.fetchall()
+            columns = [col[0] for col in cursor.description] if cursor.description else []
+            data = [dict(r) for r in rows]
+            duration_ms = (datetime.datetime.now() - start_t).total_seconds() * 1000
+            conn.close()
+            return {
+                "status": "SUCCESS",
+                "type": "QUERY",
+                "columns": columns,
+                "row_count": len(data),
+                "duration_ms": round(duration_ms, 2),
+                "rows": data[:200]  # Cap preview at 200 rows
+            }
+        else:
+            affected = cursor.rowcount
+            conn.commit()
+            duration_ms = (datetime.datetime.now() - start_t).total_seconds() * 1000
+            
+            cursor.execute("""
+            INSERT INTO audit_logs (user_name, role, action, resource_type, resource_id, details_json)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """, ("Administrator", "ADMIN", "EXECUTE_SQL", "SQLITE_DB", "bhoomishield.db", json.dumps({
+                "sql_preview": clean_q[:200],
+                "rows_affected": affected
+            })))
+            conn.commit()
+            conn.close()
+            
+            return {
+                "status": "SUCCESS",
+                "type": "MUTATION",
+                "rows_affected": affected,
+                "duration_ms": round(duration_ms, 2),
+                "message": f"Statement executed successfully. {affected} row(s) affected."
+            }
+    except Exception as e:
+        conn.close()
+        raise HTTPException(status_code=400, detail=f"SQL Execution Error: {str(e)}")
+
+@router.get("/admin/tables/{table_name}")
+def get_table_data_for_admin(table_name: str, limit: int = 50, offset: int = 0):
+    """
+    Get paginated table data from SQLite database.
+    """
+    allowed_tables = [
+        "users", "user_documents", "land_parcels", "khatian_records",
+        "register2_records", "mutations", "transactions", "court_cases",
+        "encumbrances", "complaints", "verification_reports", "officer_reviews", "audit_logs"
+    ]
+    if table_name not in allowed_tables:
+        raise HTTPException(status_code=400, detail=f"Invalid table name. Allowed: {', '.join(allowed_tables)}")
+        
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+    total_count = cursor.fetchone()[0]
+    
+    cursor.execute(f"SELECT * FROM {table_name} LIMIT ? OFFSET ?", (limit, offset))
+    rows = cursor.fetchall()
+    columns = [col[0] for col in cursor.description] if cursor.description else []
+    data = [dict(r) for r in rows]
+    
+    conn.close()
+    
+    return {
+        "table": table_name,
+        "total_records": total_count,
+        "columns": columns,
+        "count": len(data),
+        "limit": limit,
+        "offset": offset,
+        "rows": data
+    }
+
+
+
 

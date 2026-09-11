@@ -23,12 +23,12 @@ export const HomePage: React.FC<HomePageProps> = () => {
   };
 
   const stateDemos = [
-    { state: 'Jharkhand', dist: 'Bokaro', sub: 'Chas', id: 'JH-BOK-CHA-KURA-P125-PL450-2', label: 'Jharkhand (Bokaro / Chas)' },
+    { state: 'Jharkhand', dist: 'Bokaro', sub: 'Chas', id: 'JH-BOK-CHA-KURA-K125-K450-2', label: 'Jharkhand (Bokaro / Chas)' },
     { state: 'Uttar Pradesh', dist: 'Gautam Buddha Nagar (Noida)', sub: 'Dadri', id: 'UP-GAU-DAD-BHAN-P340-PL112-1', label: 'Uttar Pradesh (Noida / Dadri)' },
-    { state: 'Maharashtra', dist: 'Pune', sub: 'Haveli', id: 'MH-PUN-HAV-HINJ-P145-PL23-B', label: 'Maharashtra (Pune / Hinjawadi 7/12)' },
-    { state: 'Karnataka', dist: 'Bengaluru Urban', sub: 'Bengaluru East', id: 'KA-BEN-BEN-WHIT-P89-PL3A', label: 'Karnataka (Bengaluru / RTC Pahani)' },
-    { state: 'Bihar', dist: 'Patna', sub: 'Danapur', id: 'BR-PAT-DAN-KHAG-P201-PL56-3', label: 'Bihar (Patna / Danapur)' },
-    { state: 'Delhi', dist: 'South Delhi', sub: 'Hauz Khas', id: 'DL-SOU-HAU-MEHR-P56-PL12-A', label: 'Delhi (Hauz Khas / Mehrauli)' }
+    { state: 'Maharashtra', dist: 'Pune', sub: 'Haveli', id: 'MH-PUN-HAV-HINJ-G145-P23-B', label: 'Maharashtra (Pune / Hinjawadi 7/12)' },
+    { state: 'Karnataka', dist: 'Bengaluru Urban', sub: 'Bengaluru South', id: 'KA-BLR-SOU-WHIT-S89-P3-A', label: 'Karnataka (Bengaluru / RTC Pahani)' },
+    { state: 'Bihar', dist: 'Patna', sub: 'Danapur', id: 'BR-PAT-DAN-KHAG-K201-P56-3', label: 'Bihar (Patna / Danapur)' },
+    { state: 'Delhi', dist: 'South Delhi', sub: 'Hauz Khas', id: 'DL-SOU-HAU-MEH-K56-P12-A', label: 'Delhi (Hauz Khas / Mehrauli)' }
   ];
 
   return (

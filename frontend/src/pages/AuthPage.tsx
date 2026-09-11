@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
   ShieldCheck, User, Lock, KeyRound, Building2, Landmark, 
   BadgeCheck, CheckCircle2, ArrowRight, UserCheck, AlertCircle, 
-  Fingerprint, Sparkles, MapPin, Briefcase, FileText
+  Fingerprint, Sparkles, MapPin, Briefcase, FileText, Eye, EyeOff, Check, X
 } from 'lucide-react';
 
 interface AuthPageProps {
@@ -17,25 +17,41 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
   const { login, register, demoLogin, demoUsers, loading } = useAuth();
 
   const [activeTab, setActiveTab] = useState<'CITIZEN' | 'OFFICIAL'>('CITIZEN');
-  const [isRegisterMode, setIsRegisterMode] = useState(false);
+  const [isRegisterMode, setIsRegisterMode] = useState<boolean>(() => {
+    return location.pathname === '/register';
+  });
 
   // Form State
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [mobile, setMobile] = useState('');
-  const [employeeId, setEmployeeId] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  
+  // Officer specific fields
+  const [employeeId, setEmployeeId] = useState('UP-REV-8492');
   const [department, setDepartment] = useState('Revenue & Land Reforms');
   const [designation, setDesignation] = useState('Tahsildar / Circle Officer');
   const [state, setState] = useState('Uttar Pradesh');
   const [district, setDistrict] = useState('Gautam Buddha Nagar');
   const [tehsil, setTehsil] = useState('Dadri');
+  
+  // Citizen KYC simulation
   const [aadhaarLast4, setAadhaarLast4] = useState('5412');
   const [panNumber, setPanNumber] = useState('ABCPS1234F');
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpValue, setOtpValue] = useState('');
+  
   const [errorMsg, setErrorMsg] = useState('');
+
+  // Update register mode if route changes
+  useEffect(() => {
+    if (location.pathname === '/register') {
+      setIsRegisterMode(true);
+    } else if (location.pathname === '/login') {
+      setIsRegisterMode(false);
+    }
+  }, [location.pathname]);
 
   const handleDemoSelect = async (demoUserId: string) => {
     setErrorMsg('');
@@ -60,16 +76,36 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
     setErrorMsg('');
 
     if (isRegisterMode) {
-      if (!username || !fullName || !email || !password) {
-        setErrorMsg('Please fill all mandatory fields.');
+      if (!fullName.trim()) {
+        setErrorMsg('Please enter your Full Legal Name.');
         return;
       }
+      if (!email.trim() && !username.trim()) {
+        setErrorMsg('Please enter your Email or Username.');
+        return;
+      }
+      if (!password.trim()) {
+        setErrorMsg('Please enter a secure password.');
+        return;
+      }
+      if (password.length < 4) {
+        setErrorMsg('Password should be at least 4 characters long.');
+        return;
+      }
+      if (confirmPassword && password !== confirmPassword) {
+        setErrorMsg('Passwords do not match. Please re-enter your password.');
+        return;
+      }
+
+      const effectiveUsername = username.trim() || email.split('@')[0];
+      const effectiveEmail = email.trim() || (username.includes('@') ? username : `${effectiveUsername}@example.in`);
+
       const regData = {
-        username,
-        password,
-        full_name: fullName,
-        email,
-        mobile: mobile || '+91 98765 00000',
+        username: effectiveUsername,
+        password: password,
+        full_name: fullName.trim(),
+        email: effectiveEmail,
+        mobile: mobile.trim() || '+91 98765 43210',
         role: activeTab === 'CITIZEN' ? 'CITIZEN' : 'REVENUE_OFFICER',
         department: activeTab === 'CITIZEN' ? 'General Public' : department,
         designation: activeTab === 'CITIZEN' ? 'Landowner & Citizen' : designation,
@@ -77,23 +113,29 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
         jurisdiction_state: state,
         jurisdiction_district: district,
         jurisdiction_tehsil: tehsil,
-        aadhaar_last4: aadhaarLast4,
-        pan_number: panNumber
+        aadhaar_last4: aadhaarLast4 || "5412",
+        pan_number: panNumber || "ABCPS1234F"
       };
 
       const result = await register(regData);
       if (result.success) {
-        if (onShowToast) onShowToast('success', 'Registration Successful', result.message);
+        if (onShowToast) onShowToast('success', 'Registration Successful', `Welcome ${fullName}! Your BhoomiShield account is ready.`);
         navigate(activeTab === 'CITIZEN' ? '/vault' : '/official');
       } else {
         setErrorMsg(result.message);
       }
     } else {
-      if (!username) {
-        setErrorMsg('Please enter your username or registered email.');
+      const loginIdentifier = username.trim() || email.trim();
+      if (!loginIdentifier) {
+        setErrorMsg('Please enter your Username or Registered Email.');
         return;
       }
-      const result = await login(username, password);
+      if (!password.trim()) {
+        setErrorMsg('Please enter your Password.');
+        return;
+      }
+
+      const result = await login(loginIdentifier, password);
       if (result.success) {
         if (onShowToast) onShowToast('success', 'Welcome Back', result.message);
         navigate(activeTab === 'CITIZEN' ? '/vault' : '/official');
@@ -122,48 +164,48 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
         </div>
 
         {/* Fast One-Click Demo Personas Strip */}
-        <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 shadow-xl backdrop-blur-sm">
-          <div className="flex items-center justify-between mb-3">
+        <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 shadow-xl backdrop-blur-sm">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
             <div className="flex items-center space-x-2 text-xs font-bold text-sky-400 uppercase tracking-wide">
-              <Sparkles className="w-4 h-4 text-amber-400 animate-spin" />
-              <span>⚡ One-Click Instant Demo Login (Zero Setup Required)</span>
+              <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
+              <span>⚡ 1-Click Instant Demo Login (For Evaluators & Testing)</span>
             </div>
-            <span className="text-[11px] text-slate-400 bg-slate-900/60 px-2 py-0.5 rounded border border-slate-700">
-              Click any profile to test live
+            <span className="text-[11px] text-slate-400 bg-slate-900/80 px-2 py-0.5 rounded border border-slate-700">
+              Click any profile below to sign in instantly
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
             {demoUsers.map((demo) => {
               const isOfficer = demo.role !== 'CITIZEN';
               return (
                 <button
                   key={demo.user_id}
                   onClick={() => handleDemoSelect(demo.user_id)}
-                  className="flex items-center space-x-3 p-2.5 rounded-xl bg-slate-900/70 hover:bg-slate-700/80 border border-slate-700 hover:border-sky-500 transition-all text-left group"
+                  className="flex items-center space-x-2.5 p-2.5 rounded-xl bg-slate-900/80 hover:bg-slate-750 hover:border-sky-500 border border-slate-700 transition-all text-left group cursor-pointer"
                 >
                   <img
                     src={demo.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80'}
                     alt={demo.full_name}
-                    className="w-10 h-10 rounded-full object-cover border border-slate-600 group-hover:border-sky-400"
+                    className="w-9 h-9 rounded-full object-cover border border-slate-600 group-hover:border-sky-400 shrink-0"
                   />
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-1">
                       <span className="text-xs font-bold text-white truncate group-hover:text-sky-300">
-                        {demo.full_name}
+                        {demo.full_name.split(' ')[0]} {demo.full_name.split(' ')[1] || ''}
                       </span>
-                      <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded uppercase ${
-                        isOfficer ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-800/50' : 'bg-sky-950/80 text-sky-400 border border-sky-800/50'
+                      <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded uppercase shrink-0 ${
+                        isOfficer ? 'bg-emerald-950/90 text-emerald-300 border border-emerald-800' : 'bg-sky-950/90 text-sky-300 border border-sky-800'
                       }`}>
                         {isOfficer ? 'Official' : 'Citizen'}
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-400 truncate">
+                    <p className="text-[10px] text-slate-400 truncate">
                       {demo.designation || demo.role}
                     </p>
-                    <p className="text-[10px] text-slate-500 truncate flex items-center space-x-1">
+                    <p className="text-[9px] text-slate-500 truncate flex items-center space-x-1">
                       <MapPin className="w-2.5 h-2.5 inline text-slate-400" />
-                      <span>{demo.jurisdiction_district}, {demo.jurisdiction_state}</span>
+                      <span>{demo.jurisdiction_district}</span>
                     </p>
                   </div>
                 </button>
@@ -174,11 +216,12 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
 
         {/* Main Portal Card */}
         <div className="bg-slate-800/90 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
-          {/* Dual Tab Switcher */}
+          
+          {/* Dual Tab Switcher for Citizen vs Official */}
           <div className="grid grid-cols-2 border-b border-slate-700 text-center font-semibold text-sm">
             <button
-              onClick={() => { setActiveTab('CITIZEN'); setIsRegisterMode(false); setErrorMsg(''); }}
-              className={`py-4 px-6 flex items-center justify-center space-x-2 transition-all ${
+              onClick={() => { setActiveTab('CITIZEN'); setErrorMsg(''); }}
+              className={`py-3.5 px-6 flex items-center justify-center space-x-2 transition-all ${
                 activeTab === 'CITIZEN'
                   ? 'bg-slate-800 text-sky-400 border-b-2 border-sky-500 shadow-inner'
                   : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
@@ -188,8 +231,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
               <span>Citizen & Landowner Locker</span>
             </button>
             <button
-              onClick={() => { setActiveTab('OFFICIAL'); setIsRegisterMode(false); setErrorMsg(''); }}
-              className={`py-4 px-6 flex items-center justify-center space-x-2 transition-all ${
+              onClick={() => { setActiveTab('OFFICIAL'); setErrorMsg(''); }}
+              className={`py-3.5 px-6 flex items-center justify-center space-x-2 transition-all ${
                 activeTab === 'OFFICIAL'
                   ? 'bg-slate-800 text-emerald-400 border-b-2 border-emerald-500 shadow-inner'
                   : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
@@ -200,122 +243,191 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
             </button>
           </div>
 
-          <div className="p-6 sm:p-8 space-y-6">
-            {/* Tab Subtitle */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-700/60">
-              <div>
-                <h2 className="text-lg font-bold text-white flex items-center space-x-2">
-                  {activeTab === 'CITIZEN' ? (
-                    <>
-                      <FileText className="w-5 h-5 text-sky-400" />
-                      <span>Citizen Bhoomi Vault Access</span>
-                    </>
-                  ) : (
-                    <>
-                      <Building2 className="w-5 h-5 text-emerald-400" />
-                      <span>Govt. Land Revenue Officer Workspace</span>
-                    </>
-                  )}
-                </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  {activeTab === 'CITIZEN'
-                    ? 'Store, view and cryptographically verify your land records, sale deeds & tax receipts.'
-                    : 'Authorized desk for Lekhpals, Tehsildars, Sub-Registrars, and District Collectors.'}
-                </p>
-              </div>
-
-              {/* Register / Sign In toggle */}
+          {/* Mode Switcher: Sign In vs Register */}
+          <div className="px-6 sm:px-8 pt-6">
+            <div className="flex items-center justify-between p-1 bg-slate-900/90 rounded-xl border border-slate-700 max-w-md mx-auto">
               <button
                 type="button"
-                onClick={() => setIsRegisterMode(!isRegisterMode)}
-                className="text-xs font-semibold text-sky-400 hover:text-sky-300 hover:underline px-3 py-1.5 rounded-lg bg-sky-950/40 border border-sky-800/40"
+                onClick={() => { setIsRegisterMode(false); setErrorMsg(''); }}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center space-x-1.5 ${
+                  !isRegisterMode
+                    ? 'bg-sky-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-white'
+                }`}
               >
-                {isRegisterMode ? 'Already have account? Sign In' : '+ Create New Account'}
+                <KeyRound className="w-3.5 h-3.5" />
+                <span>Sign In to Account</span>
               </button>
+              <button
+                type="button"
+                onClick={() => { setIsRegisterMode(true); setErrorMsg(''); }}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center space-x-1.5 ${
+                  isRegisterMode
+                    ? 'bg-sky-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <UserCheck className="w-3.5 h-3.5" />
+                <span>Create New Account (Register)</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="p-6 sm:p-8 space-y-6">
+            
+            {/* Header description for current mode */}
+            <div className="border-b border-slate-700/60 pb-4">
+              <h2 className="text-lg font-bold text-white flex items-center space-x-2">
+                {activeTab === 'CITIZEN' ? (
+                  <>
+                    <FileText className="w-5 h-5 text-sky-400" />
+                    <span>{isRegisterMode ? 'Register New Citizen Bhoomi Account' : 'Sign In to Citizen Bhoomi Vault'}</span>
+                  </>
+                ) : (
+                  <>
+                    <Building2 className="w-5 h-5 text-emerald-400" />
+                    <span>{isRegisterMode ? 'Register Revenue Officer Credentials' : 'Govt. Land Revenue Officer Workspace'}</span>
+                  </>
+                )}
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">
+                {activeTab === 'CITIZEN'
+                  ? 'Store, view, and cryptographically verify land records, sale deeds, tax receipts, and mutation tracking.'
+                  : 'Authorized revenue workspace for Circle Officers, Tahsildars, SDMs, Sub-Registrars, and District Collectors.'}
+              </p>
             </div>
 
             {errorMsg && (
-              <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-800/60 text-rose-300 text-xs flex items-center space-x-2">
+              <div className="p-3.5 rounded-xl bg-rose-950/70 border border-rose-800/80 text-rose-300 text-xs flex items-center space-x-2.5 animate-in fade-in">
                 <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
                 <span>{errorMsg}</span>
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {isRegisterMode && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">
-                      Full Legal Name *
-                    </label>
-                    <input
-                      type="text"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      placeholder="e.g. Ramesh Kumar Sharma"
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">
-                      Mobile Number (Aadhaar linked) *
-                    </label>
-                    <input
-                      type="text"
-                      value={mobile}
-                      onChange={(e) => setMobile(e.target.value)}
-                      placeholder="+91 98765 43210"
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500"
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">
-                    {activeTab === 'CITIZEN' ? 'Username or Email ID *' : 'Official Govt Email / Employee Code *'}
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      placeholder={activeTab === 'CITIZEN' ? 'ramesh.sharma or email' : 'rajesh.verma@rev.up.gov.in'}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500"
-                      required
-                    />
-                    <User className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">
-                    Password *
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500"
-                      required
-                    />
-                    <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
-                  </div>
-                </div>
-              </div>
-
-              {isRegisterMode && (
+              
+              {/* REGISTRATION SPECIFIC FIELDS */}
+              {isRegisterMode ? (
                 <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                        Full Legal Name <span className="text-rose-400">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="e.g. Ramesh Kumar Sharma"
+                        className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                        Email Address <span className="text-rose-400">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="e.g. ramesh.sharma@example.in"
+                        className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                        Preferred Username (or leave blank to use email)
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={username}
+                          onChange={(e) => setUsername(e.target.value)}
+                          placeholder="e.g. ramesh_sharma"
+                          className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                        />
+                        <User className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                        Mobile Number (Aadhaar linked)
+                      </label>
+                      <input
+                        type="tel"
+                        value={mobile}
+                        onChange={(e) => setMobile(e.target.value)}
+                        placeholder="+91 98765 43210"
+                        className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                        Create Password <span className="text-rose-400">*</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Create strong password"
+                          className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-10 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                          required
+                        />
+                        <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-3 text-slate-400 hover:text-slate-200"
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                        Confirm Password <span className="text-rose-400">*</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="Re-enter password"
+                          className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-10 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                          required
+                        />
+                        <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                        {confirmPassword && (
+                          <span className="absolute right-3 top-3">
+                            {confirmPassword === password ? (
+                              <Check className="w-4 h-4 text-emerald-400" />
+                            ) : (
+                              <X className="w-4 h-4 text-rose-400" />
+                            )}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Citizen KYC Linkage simulation */}
                   {activeTab === 'CITIZEN' ? (
                     <div className="p-3.5 rounded-xl bg-slate-900/70 border border-slate-700/80 space-y-3">
                       <div className="flex items-center space-x-2 text-xs font-semibold text-sky-400">
                         <Fingerprint className="w-4 h-4 text-sky-400" />
-                        <span>DigiLocker & Citizen KYC Linkage (Optional Simulation)</span>
+                        <span>DigiLocker & Citizen KYC Verification (Verified)</span>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
@@ -336,7 +448,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
                             value={panNumber}
                             onChange={(e) => setPanNumber(e.target.value.toUpperCase())}
                             placeholder="ABCPS1234F"
-                            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white"
+                            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white uppercase"
                           />
                         </div>
                       </div>
@@ -383,6 +495,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
                             <option value="Maharashtra">Maharashtra</option>
                             <option value="Karnataka">Karnataka</option>
                             <option value="Jharkhand">Jharkhand</option>
+                            <option value="Bihar">Bihar</option>
                             <option value="Delhi">Delhi</option>
                           </select>
                         </div>
@@ -390,23 +503,81 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
                     </div>
                   )}
                 </>
+              ) : (
+                /* LOGIN SPECIFIC FIELDS */
+                <>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                        {activeTab === 'CITIZEN' ? 'Username or Registered Email ID' : 'Official Govt Email / Employee Code'} <span className="text-rose-400">*</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={username}
+                          onChange={(e) => setUsername(e.target.value)}
+                          placeholder={activeTab === 'CITIZEN' ? 'ramesh_sharma or ramesh@example.in' : 'vikram.rao@revenue.gov.in'}
+                          className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                          required
+                        />
+                        <User className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-xs font-semibold text-slate-300">
+                          Password <span className="text-rose-400">*</span>
+                        </label>
+                        <span className="text-[11px] text-slate-400">
+                          Default demo: <code className="text-sky-300">password123</code>
+                        </span>
+                      </div>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Enter your password"
+                          className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-10 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                          required
+                        />
+                        <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-3 text-slate-400 hover:text-slate-200"
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </>
               )}
 
-              {/* Submit Button */}
+              {/* Submit Action Button */}
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full py-3 px-4 rounded-xl font-bold text-sm text-white shadow-lg transition-all flex items-center justify-center space-x-2 ${
+                className={`w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white shadow-lg transition-all flex items-center justify-center space-x-2 cursor-pointer ${
                   activeTab === 'CITIZEN'
                     ? 'bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 shadow-sky-600/20'
                     : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-emerald-600/20'
                 }`}
               >
                 {loading ? (
-                  <span>Authenticating...</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Authenticating Credentials...</span>
+                  </div>
                 ) : (
                   <>
-                    <span>{isRegisterMode ? 'Complete Registration & Open Locker' : `Sign In to ${activeTab === 'CITIZEN' ? 'Citizen Bhoomi Vault' : 'Revenue Desk'}`}</span>
+                    <span>
+                      {isRegisterMode 
+                        ? 'Complete Registration & Enter Locker' 
+                        : `Sign In to ${activeTab === 'CITIZEN' ? 'Citizen Bhoomi Vault' : 'Revenue Official Desk'}`}
+                    </span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}

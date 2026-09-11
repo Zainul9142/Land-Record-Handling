@@ -13,7 +13,9 @@ export interface LandParcel {
   area_acre: number;
   land_type: string;
   polygon_json?: string;
+  polygon_coords?: [number, number][];
   owner_name?: string;
+  created_at?: string;
 }
 
 export interface StateMetadata {
