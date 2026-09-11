@@ -40,8 +40,10 @@ export const App: React.FC = () => {
 
             <main className="flex-1">
               <Routes>
-                <Route path="/" element={<HomePage />} />
+                <Route path="/" element={<LandSearchPage onShowToast={showToast} />} />
                 <Route path="/search" element={<LandSearchPage onShowToast={showToast} />} />
+                <Route path="/overview" element={<HomePage />} />
+                <Route path="/home" element={<HomePage />} />
                 <Route path="/land/:landIdentityId" element={<LandProfilePage onShowToast={showToast} />} />
                 <Route path="/login" element={<AuthPage onShowToast={showToast} />} />
                 <Route path="/register" element={<AuthPage onShowToast={showToast} />} />
@@ -54,6 +56,7 @@ export const App: React.FC = () => {
                 <Route path="/check-buy" element={<CheckBeforeYouBuy />} />
                 <Route path="/track-mutation" element={<MutationTrackerPage />} />
                 <Route path="/track-mutation/:appNo" element={<MutationTrackerPage />} />
+                <Route path="/verify" element={<ReportVerificationPage />} />
                 <Route path="/verify/:reportId" element={<ReportVerificationPage />} />
                 <Route path="/admin" element={<AdminDashboard onShowToast={showToast} />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
