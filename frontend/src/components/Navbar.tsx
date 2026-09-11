@@ -164,16 +164,29 @@ export const Navbar: React.FC<NavbarProps> = () => {
           {/* Desktop Right Quick Actions */}
           <div className="flex items-center space-x-2 sm:space-x-3">
             
-            {/* Quick Land Search Link */}
+            {/* Quick Overview Link */}
             <Link
               to="/"
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all hidden md:flex items-center space-x-1.5 ${
-                location.pathname === '/' || location.pathname === '/search'
+                location.pathname === '/' || location.pathname === '/overview'
                   ? 'bg-sky-600/30 text-sky-300 border border-sky-500/50'
                   : 'text-slate-300 hover:bg-slate-800 hover:text-white border border-transparent'
               }`}
             >
-              <Search className="w-3.5 h-3.5 text-sky-400" />
+              <Globe2 className="w-3.5 h-3.5 text-sky-400" />
+              <span>{isEn ? "Overview" : "अवलोकन"}</span>
+            </Link>
+
+            {/* Quick Land Search Link */}
+            <Link
+              to="/search"
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all hidden md:flex items-center space-x-1.5 ${
+                location.pathname === '/search' || location.pathname === '/land-search'
+                  ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-500/50'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white border border-transparent'
+              }`}
+            >
+              <Search className="w-3.5 h-3.5 text-indigo-400" />
               <span>{isEn ? "Land Search" : "भूमि खोज"}</span>
             </Link>
 
@@ -182,11 +195,11 @@ export const Navbar: React.FC<NavbarProps> = () => {
               to="/vault"
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all hidden md:flex items-center space-x-1.5 ${
                 location.pathname === '/vault'
-                  ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-500/50'
+                  ? 'bg-emerald-600/30 text-emerald-300 border border-emerald-500/50'
                   : 'text-slate-300 hover:bg-slate-800 hover:text-white border border-transparent'
               }`}
             >
-              <FolderLock className="w-3.5 h-3.5 text-indigo-400" />
+              <FolderLock className="w-3.5 h-3.5 text-emerald-400" />
               <span>{isEn ? "My Vault" : "मेरी वॉल्ट"}</span>
             </Link>
 
@@ -202,7 +215,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
             ) : (
               <Link
                 to="/login"
-                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center space-x-1.5 border border-slate-700"
+                className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center space-x-1.5 border border-slate-700"
                 title="Switch Persona / Accounts"
               >
                 <UserIcon className="w-3.5 h-3.5 text-sky-400" />
@@ -246,10 +259,10 @@ export const Navbar: React.FC<NavbarProps> = () => {
             {/* Feature Options (Represented by Name Only) */}
             <div className="p-5 space-y-5 flex-1">
               
-              {/* Category 1: Land Discovery & Due Diligence */}
+              {/* Category 1: National Layer & Land Discovery */}
               <div className="space-y-1.5">
                 <div className="text-[10px] font-bold text-sky-400 uppercase tracking-wider px-1 mb-1">
-                  1. Land Discovery & Due Diligence
+                  1. National Layer & Land Discovery
                 </div>
 
                 <Link
@@ -258,10 +271,22 @@ export const Navbar: React.FC<NavbarProps> = () => {
                   className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-sky-600/20 text-slate-200 hover:text-sky-300 border border-slate-800 hover:border-sky-500/40 transition-all font-semibold text-xs group"
                 >
                   <div className="flex items-center space-x-2.5">
-                    <Search className="w-4 h-4 text-sky-400" />
-                    <span>Universal Land Search</span>
+                    <Globe2 className="w-4 h-4 text-sky-400" />
+                    <span>National Portal Overview</span>
                   </div>
                   <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-sky-400 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+
+                <Link
+                  to="/search"
+                  onClick={closeMenuDrawer}
+                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-indigo-600/20 text-slate-200 hover:text-indigo-300 border border-slate-800 hover:border-indigo-500/40 transition-all font-semibold text-xs group"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    <Search className="w-4 h-4 text-indigo-400" />
+                    <span>Universal Land Search</span>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
 
                 <Link
@@ -310,18 +335,6 @@ export const Navbar: React.FC<NavbarProps> = () => {
                     <span>Report Verification</span>
                   </div>
                   <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-sky-400 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
-
-                <Link
-                  to="/overview"
-                  onClick={closeMenuDrawer}
-                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-indigo-600/20 text-slate-200 hover:text-indigo-300 border border-slate-800 hover:border-indigo-500/40 transition-all font-semibold text-xs group"
-                >
-                  <div className="flex items-center space-x-2.5">
-                    <Globe2 className="w-4 h-4 text-indigo-400" />
-                    <span>National Portal Overview</span>
-                  </div>
-                  <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
               </div>
 

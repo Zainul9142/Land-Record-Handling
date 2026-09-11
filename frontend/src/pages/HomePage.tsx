@@ -203,6 +203,199 @@ export const HomePage: React.FC<HomePageProps> = () => {
         </div>
       </section>
 
+      {/* Direct Quick Access to All Key Citizen Services */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+              <Sparkles className="w-5 h-5 text-amber-500" />
+              <span>{isEn ? "Core Citizen & Governance Services" : "प्रमुख नागरिक एवं शासन सेवाएँ"}</span>
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {isEn ? "Select any service below to begin instant verification, calculation, or locker access." : "सत्यापन, गणना, या वॉल्ट शुरू करने के लिए नीचे दी गई सेवा चुनें।"}
+            </p>
+          </div>
+          <Link
+            to="/search"
+            className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-xl shadow transition-all flex items-center space-x-1.5 shrink-0"
+          >
+            <Search className="w-3.5 h-3.5" />
+            <span>{isEn ? "Universal Search" : "सार्वभौमिक खोज"}</span>
+            <ArrowRight className="w-3.5 h-3.5 ml-1" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Link
+            to="/search"
+            className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-sky-500 shadow-sm hover:shadow-lg transition-all text-left group flex flex-col justify-between"
+          >
+            <div className="space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-500 flex items-center justify-center font-bold">
+                <Search className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-sky-500 transition-colors">
+                Universal Land Search
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Search state land records by State, District, Khata/Khesra, or Ground GPS pin drop.
+              </p>
+            </div>
+            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-sky-600 dark:text-sky-400">
+              <span>Execute Search</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
+
+          <Link
+            to="/check-buy"
+            className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 shadow-sm hover:shadow-lg transition-all text-left group flex flex-col justify-between"
+          >
+            <div className="space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center font-bold">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-emerald-500 transition-colors">
+                Check Before You Buy
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Multi-layer due diligence scanning title defects, mortgages, and court stay orders.
+              </p>
+            </div>
+            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-emerald-600 dark:text-emerald-400">
+              <span>Run Due Diligence</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
+
+          <Link
+            to="/track-mutation"
+            className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-amber-500 shadow-sm hover:shadow-lg transition-all text-left group flex flex-col justify-between"
+          >
+            <div className="space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-amber-500 transition-colors">
+                Live Mutation Tracker
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Track Dakhil-Kharij application SLA timelines and revenue court hearing dates.
+              </p>
+            </div>
+            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-amber-600 dark:text-amber-400">
+              <span>Track Application</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
+
+          <Link
+            to="/valuation"
+            className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-indigo-500 shadow-sm hover:shadow-lg transition-all text-left group flex flex-col justify-between"
+          >
+            <div className="space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center font-bold">
+                <Globe2 className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-indigo-500 transition-colors">
+                Stamp Duty & Valuation
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Calculate official circle rates, registration fees, and women concessions across India.
+              </p>
+            </div>
+            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-indigo-600 dark:text-indigo-400">
+              <span>Calculate Fees</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
+
+          <Link
+            to="/vault"
+            className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 shadow-sm hover:shadow-lg transition-all text-left group flex flex-col justify-between"
+          >
+            <div className="space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center font-bold">
+                <FolderLock className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-emerald-500 transition-colors">
+                My Bhoomi Vault
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Encrypted digital document locker with DigiLocker sync and property portfolio tracking.
+              </p>
+            </div>
+            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-emerald-600 dark:text-emerald-400">
+              <span>Open Vault</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
+
+          <Link
+            to="/legal-advisor"
+            className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-purple-500 shadow-sm hover:shadow-lg transition-all text-left group flex flex-col justify-between"
+          >
+            <div className="space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center font-bold">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-purple-500 transition-colors">
+                AI Legal Advisor
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Instant legal guidance on UP Revenue Code, MLRC, PTCL, CNT/SPT Acts, and RERA.
+              </p>
+            </div>
+            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-purple-600 dark:text-purple-400">
+              <span>Consult Legal AI</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
+
+          <Link
+            to="/verify"
+            className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-sky-500 shadow-sm hover:shadow-lg transition-all text-left group flex flex-col justify-between"
+          >
+            <div className="space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-500 flex items-center justify-center font-bold">
+                <FileCheck className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-sky-500 transition-colors">
+                Report QR Verification
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Verify cryptographic SHA-256 signatures and QR codes of generated PDF audit reports.
+              </p>
+            </div>
+            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-sky-600 dark:text-sky-400">
+              <span>Verify Report</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
+
+          <Link
+            to="/complaints"
+            className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-rose-500 shadow-sm hover:shadow-lg transition-all text-left group flex flex-col justify-between"
+          >
+            <div className="space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center font-bold">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-rose-500 transition-colors">
+                Grievance Redressal
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Directly lodge grievances to SDM, Tahsildars, LRDC, and District Collectors.
+              </p>
+            </div>
+            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-rose-600 dark:text-rose-400">
+              <span>File Grievance</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
+        </div>
+      </section>
+
       {/* Target Personas Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         <div className="bg-slate-900 rounded-3xl p-8 text-white border border-slate-800 shadow-xl space-y-6">
