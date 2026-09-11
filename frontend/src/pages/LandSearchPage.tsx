@@ -439,9 +439,6 @@ export const LandSearchPage: React.FC<LandSearchPageProps> = ({ onShowToast }) =
             <Globe2 className="w-6 h-6 text-sky-600" />
             <span>{t('search_land', 'Universal Real-Time Land Record Search (Pan-India)')}</span>
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            {t('hero_subtitle', 'Real-time live queries connected to official State Bhulekh & Digital India Land Record portal streams across 28 States & 8 UTs.')}
-          </p>
         </div>
 
         {/* Live Portal Toggle */}
@@ -469,9 +466,6 @@ export const LandSearchPage: React.FC<LandSearchPageProps> = ({ onShowToast }) =
           <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
             Find Land Records by Ground GPS Location or Google Map Pin
           </h2>
-          <p className="text-xs sm:text-sm text-slate-300 max-w-2xl">
-            Detect your location on the ground or click anywhere on India's map to auto-identify the underlying Cadastral Survey Plot, Khasra, Gat Number, and 7/12 RoR records.
-          </p>
         </div>
 
         <button
