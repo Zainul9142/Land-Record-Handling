@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { HomePage } from './pages/HomePage';
@@ -32,44 +33,46 @@ export const App: React.FC = () => {
   };
 
   return (
-    <LanguageProvider>
-      <AuthProvider>
-        <Router>
-          <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
-            <Navbar />
+    <ThemeProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <Router>
+            <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+              <Navbar />
 
-            <main className="flex-1">
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/overview" element={<HomePage />} />
-                <Route path="/home" element={<HomePage />} />
-                <Route path="/search" element={<LandSearchPage onShowToast={showToast} />} />
-                <Route path="/land-search" element={<LandSearchPage onShowToast={showToast} />} />
-                <Route path="/land/:landIdentityId" element={<LandProfilePage onShowToast={showToast} />} />
-                <Route path="/login" element={<AuthPage onShowToast={showToast} />} />
-                <Route path="/register" element={<AuthPage onShowToast={showToast} />} />
-                <Route path="/auth" element={<AuthPage onShowToast={showToast} />} />
-                <Route path="/vault" element={<UserVaultPage onShowToast={showToast} />} />
-                <Route path="/official" element={<OfficialWorkspacePage onShowToast={showToast} />} />
-                <Route path="/legal-advisor" element={<LegalAdvisorPage onShowToast={showToast} />} />
-                <Route path="/complaints" element={<GrievancePage onShowToast={showToast} />} />
-                <Route path="/valuation" element={<ValuationCalculatorPage onShowToast={showToast} />} />
-                <Route path="/check-buy" element={<CheckBeforeYouBuy />} />
-                <Route path="/track-mutation" element={<MutationTrackerPage />} />
-                <Route path="/track-mutation/:appNo" element={<MutationTrackerPage />} />
-                <Route path="/verify" element={<ReportVerificationPage />} />
-                <Route path="/verify/:reportId" element={<ReportVerificationPage />} />
-                <Route path="/admin" element={<AdminDashboard onShowToast={showToast} />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </main>
+              <main className="flex-1">
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/overview" element={<HomePage />} />
+                  <Route path="/home" element={<HomePage />} />
+                  <Route path="/search" element={<LandSearchPage onShowToast={showToast} />} />
+                  <Route path="/land-search" element={<LandSearchPage onShowToast={showToast} />} />
+                  <Route path="/land/:landIdentityId" element={<LandProfilePage onShowToast={showToast} />} />
+                  <Route path="/login" element={<AuthPage onShowToast={showToast} />} />
+                  <Route path="/register" element={<AuthPage onShowToast={showToast} />} />
+                  <Route path="/auth" element={<AuthPage onShowToast={showToast} />} />
+                  <Route path="/vault" element={<UserVaultPage onShowToast={showToast} />} />
+                  <Route path="/official" element={<OfficialWorkspacePage onShowToast={showToast} />} />
+                  <Route path="/legal-advisor" element={<LegalAdvisorPage onShowToast={showToast} />} />
+                  <Route path="/complaints" element={<GrievancePage onShowToast={showToast} />} />
+                  <Route path="/valuation" element={<ValuationCalculatorPage onShowToast={showToast} />} />
+                  <Route path="/check-buy" element={<CheckBeforeYouBuy />} />
+                  <Route path="/track-mutation" element={<MutationTrackerPage />} />
+                  <Route path="/track-mutation/:appNo" element={<MutationTrackerPage />} />
+                  <Route path="/verify" element={<ReportVerificationPage />} />
+                  <Route path="/verify/:reportId" element={<ReportVerificationPage />} />
+                  <Route path="/admin" element={<AdminDashboard onShowToast={showToast} />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </main>
 
-            <Footer />
-            <ToastContainer toasts={toasts} onDismiss={handleDismissToast} />
-          </div>
-        </Router>
-      </AuthProvider>
-    </LanguageProvider>
+              <Footer />
+              <ToastContainer toasts={toasts} onDismiss={handleDismissToast} />
+            </div>
+          </Router>
+        </AuthProvider>
+      </LanguageProvider>
+    </ThemeProvider>
   );
 };
 

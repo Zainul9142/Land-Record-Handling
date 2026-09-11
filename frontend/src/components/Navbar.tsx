@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme, ThemeMode } from '../context/ThemeContext';
 import { SupportedLanguage } from '../i18n/translations';
 import { 
   ShieldCheck, Search, Lock, Languages, UserCheck, Scale, 
   ShieldAlert, Menu, X, Globe2, FolderLock, Landmark, 
   LogIn, LogOut, User as UserIcon, ChevronDown, Calculator, Database,
-  Sparkles, Compass, FileCheck, Layers, Grid, ArrowRight, ExternalLink, BadgeCheck, FileText
+  Sparkles, Compass, FileCheck, Layers, Grid, ArrowRight, ExternalLink, BadgeCheck, FileText,
+  Palette, Sun, Moon
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -21,8 +23,10 @@ export const Navbar: React.FC<NavbarProps> = () => {
   const location = useLocation();
   const [menuDrawerOpen, setMenuDrawerOpen] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+  const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
   const { user, isAuthenticated, isOfficial, isAdmin, logout } = useAuth();
   const { lang, setLang, t, currentLangInfo, languages } = useLanguage();
+  const { theme, setTheme, currentThemeInfo, themes } = useTheme();
   const isEn = lang === 'en';
 
   const toggleMenuDrawer = () => setMenuDrawerOpen(!menuDrawerOpen);
@@ -34,11 +38,65 @@ export const Navbar: React.FC<NavbarProps> = () => {
         {/* Top Govt Bar */}
         <div className="bg-slate-950 px-4 py-1 text-xs border-b border-slate-800 text-slate-400 flex justify-end items-center">
           
-          <div className="flex items-center space-x-3 shrink-0">
+          <div className="flex items-center space-x-2.5 shrink-0">
+            {/* 🎨 Theme Selector Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => {
+                  setThemeDropdownOpen(!themeDropdownOpen);
+                  setLangDropdownOpen(false);
+                }}
+                className="flex items-center space-x-1.5 hover:text-sky-400 transition-colors text-slate-200 font-semibold bg-slate-900/90 border border-slate-700/80 px-2 py-0.5 rounded-lg text-xs cursor-pointer"
+                title="Change Color Theme (Dark, Light, Emerald Bhoomi, Cyber)"
+              >
+                <span>{currentThemeInfo.icon}</span>
+                <span className="hidden sm:inline">{currentThemeInfo.name}</span>
+                <ChevronDown className="w-3 h-3 text-slate-400" />
+              </button>
+
+              {themeDropdownOpen && (
+                <div 
+                  className="absolute right-0 mt-1 w-64 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 py-1.5 divide-y divide-slate-800"
+                  onMouseLeave={() => setThemeDropdownOpen(false)}
+                >
+                  <div className="px-3 py-1 text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center space-x-1.5">
+                    <Palette className="w-3.5 h-3.5 text-sky-400" />
+                    <span>Select Color Theme (4)</span>
+                  </div>
+                  <div className="py-1">
+                    {themes.map((th) => (
+                      <button
+                        key={th.id}
+                        onClick={() => {
+                          setTheme(th.id);
+                          setThemeDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-800 transition-colors ${
+                          theme === th.id ? 'bg-sky-950/80 text-sky-400 font-bold' : 'text-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-2.5">
+                          <span className="text-base">{th.icon}</span>
+                          <div>
+                            <span className="block font-semibold">{th.name} ({th.nativeName})</span>
+                            <span className="text-[10px] text-slate-400 font-normal">{th.description}</span>
+                          </div>
+                        </div>
+                        {theme === th.id && <span className="text-sky-400 font-bold">✓</span>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* 11 Indian Languages Dropdown Selector */}
             <div className="relative">
               <button
-                onClick={() => setLangDropdownOpen(!langDropdownOpen)}
+                onClick={() => {
+                  setLangDropdownOpen(!langDropdownOpen);
+                  setThemeDropdownOpen(false);
+                }}
                 className="flex items-center space-x-1.5 hover:text-sky-400 transition-colors text-slate-200 font-semibold bg-slate-900/90 border border-slate-700/80 px-2 py-0.5 rounded-lg text-xs cursor-pointer"
                 title="Change Language across 11 Indian Languages"
               >
@@ -429,11 +487,39 @@ export const Navbar: React.FC<NavbarProps> = () => {
                 </Link>
               </div>
 
+              {/* Theme Selector Section in Drawer */}
+              <div className="pt-2 border-t border-slate-800/80 space-y-2">
+                <div className="flex items-center justify-between px-1">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1.5">
+                    <Palette className="w-3.5 h-3.5 text-sky-400" />
+                    <span>Visual Theme / दृश्य थीम</span>
+                  </span>
+                  <span className="text-[10px] text-sky-400 font-semibold">{currentThemeInfo.name}</span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                  {themes.map((th) => (
+                    <button
+                      key={th.id}
+                      onClick={() => setTheme(th.id)}
+                      className={`p-2 rounded-xl text-xs font-semibold flex items-center justify-center space-x-1.5 border transition-all cursor-pointer ${
+                        theme === th.id
+                          ? 'bg-sky-500/20 text-sky-300 border-sky-500 shadow-sm'
+                          : 'bg-slate-800/80 hover:bg-slate-750 text-slate-300 border-slate-700'
+                      }`}
+                    >
+                      <span>{th.icon}</span>
+                      <span className="text-[11px] truncate">{th.name.split(' ')[0]}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
             </div>
 
             {/* Drawer Footer */}
             <div className="p-3.5 border-t border-slate-800 bg-slate-950 text-center text-[10px] text-slate-500">
-              BhoomiShield National Land Governance Platform
+              BhoomiShield National Land Governance Platform • DILRMP Compliant
             </div>
 
           </div>
