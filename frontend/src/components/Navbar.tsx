@@ -122,12 +122,35 @@ export const Navbar: React.FC<NavbarProps> = () => {
         {/* Main Clean Navbar Bar */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           
-          {/* Logo & Platform Badge */}
-          <Link to="/" onClick={closeMenuDrawer} className="flex items-center space-x-3 group">
-            <div className="p-2 bg-gradient-to-tr from-sky-600 to-indigo-600 rounded-xl shadow-lg group-hover:scale-105 transition-transform">
-              <ShieldCheck className="w-6 h-6 text-white" />
-            </div>
-            <div>
+          {/* Top Left: Menu Button & Platform Logo */}
+          <div className="flex items-center space-x-3 sm:space-x-4">
+            
+            {/* 🌟 Dedicated Top-Left Menu Trigger Button */}
+            <button
+              onClick={toggleMenuDrawer}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-2 border cursor-pointer ${
+                menuDrawerOpen
+                  ? 'bg-sky-500/20 text-sky-300 border-sky-500 shadow-lg shadow-sky-500/20'
+                  : 'bg-slate-800/90 text-slate-100 border-slate-700 hover:bg-slate-750 hover:border-sky-500 shadow-sm'
+              }`}
+              title="Open All Features & Services Menu"
+            >
+              {menuDrawerOpen ? (
+                <X className="w-4 h-4 text-rose-400" />
+              ) : (
+                <Menu className="w-4 h-4 text-sky-400" />
+              )}
+              <span className="font-extrabold tracking-wide">{isEn ? "Menu" : "मेनू"}</span>
+              <span className="bg-sky-500/30 text-sky-300 text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold">
+                11+
+              </span>
+            </button>
+
+            {/* Platform Logo & Pan-India Badge (Cleaned - without redundant subtitle) */}
+            <Link to="/" onClick={closeMenuDrawer} className="flex items-center space-x-2.5 group">
+              <div className="p-2 bg-gradient-to-tr from-sky-600 to-indigo-600 rounded-xl shadow-lg group-hover:scale-105 transition-transform">
+                <ShieldCheck className="w-5 h-5 text-white" />
+              </div>
               <div className="flex items-center space-x-2">
                 <span className="font-extrabold text-xl tracking-tight text-white">BhoomiShield</span>
                 <span className="text-[10px] uppercase font-bold bg-sky-500/20 text-sky-400 px-1.5 py-0.5 rounded border border-sky-500/30 flex items-center space-x-1">
@@ -135,62 +158,43 @@ export const Navbar: React.FC<NavbarProps> = () => {
                   <span>Pan-India V3.0</span>
                 </span>
               </div>
-              <span className="text-[11px] text-slate-400 block -mt-0.5 hidden sm:block">
-                {isEn ? "All India Real-time Land Records & Legal Risk AI" : "अखिल भारतीय रियल-टाइम भूमि रिकॉर्ड एवं एआई कानूनी सलाहकार"}
-              </span>
-            </div>
-          </Link>
+            </Link>
+          </div>
 
-          {/* Desktop Clean Navigation Buttons */}
-          <div className="hidden md:flex items-center space-x-2">
+          {/* Desktop Right Quick Actions */}
+          <div className="flex items-center space-x-2 sm:space-x-3">
             
-            {/* Direct Quick Search Button */}
+            {/* Quick Land Search Link */}
             <Link
               to="/"
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all hidden md:flex items-center space-x-1.5 ${
                 location.pathname === '/' || location.pathname === '/search'
-                  ? 'bg-sky-600 text-white shadow-md shadow-sky-600/30'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-sky-600/30 text-sky-300 border border-sky-500/50'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white border border-transparent'
               }`}
             >
-              <Search className="w-3.5 h-3.5" />
+              <Search className="w-3.5 h-3.5 text-sky-400" />
               <span>{isEn ? "Land Search" : "भूमि खोज"}</span>
             </Link>
 
-            {/* Direct Bhoomi Vault Locker */}
+            {/* Quick Vault Link */}
             <Link
               to="/vault"
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all hidden md:flex items-center space-x-1.5 ${
                 location.pathname === '/vault'
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-500/50'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white border border-transparent'
               }`}
             >
               <FolderLock className="w-3.5 h-3.5 text-indigo-400" />
-              <span>{isEn ? "My Bhoomi Vault" : "मेरी भूमि वॉल्ट"}</span>
+              <span>{isEn ? "My Vault" : "मेरी वॉल्ट"}</span>
             </Link>
-
-            {/* 🌟 Dedicated Mega Menu Trigger Button */}
-            <button
-              onClick={toggleMenuDrawer}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-2 border cursor-pointer ${
-                menuDrawerOpen
-                  ? 'bg-sky-500/20 text-sky-300 border-sky-500 shadow-lg shadow-sky-500/20'
-                  : 'bg-slate-800/90 text-slate-200 border-slate-700 hover:bg-slate-750 hover:border-sky-500'
-              }`}
-            >
-              <Grid className="w-4 h-4 text-sky-400" />
-              <span>{isEn ? "All Features & Services Menu" : "सभी सेवाएँ व मेनू"}</span>
-              <span className="bg-sky-500/30 text-sky-300 text-[10px] px-1.5 py-0.2 rounded-full font-mono">
-                9+
-              </span>
-            </button>
 
             {/* Account / Login Pill */}
             {!isAuthenticated ? (
               <Link
                 to="/login"
-                className="ml-2 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center space-x-1.5 shadow-md shadow-sky-600/20"
+                className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center space-x-1.5 shadow-md shadow-sky-600/20"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>{isEn ? "Sign In" : "लॉग इन"}</span>
@@ -198,7 +202,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
             ) : (
               <Link
                 to="/login"
-                className="ml-2 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center space-x-1 border border-slate-700"
+                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center space-x-1.5 border border-slate-700"
                 title="Switch Persona / Accounts"
               >
                 <UserIcon className="w-3.5 h-3.5 text-sky-400" />
@@ -206,29 +210,18 @@ export const Navbar: React.FC<NavbarProps> = () => {
               </Link>
             )}
           </div>
-
-          {/* Mobile Menu Button */}
-          <div className="flex items-center md:hidden space-x-2">
-            <button
-              onClick={toggleMenuDrawer}
-              className="p-2 rounded-xl bg-slate-800 text-slate-200 border border-slate-700 flex items-center space-x-1.5 text-xs font-bold"
-            >
-              {menuDrawerOpen ? <X className="w-5 h-5 text-rose-400" /> : <Menu className="w-5 h-5 text-sky-400" />}
-              <span>Menu</span>
-            </button>
-          </div>
         </div>
       </header>
 
-      {/* 🌟 MEGA MENU DRAWER & FEATURE MODAL */}
+      {/* 🌟 MEGA MENU DRAWER & FEATURE MODAL (SLIDES FROM LEFT) */}
       {menuDrawerOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex justify-end animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex justify-start animate-in fade-in duration-200">
           
           {/* Backdrop Click to Close */}
           <div className="fixed inset-0" onClick={closeMenuDrawer}></div>
 
           {/* Slide-over Content Panel */}
-          <div className="relative w-full max-w-2xl bg-slate-900 border-l border-slate-800 shadow-2xl h-full flex flex-col z-10 overflow-y-auto">
+          <div className="relative w-full max-w-2xl bg-slate-900 border-r border-slate-800 shadow-2xl h-full flex flex-col z-10 overflow-y-auto">
             
             {/* Drawer Header */}
             <div className="p-6 border-b border-slate-800 flex items-center justify-between sticky top-0 bg-slate-900/95 backdrop-blur z-20">
