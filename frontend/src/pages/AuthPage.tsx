@@ -16,7 +16,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
   const location = useLocation();
   const { login, register, demoLogin, demoUsers, loading } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<'CITIZEN' | 'OFFICIAL'>('CITIZEN');
+  const [activeTab, setActiveTab] = useState<'CITIZEN' | 'OFFICIAL' | 'ADMIN'>('CITIZEN');
   const [isRegisterMode, setIsRegisterMode] = useState<boolean>(() => {
     return location.pathname === '/register';
   });
@@ -24,14 +24,14 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
   // Form State
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState('ramesh_sharma');
   const [mobile, setMobile] = useState('');
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState('Citizen@Ramesh2026#');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   
-  // Officer specific fields
-  const [employeeId, setEmployeeId] = useState('UP-REV-8492');
+  // Officer / Admin specific fields
+  const [employeeId, setEmployeeId] = useState('UP-REV-OFF-8821');
   const [department, setDepartment] = useState('Revenue & Land Reforms');
   const [designation, setDesignation] = useState('Tahsildar / Circle Officer');
   const [state, setState] = useState('Uttar Pradesh');
@@ -43,6 +43,30 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
   const [panNumber, setPanNumber] = useState('ABCPS1234F');
   
   const [errorMsg, setErrorMsg] = useState('');
+
+  // Handle Tab Switch default credentials
+  const handleTabChange = (tab: 'CITIZEN' | 'OFFICIAL' | 'ADMIN') => {
+    setActiveTab(tab);
+    setErrorMsg('');
+    if (tab === 'CITIZEN') {
+      setUsername('ramesh_sharma');
+      setPassword('Citizen@Ramesh2026#');
+      setDepartment('General Public');
+      setDesignation('Landowner & Citizen');
+    } else if (tab === 'OFFICIAL') {
+      setUsername('tahsildar_dadri');
+      setPassword('Officer@Dadri2026#');
+      setEmployeeId('UP-REV-OFF-8821');
+      setDepartment('Revenue & Land Reforms Department');
+      setDesignation('Tahsildar / Circle Officer');
+    } else if (tab === 'ADMIN') {
+      setUsername('admin_dilrmp');
+      setPassword('Admin@BhoomiShield2026#');
+      setEmployeeId('NIC-DILRMP-001');
+      setDepartment('Ministry of Rural Development (DoLR)');
+      setDesignation('National Technical Director');
+    }
+  };
 
   // Update register mode if route changes
   useEffect(() => {
@@ -63,6 +87,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
       }
       if (selected?.role === 'CITIZEN') {
         navigate('/vault');
+      } else if (selected?.role === 'ADMIN') {
+        navigate('/admin');
       } else {
         navigate('/official');
       }
@@ -100,13 +126,15 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
       const effectiveUsername = username.trim() || email.split('@')[0];
       const effectiveEmail = email.trim() || (username.includes('@') ? username : `${effectiveUsername}@example.in`);
 
+      const regRole = activeTab === 'CITIZEN' ? 'CITIZEN' : activeTab === 'ADMIN' ? 'ADMIN' : 'REVENUE_OFFICER';
+
       const regData = {
         username: effectiveUsername,
         password: password,
         full_name: fullName.trim(),
         email: effectiveEmail,
         mobile: mobile.trim() || '+91 98765 43210',
-        role: activeTab === 'CITIZEN' ? 'CITIZEN' : 'REVENUE_OFFICER',
+        role: regRole,
         department: activeTab === 'CITIZEN' ? 'General Public' : department,
         designation: activeTab === 'CITIZEN' ? 'Landowner & Citizen' : designation,
         employee_id: activeTab === 'CITIZEN' ? null : employeeId,
@@ -120,7 +148,9 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
       const result = await register(regData);
       if (result.success) {
         if (onShowToast) onShowToast('success', 'Registration Successful', `Welcome ${fullName}! Your BhoomiShield account is ready.`);
-        navigate(activeTab === 'CITIZEN' ? '/vault' : '/official');
+        if (activeTab === 'CITIZEN') navigate('/vault');
+        else if (activeTab === 'ADMIN') navigate('/admin');
+        else navigate('/official');
       } else {
         setErrorMsg(result.message);
       }
@@ -138,7 +168,9 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
       const result = await login(loginIdentifier, password);
       if (result.success) {
         if (onShowToast) onShowToast('success', 'Welcome Back', result.message);
-        navigate(activeTab === 'CITIZEN' ? '/vault' : '/official');
+        if (activeTab === 'CITIZEN') navigate('/vault');
+        else if (activeTab === 'ADMIN') navigate('/admin');
+        else navigate('/official');
       } else {
         setErrorMsg(result.message);
       }
@@ -177,7 +209,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
             {demoUsers.map((demo) => {
-              const isOfficer = demo.role !== 'CITIZEN';
+              const isAdminUser = demo.role === 'ADMIN';
+              const isOfficer = demo.role !== 'CITIZEN' && !isAdminUser;
               return (
                 <button
                   key={demo.user_id}
@@ -195,9 +228,13 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
                         {demo.full_name.split(' ')[0]} {demo.full_name.split(' ')[1] || ''}
                       </span>
                       <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded uppercase shrink-0 ${
-                        isOfficer ? 'bg-emerald-950/90 text-emerald-300 border border-emerald-800' : 'bg-sky-950/90 text-sky-300 border border-sky-800'
+                        isAdminUser 
+                          ? 'bg-purple-950/90 text-purple-300 border border-purple-800' 
+                          : isOfficer 
+                            ? 'bg-emerald-950/90 text-emerald-300 border border-emerald-800' 
+                            : 'bg-sky-950/90 text-sky-300 border border-sky-800'
                       }`}>
-                        {isOfficer ? 'Official' : 'Citizen'}
+                        {isAdminUser ? 'Admin' : isOfficer ? 'Official' : 'Citizen'}
                       </span>
                     </div>
                     <p className="text-[10px] text-slate-400 truncate">
@@ -205,7 +242,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
                     </p>
                     <p className="text-[9px] text-slate-500 truncate flex items-center space-x-1">
                       <MapPin className="w-2.5 h-2.5 inline text-slate-400" />
-                      <span>{demo.jurisdiction_district}</span>
+                      <span>{demo.jurisdiction_district || 'Central'}</span>
                     </p>
                   </div>
                 </button>
@@ -217,29 +254,40 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
         {/* Main Portal Card */}
         <div className="bg-slate-800/90 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
           
-          {/* Dual Tab Switcher for Citizen vs Official */}
-          <div className="grid grid-cols-2 border-b border-slate-700 text-center font-semibold text-sm">
+          {/* Triple Tab Switcher for Citizen vs Official vs Admin */}
+          <div className="grid grid-cols-3 border-b border-slate-700 text-center font-semibold text-xs sm:text-sm">
             <button
-              onClick={() => { setActiveTab('CITIZEN'); setErrorMsg(''); }}
-              className={`py-3.5 px-6 flex items-center justify-center space-x-2 transition-all ${
+              onClick={() => handleTabChange('CITIZEN')}
+              className={`py-3.5 px-3 sm:px-6 flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
                 activeTab === 'CITIZEN'
-                  ? 'bg-slate-800 text-sky-400 border-b-2 border-sky-500 shadow-inner'
+                  ? 'bg-slate-800 text-sky-400 border-b-2 border-sky-500 shadow-inner font-bold'
                   : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
               }`}
             >
-              <User className="w-4 h-4" />
-              <span>Citizen & Landowner Locker</span>
+              <User className="w-4 h-4 text-sky-400" />
+              <span>1. Citizen Locker</span>
             </button>
             <button
-              onClick={() => { setActiveTab('OFFICIAL'); setErrorMsg(''); }}
-              className={`py-3.5 px-6 flex items-center justify-center space-x-2 transition-all ${
+              onClick={() => handleTabChange('OFFICIAL')}
+              className={`py-3.5 px-3 sm:px-6 flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
                 activeTab === 'OFFICIAL'
-                  ? 'bg-slate-800 text-emerald-400 border-b-2 border-emerald-500 shadow-inner'
+                  ? 'bg-slate-800 text-emerald-400 border-b-2 border-emerald-500 shadow-inner font-bold'
                   : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
               }`}
             >
-              <Landmark className="w-4 h-4" />
-              <span>Revenue Official & Authority Desk</span>
+              <Landmark className="w-4 h-4 text-emerald-400" />
+              <span>2. Revenue Official</span>
+            </button>
+            <button
+              onClick={() => handleTabChange('ADMIN')}
+              className={`py-3.5 px-3 sm:px-6 flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
+                activeTab === 'ADMIN'
+                  ? 'bg-slate-800 text-purple-400 border-b-2 border-purple-500 shadow-inner font-bold'
+                  : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+              }`}
+            >
+              <Lock className="w-4 h-4 text-purple-400" />
+              <span>3. National Admin</span>
             </button>
           </div>
 
@@ -249,9 +297,9 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
               <button
                 type="button"
                 onClick={() => { setIsRegisterMode(false); setErrorMsg(''); }}
-                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center space-x-1.5 ${
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
                   !isRegisterMode
-                    ? 'bg-sky-600 text-white shadow-md'
+                    ? activeTab === 'ADMIN' ? 'bg-purple-600 text-white shadow-md' : activeTab === 'OFFICIAL' ? 'bg-emerald-600 text-white shadow-md' : 'bg-sky-600 text-white shadow-md'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -261,9 +309,9 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
               <button
                 type="button"
                 onClick={() => { setIsRegisterMode(true); setErrorMsg(''); }}
-                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center space-x-1.5 ${
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
                   isRegisterMode
-                    ? 'bg-sky-600 text-white shadow-md'
+                    ? activeTab === 'ADMIN' ? 'bg-purple-600 text-white shadow-md' : activeTab === 'OFFICIAL' ? 'bg-emerald-600 text-white shadow-md' : 'bg-sky-600 text-white shadow-md'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -283,17 +331,24 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
                     <FileText className="w-5 h-5 text-sky-400" />
                     <span>{isRegisterMode ? 'Register New Citizen Bhoomi Account' : 'Sign In to Citizen Bhoomi Vault'}</span>
                   </>
-                ) : (
+                ) : activeTab === 'OFFICIAL' ? (
                   <>
                     <Building2 className="w-5 h-5 text-emerald-400" />
                     <span>{isRegisterMode ? 'Register Revenue Officer Credentials' : 'Govt. Land Revenue Officer Workspace'}</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-5 h-5 text-purple-400" />
+                    <span>{isRegisterMode ? 'Provision Central Admin Profile' : 'National DILRMP Administrator Gateway'}</span>
                   </>
                 )}
               </h2>
               <p className="text-xs text-slate-400 mt-1">
                 {activeTab === 'CITIZEN'
                   ? 'Store, view, and cryptographically verify land records, sale deeds, tax receipts, and mutation tracking.'
-                  : 'Authorized revenue workspace for Circle Officers, Tahsildars, SDMs, Sub-Registrars, and District Collectors.'}
+                  : activeTab === 'OFFICIAL'
+                    ? 'Authorized revenue workspace for Circle Officers, Tahsildars, SDMs, Sub-Registrars, and District Collectors.'
+                    : 'Central registry administration for SQLite database inspection, direct SQL queries, and user role management.'}
               </p>
             </div>
 
@@ -509,15 +564,25 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
                   <div className="space-y-4">
                     <div>
                       <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                        {activeTab === 'CITIZEN' ? 'Username or Registered Email ID' : 'Official Govt Email / Employee Code'} <span className="text-rose-400">*</span>
+                        {activeTab === 'CITIZEN' 
+                          ? 'Username or Registered Email ID' 
+                          : activeTab === 'OFFICIAL' 
+                            ? 'Official Revenue Email / Officer User ID' 
+                            : 'National Administrator User ID / Email'} <span className="text-rose-400">*</span>
                       </label>
                       <div className="relative">
                         <input
                           type="text"
                           value={username}
                           onChange={(e) => setUsername(e.target.value)}
-                          placeholder={activeTab === 'CITIZEN' ? 'ramesh_sharma or ramesh@example.in' : 'vikram.rao@revenue.gov.in'}
-                          className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                          placeholder={
+                            activeTab === 'CITIZEN' 
+                              ? 'ramesh_sharma or ramesh@example.in' 
+                              : activeTab === 'OFFICIAL' 
+                                ? 'tahsildar_dadri or vikram.rao@revenue.gov.in' 
+                                : 'admin_dilrmp or admin@bhoomishield.gov.in'
+                          }
+                          className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 font-mono"
                           required
                         />
                         <User className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
@@ -527,10 +592,16 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
                         <label className="block text-xs font-semibold text-slate-300">
-                          Password <span className="text-rose-400">*</span>
+                          {activeTab === 'ADMIN' ? 'Master Security Passcode' : 'Password'} <span className="text-rose-400">*</span>
                         </label>
-                        <span className="text-[11px] text-slate-400">
-                          Default demo: <code className="text-sky-300">password123</code>
+                        <span className="text-[11px] text-slate-400 font-mono">
+                          {activeTab === 'CITIZEN' ? (
+                            <span>Demo: <code className="text-sky-300">Citizen@Ramesh2026#</code></span>
+                          ) : activeTab === 'OFFICIAL' ? (
+                            <span>Demo: <code className="text-emerald-300">Officer@Dadri2026#</code></span>
+                          ) : (
+                            <span>Master: <code className="text-purple-300">Admin@BhoomiShield2026#</code></span>
+                          )}
                         </span>
                       </div>
                       <div className="relative">
@@ -538,8 +609,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
                           type={showPassword ? "text" : "password"}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          placeholder="Enter your password"
-                          className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-10 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                          placeholder="Enter your security password"
+                          className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-10 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 font-mono"
                           required
                         />
                         <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
@@ -563,7 +634,9 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
                 className={`w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white shadow-lg transition-all flex items-center justify-center space-x-2 cursor-pointer ${
                   activeTab === 'CITIZEN'
                     ? 'bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 shadow-sky-600/20'
-                    : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-emerald-600/20'
+                    : activeTab === 'OFFICIAL'
+                      ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-emerald-600/20'
+                      : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 shadow-purple-600/20'
                 }`}
               >
                 {loading ? (
@@ -575,8 +648,12 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onShowToast }) => {
                   <>
                     <span>
                       {isRegisterMode 
-                        ? 'Complete Registration & Enter Locker' 
-                        : `Sign In to ${activeTab === 'CITIZEN' ? 'Citizen Bhoomi Vault' : 'Revenue Official Desk'}`}
+                        ? 'Complete Registration & Enter Workspace' 
+                        : activeTab === 'CITIZEN' 
+                          ? 'Sign In to Citizen Bhoomi Vault' 
+                          : activeTab === 'OFFICIAL' 
+                            ? 'Sign In to Revenue Official Desk' 
+                            : 'Sign In to National Admin Gateway'}
                     </span>
                     <ArrowRight className="w-4 h-4" />
                   </>

@@ -5,7 +5,8 @@ import { UserDocument } from '../types';
 import { 
   Landmark, ShieldCheck, FileCheck, AlertTriangle, CheckCircle2, 
   XCircle, Clock, Building2, MapPin, User, ExternalLink, 
-  Search, Filter, RefreshCw, Stamp, Lock, Sparkles, X, Check
+  Search, Filter, RefreshCw, Stamp, Lock, Sparkles, X, Check,
+  Eye, EyeOff, ShieldAlert, KeyRound, ArrowRight, AlertOctagon
 } from 'lucide-react';
 
 const API_BASE = '/api';
@@ -15,8 +16,16 @@ interface OfficialWorkspacePageProps {
 }
 
 export const OfficialWorkspacePage: React.FC<OfficialWorkspacePageProps> = ({ onShowToast }) => {
-  const { user, isOfficial, isAuthenticated } = useAuth();
+  const { user, isOfficial, isAuthenticated, login, logout } = useAuth();
   const navigate = useNavigate();
+
+  // Officer Security Gate State
+  const [officerLoginId, setOfficerLoginId] = useState('tahsildar_dadri');
+  const [officerPassword, setOfficerPassword] = useState('Officer@Dadri2026#');
+  const [officerEmpCode, setOfficerEmpCode] = useState('UP-REV-OFF-8821');
+  const [showOfficerPass, setShowOfficerPass] = useState(false);
+  const [officerAuthError, setOfficerAuthError] = useState('');
+  const [officerAuthLoading, setOfficerAuthLoading] = useState(false);
 
   const [pendingDocs, setPendingDocs] = useState<UserDocument[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -29,11 +38,47 @@ export const OfficialWorkspacePage: React.FC<OfficialWorkspacePageProps> = ({ on
   const [remarks, setRemarks] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
+  const handleOfficerAuthenticate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setOfficerAuthError('');
+    if (!officerLoginId.trim()) {
+      setOfficerAuthError('Please enter Revenue Officer User ID or Official Email.');
+      return;
     }
-  }, [isAuthenticated, navigate]);
+    if (!officerPassword.trim()) {
+      setOfficerAuthError('Please enter Officer Security Passcode.');
+      return;
+    }
+
+    setOfficerAuthLoading(true);
+    const res = await login(officerLoginId.trim(), officerPassword.trim());
+    setOfficerAuthLoading(false);
+
+    if (res.success) {
+      if (onShowToast) {
+        onShowToast('success', 'Officer Signature Clearance Verified', 'Revenue Authority Desk Unlocked.');
+      }
+    } else {
+      setOfficerAuthError(res.message || 'Invalid officer credentials. Access Denied.');
+      if (onShowToast) {
+        onShowToast('error', 'Authentication Failed', 'Invalid officer credentials.');
+      }
+    }
+  };
+
+  const handleQuickFillTahsildar = () => {
+    setOfficerLoginId('tahsildar_dadri');
+    setOfficerPassword('Officer@Dadri2026#');
+    setOfficerEmpCode('UP-REV-OFF-8821');
+    setOfficerAuthError('');
+  };
+
+  const handleQuickFillSDM = () => {
+    setOfficerLoginId('sdm_noida');
+    setOfficerPassword('SDM@NoidaIAS2026#');
+    setOfficerEmpCode('IAS-UP-2018-44');
+    setOfficerAuthError('');
+  };
 
   const DEFAULT_PENDING_DOCS: UserDocument[] = [
     {
@@ -172,12 +217,184 @@ export const OfficialWorkspacePage: React.FC<OfficialWorkspacePageProps> = ({ on
     setIsProcessing(false);
   };
 
+  // Render Officer Security Gate if User is Not a Revenue Officer / Official
+  if (!isOfficial) {
+    return (
+      <div className="min-h-[calc(100vh-80px)] bg-slate-950 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+        <div className="max-w-xl w-full space-y-8">
+          
+          {/* Security Shield Header */}
+          <div className="text-center space-y-3">
+            <div className="inline-flex p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 shadow-xl shadow-emerald-950/50">
+              <Landmark className="w-10 h-10 text-emerald-400 animate-pulse" />
+            </div>
+            <div className="flex items-center justify-center space-x-2">
+              <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] uppercase font-black px-2.5 py-0.5 rounded-full tracking-wider flex items-center space-x-1">
+                <ShieldAlert className="w-3 h-3" />
+                <span>Restricted Revenue Authority Desk</span>
+              </span>
+            </div>
+            <h1 className="text-3xl font-black text-white tracking-tight sm:text-4xl">
+              Revenue Officer Security Gate
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto">
+              Verification of registered sale deeds, issuance of digital encumbrance certificates, and mutation sign-offs require verified Revenue Officer credentials.
+            </p>
+          </div>
+
+          {/* Security Challenge Card */}
+          <div className="bg-slate-900/90 border border-emerald-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl space-y-6">
+            
+            {officerAuthError && (
+              <div className="p-3.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-center space-x-2 animate-shake">
+                <AlertOctagon className="w-4 h-4 shrink-0 text-rose-400" />
+                <span>{officerAuthError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleOfficerAuthenticate} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center space-x-1.5">
+                  <User className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Revenue Officer User ID / Official Email</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={officerLoginId}
+                    onChange={(e) => setOfficerLoginId(e.target.value)}
+                    placeholder="tahsildar_dadri or vikram.rao@revenue.gov.in"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 font-mono"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center space-x-1.5">
+                  <KeyRound className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Officer Password / Security Passcode</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type={showOfficerPass ? "text" : "password"}
+                    value={officerPassword}
+                    onChange={(e) => setOfficerPassword(e.target.value)}
+                    placeholder="Enter officer passcode"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 font-mono pr-11"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowOfficerPass(!showOfficerPass)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+                    title={showOfficerPass ? "Hide passcode" : "Show passcode"}
+                  >
+                    {showOfficerPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center space-x-1.5">
+                  <Building2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Official Employee / Cadre Code</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={officerEmpCode}
+                    onChange={(e) => setOfficerEmpCode(e.target.value)}
+                    placeholder="UP-REV-OFF-8821"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 font-mono uppercase"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={officerAuthLoading}
+                className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 flex items-center justify-center space-x-2 transition-all cursor-pointer disabled:opacity-50"
+              >
+                {officerAuthLoading ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <Stamp className="w-4 h-4" />
+                    <span>Authenticate DSC & Unlock Revenue Desk</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Official Credentials Helper Card for Testing / Evaluation */}
+            <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-1.5 text-xs font-bold text-emerald-300">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Authorized Revenue Officer Credentials:</span>
+                </div>
+                <span className="text-[10px] text-slate-500">Select persona below</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {/* Tahsildar Option */}
+                <button
+                  type="button"
+                  onClick={async () => {
+                    handleQuickFillTahsildar();
+                    const res = await login('tahsildar_dadri', 'Officer@Dadri2026#');
+                    if (res.success && onShowToast) {
+                      onShowToast('success', 'Officer Cleared', 'Logged in as Vikramaditya Rao (Tahsildar Dadri).');
+                    }
+                  }}
+                  className="p-2.5 rounded-xl bg-slate-900 hover:bg-emerald-950/50 border border-slate-800 hover:border-emerald-700 text-left transition-all group cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white group-hover:text-emerald-300">Tahsildar Dadri</span>
+                    <span className="text-[9px] bg-emerald-900/60 text-emerald-300 px-1 rounded">UP-REV</span>
+                  </div>
+                  <p className="text-[10px] text-slate-400 font-mono mt-0.5">ID: tahsildar_dadri</p>
+                  <p className="text-[10px] text-emerald-400/80 font-mono">Pass: Officer@Dadri2026#</p>
+                </button>
+
+                {/* SDM Option */}
+                <button
+                  type="button"
+                  onClick={async () => {
+                    handleQuickFillSDM();
+                    const res = await login('sdm_noida', 'SDM@NoidaIAS2026#');
+                    if (res.success && onShowToast) {
+                      onShowToast('success', 'Magistrate Cleared', 'Logged in as Ananya Mishra, IAS (SDM Noida).');
+                    }
+                  }}
+                  className="p-2.5 rounded-xl bg-slate-900 hover:bg-emerald-950/50 border border-slate-800 hover:border-emerald-700 text-left transition-all group cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white group-hover:text-emerald-300">SDM Noida (IAS)</span>
+                    <span className="text-[9px] bg-indigo-900/60 text-indigo-300 px-1 rounded">IAS Cadre</span>
+                  </div>
+                  <p className="text-[10px] text-slate-400 font-mono mt-0.5">ID: sdm_noida</p>
+                  <p className="text-[10px] text-emerald-400/80 font-mono">Pass: SDM@NoidaIAS2026#</p>
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* Official Header */}
-        <div className="bg-slate-800/90 border border-slate-700 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="bg-slate-800/90 border border-emerald-900/40 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center space-x-4">
             <img
               src={user?.avatar_url || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150'}
@@ -191,26 +408,40 @@ export const OfficialWorkspacePage: React.FC<OfficialWorkspacePageProps> = ({ on
                   <Landmark className="w-3 h-3" />
                   <span>Revenue Authority Desk</span>
                 </span>
+                <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[9px] px-2 py-0.2 rounded-full font-mono">
+                  DSC SIGNED
+                </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
                 {user?.department || 'Revenue & Land Reforms Department'} • {user?.designation || 'Revenue Officer'}
               </p>
               <div className="flex items-center space-x-3 text-xs text-slate-400 mt-2">
-                <span>Emp Code: <strong className="text-emerald-400 font-mono">{user?.employee_id || 'UP-REV-8492'}</strong></span>
+                <span>Emp Code: <strong className="text-emerald-400 font-mono">{user?.employee_id || 'UP-REV-OFF-8821'}</strong></span>
                 <span>•</span>
                 <span>Jurisdiction: <strong className="text-slate-200">{user?.jurisdiction_district}, {user?.jurisdiction_state}</strong></span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 self-end md:self-center">
+          <div className="flex items-center space-x-2">
             <Link
               to="/admin"
-              className="px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs border border-slate-600 flex items-center space-x-2 transition-transform active:scale-95"
+              className="px-3.5 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs border border-slate-600 flex items-center space-x-1.5 transition-transform active:scale-95"
             >
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>National Risk Dashboard</span>
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Admin Studio</span>
             </Link>
+            <button
+              onClick={() => {
+                logout();
+                if (onShowToast) onShowToast('info', 'Desk Locked', 'Logged out of official revenue desk.');
+              }}
+              className="px-3 py-2 bg-rose-950/80 hover:bg-rose-900 border border-rose-800 text-rose-300 text-xs font-bold rounded-xl flex items-center space-x-1.5 transition-colors cursor-pointer"
+              title="Lock official workspace"
+            >
+              <Lock className="w-3.5 h-3.5" />
+              <span>Lock Desk</span>
+            </button>
           </div>
         </div>
 

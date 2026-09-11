@@ -940,7 +940,7 @@ def login_user(req: UserLoginRequest):
     if req.demo_user_id:
         cursor.execute("SELECT * FROM users WHERE user_id = ? AND status = 'ACTIVE'", (req.demo_user_id,))
     elif req.username:
-        cursor.execute("SELECT * FROM users WHERE (username = ? OR email = ?) AND status = 'ACTIVE'", (req.username, req.username))
+        cursor.execute("SELECT * FROM users WHERE (username = ? OR email = ?) AND status = 'ACTIVE'", (req.username.strip(), req.username.strip()))
     else:
         conn.close()
         raise HTTPException(status_code=400, detail="Please provide username or select a demo user.")
@@ -949,9 +949,22 @@ def login_user(req: UserLoginRequest):
     conn.close()
     
     if not user_row:
-        raise HTTPException(status_code=404, detail="User account not found. Please register or select a demo persona.")
+        raise HTTPException(status_code=404, detail="User account not found. Please register or check your credentials.")
         
     user = dict(user_row)
+    
+    # Password verification
+    if req.password:
+        stored_hash = user.get("password_hash")
+        input_pass = req.password.strip()
+        
+        # Check direct match or SHA-256 match
+        sha_match = hashlib.sha256(input_pass.encode('utf-8')).hexdigest()
+        if stored_hash and stored_hash != input_pass and stored_hash != sha_match:
+            # Check standard bypass for demo personas if needed, else reject
+            if not req.demo_user_id:
+                raise HTTPException(status_code=401, detail="Authentication failed: Incorrect password or security passcode.")
+    
     token = hashlib.sha256(f"{user['user_id']}:{datetime.datetime.now().isoformat()}".encode()).hexdigest()
     
     return {

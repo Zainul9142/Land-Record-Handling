@@ -305,11 +305,31 @@ def seed_auth_and_vault_data(conn):
     cursor.execute("SELECT COUNT(*) FROM users")
     count = cursor.fetchone()[0]
     
-    # Pre-defined Demo Accounts
+    # Pre-defined Master Admin, Revenue Officer & Citizen Accounts
     demo_users = [
+        # Central / National Administrator
+        (
+            "USR-ADM-3001", "admin_dilrmp", "Admin@BhoomiShield2026#", "National DILRMP Administrator", "admin@bhoomishield.gov.in",
+            "+91 99000 11223", "ADMIN", "Ministry of Rural Development (DoLR)", "National Technical Director", "NIC-DILRMP-001",
+            "National / All States", "Central Registry", "Central", "VERIFIED", "0001", "DILRMP0001Z",
+            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80", "ACTIVE"
+        ),
+        # Revenue Officers
+        (
+            "USR-OFF-2001", "tahsildar_dadri", "Officer@Dadri2026#", "Vikramaditya Rao", "vikram.rao@revenue.gov.in",
+            "+91 98111 22334", "REVENUE_OFFICER", "Revenue & Land Reforms Department", "Tahsildar / Circle Officer", "UP-REV-OFF-8821",
+            "Uttar Pradesh", "Gautam Buddha Nagar", "Dadri", "VERIFIED", "9823", "GOVRB9981E",
+            "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80", "ACTIVE"
+        ),
+        (
+            "USR-OFF-2002", "sdm_noida", "SDM@NoidaIAS2026#", "Ananya Mishra, IAS", "ananya.mishra@gov.in",
+            "+91 98222 33445", "DISTRICT_COLLECTOR", "District Administration & Land Revenue", "Sub-Divisional Magistrate (SDM)", "IAS-UP-2018-44",
+            "Uttar Pradesh", "Gautam Buddha Nagar", "Noida / Dadri", "VERIFIED", "1122", "GOVRB1122A",
+            "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80", "ACTIVE"
+        ),
         # Citizens
         (
-            "USR-CIT-1001", "ramesh.sharma", "demo123", "Ramesh Kumar Sharma", "ramesh.sharma@bhoomi.nic.in",
+            "USR-CIT-1001", "ramesh_sharma", "Citizen@Ramesh2026#", "Ramesh Kumar Sharma", "ramesh.sharma@example.in",
             "+91 98765 43210", "CITIZEN", "General Public", "Landowner & Farmer", None,
             "Uttar Pradesh", "Gautam Buddha Nagar", "Dadri", "AADHAAR_LINKED", "5412", "ABCPS1234F",
             "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80", "ACTIVE"
@@ -319,25 +339,6 @@ def seed_auth_and_vault_data(conn):
             "+91 98111 22334", "CITIZEN", "General Public", "Property Investor", None,
             "Maharashtra", "Pune", "Haveli", "AADHAAR_LINKED", "8921", "BHYPP4567K",
             "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80", "ACTIVE"
-        ),
-        # Revenue Officials
-        (
-            "USR-OFF-2001", "rajesh.tehsildar", "demo123", "Rajesh Verma (Tahsildar)", "rajesh.verma@rev.up.gov.in",
-            "+91 94150 11223", "REVENUE_OFFICER", "Revenue & Land Reforms Department", "Tahsildar / Circle Executive", "UP-REV-8492",
-            "Uttar Pradesh", "Gautam Buddha Nagar", "Dadri", "VERIFIED", "1098", "GOVUP9988D",
-            "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80", "ACTIVE"
-        ),
-        (
-            "USR-OFF-2002", "priya.collector", "demo123", "Dr. Priya Nair, IAS", "priya.nair@ias.gov.in",
-            "+91 99887 76655", "DISTRICT_COLLECTOR", "District Administration & Land Revenue", "District Magistrate & Collector", "IAS-KA-2014-92",
-            "Karnataka", "Bengaluru Urban", "Bengaluru South", "VERIFIED", "7712", "GOVIAS7711N",
-            "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80", "ACTIVE"
-        ),
-        (
-            "USR-OFF-2003", "anand.subregistrar", "demo123", "Anand Deshmukh (Sub-Registrar)", "anand.deshmukh@igrmaharashtra.gov.in",
-            "+91 98220 33445", "REVENUE_OFFICER", "Registration & Stamps Department", "Joint Sub-Registrar Class-I", "MH-IGR-3041",
-            "Maharashtra", "Pune", "Haveli", "VERIFIED", "4432", "GOVMH3344P",
-            "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80", "ACTIVE"
         )
     ]
 

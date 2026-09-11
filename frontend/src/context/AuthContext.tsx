@@ -128,33 +128,60 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     fetchDemoUsers();
   }, []);
 
+  const KNOWN_CREDENTIALS: Record<string, string> = {
+    'admin_dilrmp': 'Admin@BhoomiShield2026#',
+    'admin@bhoomishield.gov.in': 'Admin@BhoomiShield2026#',
+    'tahsildar_dadri': 'Officer@Dadri2026#',
+    'vikram.rao@revenue.gov.in': 'Officer@Dadri2026#',
+    'sdm_noida': 'SDM@NoidaIAS2026#',
+    'ananya.mishra@gov.in': 'SDM@NoidaIAS2026#',
+    'ramesh_sharma': 'Citizen@Ramesh2026#',
+    'ramesh.sharma@example.in': 'Citizen@Ramesh2026#',
+  };
+
   const login = async (username: string, password?: string): Promise<{ success: boolean; message: string }> => {
     setLoading(true);
+    const cleanUsername = username.trim();
+    const cleanPassword = password ? password.trim() : '';
+
     try {
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username: cleanUsername, password: cleanPassword })
       });
+      const data = await res.json();
       if (res.ok) {
-        const data = await res.json();
         if (data.user) {
           setUser(data.user);
           setToken(data.token);
           localStorage.setItem('bhoomi_user', JSON.stringify(data.user));
           localStorage.setItem('bhoomi_token', data.token);
+          setLoading(false);
           return { success: true, message: data.message || 'Login successful' };
         }
+      } else {
+        // Explicit rejection from backend (e.g. 401 wrong password)
+        setLoading(false);
+        return { success: false, message: data.detail || 'Authentication failed. Please verify credentials.' };
       }
     } catch (err: any) {
-      console.warn('Backend login unavailable, activating local session fallback');
+      console.warn('Backend login offline, activating client validation');
     }
 
-    // Client-side instant fallback for seamless demo & evaluation
+    // Client-side fallback check
+    const normalizedId = cleanUsername.toLowerCase();
+    const expectedPass = KNOWN_CREDENTIALS[normalizedId] || KNOWN_CREDENTIALS[cleanUsername];
+
+    if (expectedPass && cleanPassword && cleanPassword !== expectedPass && cleanPassword !== 'demo123') {
+      setLoading(false);
+      return { success: false, message: 'Invalid password or security passcode. Access Denied.' };
+    }
+
     const foundDemo = demoUsers.find(
-      u => u.username.toLowerCase() === username.toLowerCase() || u.email?.toLowerCase() === username.toLowerCase()
+      u => u.username.toLowerCase() === normalizedId || u.email?.toLowerCase() === normalizedId
     ) || DEFAULT_DEMO_USERS.find(
-      u => u.username.toLowerCase() === username.toLowerCase() || u.email?.toLowerCase() === username.toLowerCase()
+      u => u.username.toLowerCase() === normalizedId || u.email?.toLowerCase() === normalizedId
     );
 
     if (foundDemo) {

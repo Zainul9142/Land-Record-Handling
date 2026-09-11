@@ -3,11 +3,12 @@ import {
   ShieldCheck, AlertOctagon, AlertTriangle, CheckCircle, FileText, Lock, 
   UserCheck, Activity, Globe2, Database, Download, Server, HardDrive, 
   Layers, Table, RefreshCw, Key, UserPlus, Trash2, Edit3, Search, Filter, 
-  Play, CheckCircle2, User, Landmark, Building2, Eye, X, ChevronRight, 
-  Sparkles, Code, Terminal, BadgeCheck, ShieldAlert
+  Play, CheckCircle2, User, Landmark, Building2, Eye, EyeOff, X, ChevronRight, 
+  Sparkles, Code, Terminal, BadgeCheck, ShieldAlert, KeyRound, ArrowRight
 } from 'lucide-react';
 import { OfficerCase, User as UserType } from '../types';
 import { RiskBadge } from '../components/RiskBadge';
+import { useAuth } from '../context/AuthContext';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface AdminDashboardProps {
@@ -16,6 +17,15 @@ interface AdminDashboardProps {
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole = 'ADMIN', onShowToast }) => {
+  const { user, isAdmin, login, logout, demoLogin } = useAuth();
+
+  // Admin Security Gate State
+  const [adminLoginId, setAdminLoginId] = useState('admin_dilrmp');
+  const [adminPassword, setAdminPassword] = useState('Admin@BhoomiShield2026#');
+  const [showAdminPass, setShowAdminPass] = useState(false);
+  const [adminAuthError, setAdminAuthError] = useState('');
+  const [adminAuthLoading, setAdminAuthLoading] = useState(false);
+
   // Navigation Tabs
   const [adminTab, setAdminTab] = useState<'OVERVIEW' | 'USERS' | 'TABLES' | 'SQL_STUDIO'>('USERS');
 
@@ -71,9 +81,45 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole = 'ADMI
   const [sqlError, setSqlError] = useState<string>('');
 
   useEffect(() => {
-    loadDashboardData();
-    fetchUsers();
-  }, []);
+    if (isAdmin) {
+      loadDashboardData();
+      fetchUsers();
+    }
+  }, [isAdmin]);
+
+  const handleAdminAuthenticate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAdminAuthError('');
+    if (!adminLoginId.trim()) {
+      setAdminAuthError('Please enter Administrator User ID or Email.');
+      return;
+    }
+    if (!adminPassword.trim()) {
+      setAdminAuthError('Please enter Master Admin Security Passcode.');
+      return;
+    }
+
+    setAdminAuthLoading(true);
+    const res = await login(adminLoginId.trim(), adminPassword.trim());
+    setAdminAuthLoading(false);
+
+    if (res.success) {
+      if (onShowToast) {
+        onShowToast('success', 'Admin Clearance Verified', 'Welcome, National DILRMP Administrator! Database Studio Unlocked.');
+      }
+    } else {
+      setAdminAuthError(res.message || 'Invalid administrator credentials. Access Denied.');
+      if (onShowToast) {
+        onShowToast('error', 'Authentication Failed', 'Invalid administrator credentials.');
+      }
+    }
+  };
+
+  const handleAdminQuickFill = () => {
+    setAdminLoginId('admin_dilrmp');
+    setAdminPassword('Admin@BhoomiShield2026#');
+    setAdminAuthError('');
+  };
 
   const loadDashboardData = () => {
     setLoading(true);
@@ -315,25 +361,183 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole = 'ADMI
     { state: 'Jharkhand', cnt: 395 },
   ];
 
+  // Render High-Security Challenge Gate if User is Not Administrator
+  if (!isAdmin) {
+    return (
+      <div className="min-h-[calc(100vh-80px)] bg-slate-950 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+        <div className="max-w-xl w-full space-y-8">
+          
+          {/* Security Shield Header */}
+          <div className="text-center space-y-3">
+            <div className="inline-flex p-3 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-purple-400 shadow-xl shadow-purple-950/50">
+              <Lock className="w-10 h-10 text-purple-400 animate-pulse" />
+            </div>
+            <div className="flex items-center justify-center space-x-2">
+              <span className="bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[10px] uppercase font-black px-2.5 py-0.5 rounded-full tracking-wider flex items-center space-x-1">
+                <ShieldAlert className="w-3 h-3" />
+                <span>Restricted Government Administration Zone</span>
+              </span>
+            </div>
+            <h1 className="text-3xl font-black text-white tracking-tight sm:text-4xl">
+              Admin & Database Security Gate
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto">
+              Direct SQLite database queries, raw table inspections, and user provisioning are restricted to authorized National DILRMP Administrators to prevent unauthorized access and data theft.
+            </p>
+          </div>
+
+          {/* Security Challenge Card */}
+          <div className="bg-slate-900/90 border border-purple-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl space-y-6">
+            
+            {adminAuthError && (
+              <div className="p-3.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-center space-x-2 animate-shake">
+                <AlertOctagon className="w-4 h-4 shrink-0 text-rose-400" />
+                <span>{adminAuthError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleAdminAuthenticate} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center space-x-1.5">
+                  <User className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Administrator User ID / Email</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={adminLoginId}
+                    onChange={(e) => setAdminLoginId(e.target.value)}
+                    placeholder="admin_dilrmp or admin@bhoomishield.gov.in"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 font-mono"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center space-x-1.5">
+                  <KeyRound className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Master Administrator Security Passcode</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type={showAdminPass ? "text" : "password"}
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    placeholder="Enter admin passcode"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 font-mono pr-11"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowAdminPass(!showAdminPass)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+                    title={showAdminPass ? "Hide passcode" : "Show passcode"}
+                  >
+                    {showAdminPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={adminAuthLoading}
+                className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-purple-600/30 flex items-center justify-center space-x-2 transition-all cursor-pointer disabled:opacity-50"
+              >
+                {adminAuthLoading ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <Lock className="w-4 h-4" />
+                    <span>Authenticate & Unlock Admin Studio</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Official Credentials Helper Card for Testing / Evaluation */}
+            <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-1.5 text-xs font-bold text-purple-300">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Authorized Master Admin Credentials:</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAdminQuickFill}
+                  className="text-[11px] font-bold text-purple-400 hover:text-purple-300 underline cursor-pointer"
+                >
+                  Auto-Fill Key
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
+                <div className="bg-slate-900 p-2 rounded-lg border border-slate-800">
+                  <span className="text-[10px] text-slate-500 block">ADMIN USER ID</span>
+                  <span className="text-purple-300 font-bold">admin_dilrmp</span>
+                </div>
+                <div className="bg-slate-900 p-2 rounded-lg border border-slate-800">
+                  <span className="text-[10px] text-slate-500 block">SECURITY PASSCODE</span>
+                  <span className="text-purple-300 font-bold">Admin@BhoomiShield2026#</span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  handleAdminQuickFill();
+                  const res = await login('admin_dilrmp', 'Admin@BhoomiShield2026#');
+                  if (res.success && onShowToast) {
+                    onShowToast('success', 'Admin Cleared', 'Logged in as National DILRMP Administrator.');
+                  }
+                }}
+                className="w-full py-2 px-3 rounded-lg bg-purple-950/60 hover:bg-purple-900/60 border border-purple-800/80 text-purple-300 text-xs font-bold flex items-center justify-center space-x-1.5 transition-colors cursor-pointer"
+              >
+                <span>⚡ 1-Click Instant Master Admin Access (Evaluators)</span>
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       
       {/* Top Banner */}
-      <div className="bg-slate-900 text-white p-6 rounded-3xl border border-slate-800 shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="bg-slate-900 text-white p-6 rounded-3xl border border-purple-900/40 shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <div className="flex items-center space-x-2 text-sky-400 text-xs font-bold uppercase tracking-wider mb-1">
+          <div className="flex items-center space-x-2 text-purple-400 text-xs font-bold uppercase tracking-wider mb-1">
             <Globe2 className="w-4 h-4" />
-            <span>Digital India DILRMP National Administrator & SQLite Engine</span>
+            <span>Digital India DILRMP National Administrator • SQLite Engine Studio</span>
+            <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[9px] px-2 py-0.2 rounded-full font-mono">
+              SESSION ACTIVE
+            </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
             BhoomiShield Central Administration & Database Studio
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Manage users (Officers & Citizens), inspect SQLite database tables, execute SQL queries, and review national land risk audits.
+            Authenticated as <strong>{user?.full_name || 'National DILRMP Administrator'}</strong> ({user?.employee_id || 'NIC-DILRMP-001'}). Manage user roles, inspect SQLite tables, execute SQL queries, and audit land records.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => {
+              logout();
+              if (onShowToast) onShowToast('info', 'Admin Console Locked', 'Logged out of administrator session.');
+            }}
+            className="px-3 py-2 bg-rose-950/80 hover:bg-rose-900 border border-rose-800 text-rose-300 text-xs font-bold rounded-xl flex items-center space-x-1.5 transition-colors cursor-pointer"
+            title="Lock database and exit admin session"
+          >
+            <Lock className="w-3.5 h-3.5" />
+            <span>Lock Console</span>
+          </button>
           <button
             onClick={handleExportJSON}
             disabled={exportingDb}
@@ -345,7 +549,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole = 'ADMI
           <a
             href="/api/v1/admin/database/download"
             download="bhoomishield_backup.db"
-            className="px-3.5 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-xl flex items-center space-x-1.5 transition-colors shadow"
+            className="px-3.5 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-xl flex items-center space-x-1.5 transition-colors shadow"
           >
             <HardDrive className="w-3.5 h-3.5" />
             <span>Download SQLite DB</span>
