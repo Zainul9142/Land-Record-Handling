@@ -221,310 +221,212 @@ export const Navbar: React.FC<NavbarProps> = () => {
           <div className="fixed inset-0" onClick={closeMenuDrawer}></div>
 
           {/* Slide-over Content Panel */}
-          <div className="relative w-full max-w-2xl bg-slate-900 border-r border-slate-800 shadow-2xl h-full flex flex-col z-10 overflow-y-auto">
+          <div className="relative w-full max-w-md bg-slate-900 border-r border-slate-800 shadow-2xl h-full flex flex-col z-10 overflow-y-auto">
             
             {/* Drawer Header */}
-            <div className="p-6 border-b border-slate-800 flex items-center justify-between sticky top-0 bg-slate-900/95 backdrop-blur z-20">
-              <div className="flex items-center space-x-3">
+            <div className="p-5 border-b border-slate-800 flex items-center justify-between sticky top-0 bg-slate-900/95 backdrop-blur z-20">
+              <div className="flex items-center space-x-2.5">
                 <div className="p-2 rounded-xl bg-sky-500/20 text-sky-400 border border-sky-500/30">
-                  <Grid className="w-5 h-5" />
+                  <Grid className="w-4 h-4" />
                 </div>
-                <div>
-                  <h2 className="text-lg font-black text-white tracking-tight">
-                    BhoomiShield Feature Directory & Portals
-                  </h2>
-                  <p className="text-xs text-slate-400">
-                    Unified Pan-India Land Governance Services across 28 States & 8 UTs
-                  </p>
-                </div>
+                <h2 className="text-sm font-black text-white tracking-tight uppercase">
+                  {isEn ? "Features & Services" : "सेवाएँ एवं मेनू"}
+                </h2>
               </div>
 
               <button
                 onClick={closeMenuDrawer}
-                className="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors cursor-pointer"
+                className="p-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors cursor-pointer"
                 title="Close Menu"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Feature Categories */}
-            <div className="p-6 space-y-6 flex-1">
+            {/* Feature Options (Represented by Name Only) */}
+            <div className="p-5 space-y-5 flex-1">
               
               {/* Category 1: Land Discovery & Due Diligence */}
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2 text-xs font-bold text-sky-400 uppercase tracking-wider">
-                  <Compass className="w-4 h-4 text-sky-400" />
-                  <span>1. Land Discovery, GPS Cadastral & Risk Due Diligence</span>
+              <div className="space-y-1.5">
+                <div className="text-[10px] font-bold text-sky-400 uppercase tracking-wider px-1 mb-1">
+                  1. Land Discovery & Due Diligence
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  <Link
-                    to="/"
-                    onClick={closeMenuDrawer}
-                    className="p-3 rounded-2xl bg-slate-800/80 hover:bg-slate-750 border border-slate-700 hover:border-sky-500 transition-all text-left group"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Search className="w-4 h-4 text-sky-400" />
-                        <span className="text-xs font-bold text-white group-hover:text-sky-300">
-                          Universal Land Search
-                        </span>
-                      </div>
-                      <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-sky-400 group-hover:translate-x-0.5 transition-transform" />
-                    </div>
-                    <p className="text-[11px] text-slate-400 mt-1">
-                      Query parcels by State, District, Khata/Khesra, or Ground GPS pin drop.
-                    </p>
-                  </Link>
-
-                  <Link
-                    to="/check-buy"
-                    onClick={closeMenuDrawer}
-                    className="p-3 rounded-2xl bg-slate-800/80 hover:bg-slate-750 border border-slate-700 hover:border-sky-500 transition-all text-left group"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                        <span className="text-xs font-bold text-white group-hover:text-emerald-300">
-                          Check Before You Buy
-                        </span>
-                      </div>
-                      <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-transform" />
-                    </div>
-                    <p className="text-[11px] text-slate-400 mt-1">
-                      Multi-tier due diligence scanning title defects, court stays, and mortgages.
-                    </p>
-                  </Link>
-
-                  <Link
-                    to="/track-mutation"
-                    onClick={closeMenuDrawer}
-                    className="p-3 rounded-2xl bg-slate-800/80 hover:bg-slate-750 border border-slate-700 hover:border-sky-500 transition-all text-left group"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Sparkles className="w-4 h-4 text-amber-400" />
-                        <span className="text-xs font-bold text-white group-hover:text-amber-300">
-                          Live Mutation Tracker
-                        </span>
-                      </div>
-                      <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-transform" />
-                    </div>
-                    <p className="text-[11px] text-slate-400 mt-1">
-                      Track Dakhil-Kharij SLA application progress and hearing dates.
-                    </p>
-                  </Link>
-
-                  <Link
-                    to="/valuation"
-                    onClick={closeMenuDrawer}
-                    className="p-3 rounded-2xl bg-slate-800/80 hover:bg-slate-750 border border-slate-700 hover:border-sky-500 transition-all text-left group"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Calculator className="w-4 h-4 text-amber-400" />
-                        <span className="text-xs font-bold text-white group-hover:text-amber-300">
-                          Stamp Duty & Valuation
-                        </span>
-                      </div>
-                      <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-transform" />
-                    </div>
-                    <p className="text-[11px] text-slate-400 mt-1">
-                      Calculate government circle rates, registration fees, and duty concessions.
-                    </p>
-                  </Link>
-
-                  <Link
-                    to="/verify"
-                    onClick={closeMenuDrawer}
-                    className="p-3 rounded-2xl bg-slate-800/80 hover:bg-slate-750 border border-slate-700 hover:border-sky-500 transition-all text-left group"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <FileCheck className="w-4 h-4 text-sky-400" />
-                        <span className="text-xs font-bold text-white group-hover:text-sky-300">
-                          Report Verification
-                        </span>
-                      </div>
-                      <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-sky-400 group-hover:translate-x-0.5 transition-transform" />
-                    </div>
-                    <p className="text-[11px] text-slate-400 mt-1">
-                      Verify cryptographic SHA-256 digests and QR codes of generated PDF audit reports.
-                    </p>
-                  </Link>
-
-                  <Link
-                    to="/overview"
-                    onClick={closeMenuDrawer}
-                    className="p-3 rounded-2xl bg-slate-800/80 hover:bg-slate-750 border border-slate-700 hover:border-sky-500 transition-all text-left group"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Globe2 className="w-4 h-4 text-indigo-400" />
-                        <span className="text-xs font-bold text-white group-hover:text-indigo-300">
-                          National Portal Overview
-                        </span>
-                      </div>
-                      <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
-                    </div>
-                    <p className="text-[11px] text-slate-400 mt-1">
-                      Explore platform vision, architecture, and multi-state DILRMP integration metrics.
-                    </p>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Category 2: Citizen Rights, Locker & Grievances */}
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2 text-xs font-bold text-indigo-400 uppercase tracking-wider">
-                  <FolderLock className="w-4 h-4 text-indigo-400" />
-                  <span>2. Citizen Bhoomi Locker & Legal Redressal</span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                  <Link
-                    to="/vault"
-                    onClick={closeMenuDrawer}
-                    className="p-3 rounded-2xl bg-slate-800/80 hover:bg-slate-750 border border-slate-700 hover:border-indigo-500 transition-all text-left group"
-                  >
-                    <div className="flex items-center justify-between">
-                      <FolderLock className="w-4 h-4 text-indigo-400" />
-                      <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-400" />
-                    </div>
-                    <span className="text-xs font-bold text-white group-hover:text-indigo-300 block mt-2">
-                      My Bhoomi Vault
-                    </span>
-                    <p className="text-[10px] text-slate-400 mt-0.5">
-                      Encrypted document locker with DigiLocker sync.
-                    </p>
-                  </Link>
-
-                  <Link
-                    to="/legal-advisor"
-                    onClick={closeMenuDrawer}
-                    className="p-3 rounded-2xl bg-slate-800/80 hover:bg-slate-750 border border-slate-700 hover:border-emerald-500 transition-all text-left group"
-                  >
-                    <div className="flex items-center justify-between">
-                      <Scale className="w-4 h-4 text-emerald-400" />
-                      <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-emerald-400" />
-                    </div>
-                    <span className="text-xs font-bold text-white group-hover:text-emerald-300 block mt-2">
-                      AI Legal Advisor
-                    </span>
-                    <p className="text-[10px] text-slate-400 mt-0.5">
-                      Instant advice on land partition & dispute laws.
-                    </p>
-                  </Link>
-
-                  <Link
-                    to="/complaints"
-                    onClick={closeMenuDrawer}
-                    className="p-3 rounded-2xl bg-slate-800/80 hover:bg-slate-750 border border-slate-700 hover:border-rose-500 transition-all text-left group"
-                  >
-                    <div className="flex items-center justify-between">
-                      <ShieldAlert className="w-4 h-4 text-rose-400" />
-                      <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-rose-400" />
-                    </div>
-                    <span className="text-xs font-bold text-white group-hover:text-rose-300 block mt-2">
-                      Grievance Portal
-                    </span>
-                    <p className="text-[10px] text-slate-400 mt-0.5">
-                      Lodge complaints to SDM & District Collector.
-                    </p>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Category 3: Authorized Government & Administrative Portals (Security Gate Protected) */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2 text-xs font-bold text-purple-400 uppercase tracking-wider">
-                    <Lock className="w-4 h-4 text-purple-400" />
-                    <span>3. Authorized Portals & Governance (Security Gate Protected)</span>
+                <Link
+                  to="/"
+                  onClick={closeMenuDrawer}
+                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-sky-600/20 text-slate-200 hover:text-sky-300 border border-slate-800 hover:border-sky-500/40 transition-all font-semibold text-xs group"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    <Search className="w-4 h-4 text-sky-400" />
+                    <span>Universal Land Search</span>
                   </div>
-                  <span className="text-[9px] bg-rose-500/20 text-rose-300 border border-rose-500/30 px-2 py-0.2 rounded-full font-mono uppercase font-bold">
-                    Credentials Required
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-sky-400 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+
+                <Link
+                  to="/check-buy"
+                  onClick={closeMenuDrawer}
+                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-emerald-600/20 text-slate-200 hover:text-emerald-300 border border-slate-800 hover:border-emerald-500/40 transition-all font-semibold text-xs group"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    <span>Check Before You Buy</span>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+
+                <Link
+                  to="/track-mutation"
+                  onClick={closeMenuDrawer}
+                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-amber-600/20 text-slate-200 hover:text-amber-300 border border-slate-800 hover:border-amber-500/40 transition-all font-semibold text-xs group"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    <Sparkles className="w-4 h-4 text-amber-400" />
+                    <span>Live Mutation Tracker</span>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+
+                <Link
+                  to="/valuation"
+                  onClick={closeMenuDrawer}
+                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-amber-600/20 text-slate-200 hover:text-amber-300 border border-slate-800 hover:border-amber-500/40 transition-all font-semibold text-xs group"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    <Calculator className="w-4 h-4 text-amber-400" />
+                    <span>Stamp Duty & Valuation</span>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+
+                <Link
+                  to="/verify"
+                  onClick={closeMenuDrawer}
+                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-sky-600/20 text-slate-200 hover:text-sky-300 border border-slate-800 hover:border-sky-500/40 transition-all font-semibold text-xs group"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    <FileCheck className="w-4 h-4 text-sky-400" />
+                    <span>Report Verification</span>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-sky-400 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+
+                <Link
+                  to="/overview"
+                  onClick={closeMenuDrawer}
+                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-indigo-600/20 text-slate-200 hover:text-indigo-300 border border-slate-800 hover:border-indigo-500/40 transition-all font-semibold text-xs group"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    <Globe2 className="w-4 h-4 text-indigo-400" />
+                    <span>National Portal Overview</span>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+              </div>
+
+              {/* Category 2: Citizen Rights & Locker */}
+              <div className="space-y-1.5">
+                <div className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider px-1 mb-1">
+                  2. Citizen Locker & Legal Redressal
+                </div>
+
+                <Link
+                  to="/vault"
+                  onClick={closeMenuDrawer}
+                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-indigo-600/20 text-slate-200 hover:text-indigo-300 border border-slate-800 hover:border-indigo-500/40 transition-all font-semibold text-xs group"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    <FolderLock className="w-4 h-4 text-indigo-400" />
+                    <span>My Bhoomi Vault</span>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+
+                <Link
+                  to="/legal-advisor"
+                  onClick={closeMenuDrawer}
+                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-emerald-600/20 text-slate-200 hover:text-emerald-300 border border-slate-800 hover:border-emerald-500/40 transition-all font-semibold text-xs group"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    <Scale className="w-4 h-4 text-emerald-400" />
+                    <span>AI Legal Advisor</span>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+
+                <Link
+                  to="/complaints"
+                  onClick={closeMenuDrawer}
+                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-rose-600/20 text-slate-200 hover:text-rose-300 border border-slate-800 hover:border-rose-500/40 transition-all font-semibold text-xs group"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    <ShieldAlert className="w-4 h-4 text-rose-400" />
+                    <span>Grievance Portal</span>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-rose-400 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+              </div>
+
+              {/* Category 3: Authorized Portals */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between px-1 mb-1">
+                  <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider">
+                    3. Authorized Portals (Protected)
+                  </span>
+                  <span className="text-[9px] bg-rose-500/20 text-rose-300 border border-rose-500/30 px-1.5 py-0.2 rounded font-mono uppercase font-bold">
+                    Credentials
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {/* Revenue Official Workspace */}
-                  <Link
-                    to="/official"
-                    onClick={closeMenuDrawer}
-                    className="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-emerald-950/40 border border-slate-700 hover:border-emerald-500 transition-all text-left group"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Landmark className="w-4 h-4 text-emerald-400" />
-                        <span className="text-xs font-bold text-white group-hover:text-emerald-300">
-                          Revenue Officer Workspace
-                        </span>
-                      </div>
-                      <span className="text-[8px] font-bold px-1.5 py-0.2 rounded bg-emerald-900/80 text-emerald-300 border border-emerald-700 uppercase">
-                        Officer Gate
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-400 mt-1">
-                      Digital DSC signature sealing, citizen deed verification, and revenue court proceedings.
-                    </p>
-                  </Link>
-
-                  {/* Central Administration & SQLite Studio */}
-                  <Link
-                    to="/admin"
-                    onClick={closeMenuDrawer}
-                    className="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-purple-950/40 border border-slate-700 hover:border-purple-500 transition-all text-left group"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Database className="w-4 h-4 text-purple-400" />
-                        <span className="text-xs font-bold text-white group-hover:text-purple-300">
-                          Central DB & User Admin
-                        </span>
-                      </div>
-                      <span className="text-[8px] font-bold px-1.5 py-0.2 rounded bg-purple-900/80 text-purple-300 border border-purple-700 uppercase">
-                        Admin Gate
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-400 mt-1">
-                      Inspect SQLite tables, execute SQL queries, and manage user role provisioning.
-                    </p>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Single Sign-On Account Access */}
-              <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20">
-                    <UserCheck className="w-4 h-4" />
+                <Link
+                  to="/official"
+                  onClick={closeMenuDrawer}
+                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-emerald-950/40 text-slate-200 hover:text-emerald-300 border border-slate-800 hover:border-emerald-500/40 transition-all font-semibold text-xs group"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    <Landmark className="w-4 h-4 text-emerald-400" />
+                    <span>Revenue Officer Workspace</span>
                   </div>
-                  <div>
-                    <span className="text-xs font-bold text-white block">
-                      {isAuthenticated && user ? `Logged In as ${user.full_name}` : 'Multi-Role Single Sign-On Gateway'}
-                    </span>
-                    <span className="text-[10px] text-slate-400">
-                      {isAuthenticated && user ? `Active Role: ${user.role} • ${user.department || 'Bhoomi User'}` : 'Switch between Citizen, Revenue Officer, or National Admin profiles'}
-                    </span>
+                  <span className="text-[8px] font-bold px-1.5 py-0.2 rounded bg-emerald-900/80 text-emerald-300 border border-emerald-700 uppercase">
+                    Officer Gate
+                  </span>
+                </Link>
+
+                <Link
+                  to="/admin"
+                  onClick={closeMenuDrawer}
+                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-purple-950/40 text-slate-200 hover:text-purple-300 border border-slate-800 hover:border-purple-500/40 transition-all font-semibold text-xs group"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    <Database className="w-4 h-4 text-purple-400" />
+                    <span>Central DB & Admin Panel</span>
                   </div>
-                </div>
+                  <span className="text-[8px] font-bold px-1.5 py-0.2 rounded bg-purple-900/80 text-purple-300 border border-purple-700 uppercase">
+                    Admin Gate
+                  </span>
+                </Link>
 
                 <Link
                   to="/login"
                   onClick={closeMenuDrawer}
-                  className="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold transition-colors"
+                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-sky-950/40 text-slate-200 hover:text-sky-300 border border-slate-800 hover:border-sky-500/40 transition-all font-semibold text-xs group"
                 >
-                  {isAuthenticated ? 'Switch' : 'Sign In'}
+                  <div className="flex items-center space-x-2.5">
+                    <UserCheck className="w-4 h-4 text-sky-400" />
+                    <span>Single Sign-On Gateway</span>
+                  </div>
+                  <span className="text-[8px] font-bold px-1.5 py-0.2 rounded bg-sky-900/80 text-sky-300 border border-sky-700 uppercase">
+                    Sign In / Switch
+                  </span>
                 </Link>
               </div>
 
             </div>
 
             {/* Drawer Footer */}
-            <div className="p-4 border-t border-slate-800 bg-slate-950 text-center text-[10px] text-slate-500">
-              BhoomiShield National Land Governance Platform • DILRMP Compliant • 28 States & 8 UTs
+            <div className="p-3.5 border-t border-slate-800 bg-slate-950 text-center text-[10px] text-slate-500">
+              BhoomiShield National Land Governance Platform
             </div>
 
           </div>
