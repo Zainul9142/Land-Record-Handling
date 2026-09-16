@@ -248,6 +248,25 @@ def init_db():
     );
     """)
 
+    # Student Researchers & Academic Trainees Table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS student_researchers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        student_id TEXT UNIQUE NOT NULL,
+        full_name TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        university TEXT NOT NULL,
+        department TEXT NOT NULL,
+        degree TEXT DEFAULT 'B.Tech CSE / LL.B',
+        semester INTEGER DEFAULT 6,
+        assigned_khatians_count INTEGER DEFAULT 0,
+        cases_analyzed_count INTEGER DEFAULT 0,
+        legal_memos_drafted INTEGER DEFAULT 0,
+        research_score REAL DEFAULT 94.0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    """)
+
     # User Bhoomi Vault - Documents Table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS user_documents (
@@ -422,9 +441,66 @@ def seed_auth_and_vault_data(conn):
             ) VALUES (?, ?, ?, ?, ?, ?, ?)
             """, p)
 
+    # Pre-seed Student Researchers
+    cursor.execute("SELECT COUNT(*) FROM student_researchers")
+    if cursor.fetchone()[0] == 0:
+        demo_students = [
+            ("STU-GIS-2026-01", "Aniket Sen", "aniket.sen@law-tech.edu.in", "National University of Study & Research in Law", "Land Laws & Spatial Cadastral Governance", "B.A. LL.B (Hons)", 8, 12, 24, 6, 96.5),
+            ("STU-GIS-2026-02", "Meera Nair", "meera.nair@tech-univ.ac.in", "BIT Mesra", "Computer Science & Remote Sensing GIS", "B.Tech CSE", 6, 18, 30, 8, 98.0)
+        ]
+        for s in demo_students:
+            cursor.execute("""
+            INSERT OR REPLACE INTO student_researchers (
+                student_id, full_name, email, university, department, degree, semester,
+                assigned_khatians_count, cases_analyzed_count, legal_memos_drafted, research_score
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, s)
+
     conn.commit()
+
+def get_all_student_researchers():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM student_researchers ORDER BY id DESC")
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def get_student_researcher_by_id(student_id: str):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM student_researchers WHERE student_id = ? OR id = ?", (student_id, student_id))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+def add_student_researcher(data: dict):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    student_id = data.get('student_id', f"STU-GIS-2026-{os.urandom(2).hex()}")
+    cursor.execute("""
+    INSERT INTO student_researchers (
+        student_id, full_name, email, university, department, degree, semester,
+        assigned_khatians_count, cases_analyzed_count, legal_memos_drafted, research_score
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        student_id,
+        data.get('full_name', 'Student Researcher'),
+        data.get('email', 'student@university.edu.in'),
+        data.get('university', 'Law & Technology University'),
+        data.get('department', 'GIS Land Governance'),
+        data.get('degree', 'B.Tech / LL.B'),
+        data.get('semester', 6),
+        data.get('assigned_khatians_count', 0),
+        data.get('cases_analyzed_count', 0),
+        data.get('legal_memos_drafted', 0),
+        data.get('research_score', 95.0)
+    ))
+    conn.commit()
+    conn.close()
+    return get_student_researcher_by_id(student_id)
 
 if __name__ == "__main__":
     init_db()
-    print("Database initialized with users, user_documents, and user_properties schema.")
+    print("Database initialized with users, student_researchers, user_documents, and user_properties schema.")
 
