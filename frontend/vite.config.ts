@@ -32,6 +32,8 @@ export default defineConfig({
     port: 5173,
     host: '0.0.0.0',
     strictPort: true,
+    cors: true,
+    allowedHosts: true,
     hmr: {
       overlay: false,
     },
