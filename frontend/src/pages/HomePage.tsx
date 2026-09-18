@@ -32,14 +32,14 @@ export const HomePage: React.FC<HomePageProps> = () => {
   ];
 
   return (
-    <div className="space-y-12 pb-16">
+    <div className="space-y-8 pb-16">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white pt-12 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden rounded-b-3xl shadow-2xl border-b border-slate-800">
+      <section className="relative bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white pt-14 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden rounded-b-3xl shadow-2xl border-b border-slate-800">
         <div className="absolute top-0 right-0 -mt-12 -mr-12 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 -mb-12 -ml-12 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="max-w-5xl mx-auto text-center space-y-6 relative z-10">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-semibold">
+          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-semibold">
             <Globe2 className="w-4 h-4 text-sky-400" />
             <span>
               {t('national_layer', 'Digital India Land Records Modernization Programme (DILRMP) • 28 States & 8 UTs National Layer')}
@@ -47,8 +47,11 @@ export const HomePage: React.FC<HomePageProps> = () => {
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
-            {t('hero_title', 'Verify Land Records Across India. Detect Risk. Protect Ownership.')}
+            {t('hero_title', 'Digital India Land Records Modernization Programme (DILRMP)')}
           </h1>
+          <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
+            {t('hero_subtitle', 'Instant unified access to 7/12 Extracts, Khatauni RoR, RTC Pahani, Patta Chitta, and AI mutation fraud prevention across all 28 Indian States & 8 UTs.')}
+          </p>
 
           {/* Quick Universal Search Card */}
           <div className="max-w-2xl mx-auto bg-slate-800/90 backdrop-blur-md p-3 sm:p-4 rounded-2xl border border-slate-700 shadow-2xl">
@@ -65,7 +68,7 @@ export const HomePage: React.FC<HomePageProps> = () => {
               </div>
               <button
                 type="submit"
-                className="w-full sm:w-auto px-6 py-3 bg-sky-600 hover:bg-sky-500 text-white font-semibold text-sm rounded-xl transition-all shadow-lg flex items-center justify-center space-x-2 shrink-0"
+                className="w-full sm:w-auto px-6 py-3 bg-sky-600 hover:bg-sky-500 text-white font-semibold text-sm rounded-xl transition-all shadow-lg flex items-center justify-center space-x-2 shrink-0 cursor-pointer"
               >
                 <span>{isEn ? "Search Pan-India" : "खोजें"}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -82,7 +85,7 @@ export const HomePage: React.FC<HomePageProps> = () => {
                 <button
                   key={idx}
                   onClick={() => navigate(`/land/${s.id}`)}
-                  className="px-2.5 py-1 bg-slate-900 hover:bg-sky-600/30 hover:border-sky-500/50 border border-slate-700 rounded-lg text-[11px] font-mono transition-colors text-sky-300"
+                  className="px-2.5 py-1 bg-slate-900 hover:bg-sky-600/30 hover:border-sky-500/50 border border-slate-700 rounded-lg text-[11px] font-mono transition-colors text-sky-300 cursor-pointer"
                 >
                   {s.label}
                 </button>
@@ -94,331 +97,57 @@ export const HomePage: React.FC<HomePageProps> = () => {
 
       {/* State Portals Integration Ribbon */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <div className="bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-xl space-y-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
-              <h3 className="text-base font-bold text-white flex items-center space-x-2">
+              <h3 className="text-base sm:text-lg font-bold text-white flex items-center space-x-2">
                 <Globe2 className="w-5 h-5 text-emerald-400" />
                 <span>Multi-State Land Record Portals Integration Network</span>
               </h3>
-              <p className="text-xs text-slate-400">
-                Connected with official State Revenue Record Streams across India
+              <p className="text-xs sm:text-sm text-slate-400 mt-1">
+                Connected with official State Revenue Record Streams and Cadastral GIS layers across India
               </p>
             </div>
             <Link
               to="/search"
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow transition-colors flex items-center space-x-1.5 shrink-0"
+              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow transition-colors flex items-center space-x-2 shrink-0"
             >
               <span>Launch Pan-India Explorer</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 text-xs">
-            <div className="bg-slate-800/70 p-3 rounded-xl border border-slate-700 text-center space-y-1">
-              <div className="font-bold text-sky-400">UP Bhulekh</div>
-              <div className="text-[10px] text-slate-400">Uttar Pradesh (Gata/Khatauni)</div>
-            </div>
-            <div className="bg-slate-800/70 p-3 rounded-xl border border-slate-700 text-center space-y-1">
-              <div className="font-bold text-emerald-400">Mahabhulekh 7/12</div>
-              <div className="text-[10px] text-slate-400">Maharashtra (Saat Bara)</div>
-            </div>
-            <div className="bg-slate-800/70 p-3 rounded-xl border border-slate-700 text-center space-y-1">
-              <div className="font-bold text-amber-400">Bhoomi RTC</div>
-              <div className="text-[10px] text-slate-400">Karnataka (Pahani/Survey)</div>
-            </div>
-            <div className="bg-slate-800/70 p-3 rounded-xl border border-slate-700 text-center space-y-1">
-              <div className="font-bold text-indigo-400">Jharbhoomi</div>
-              <div className="text-[10px] text-slate-400">Jharkhand (Khata/Khesra)</div>
-            </div>
-            <div className="bg-slate-800/70 p-3 rounded-xl border border-slate-700 text-center space-y-1">
-              <div className="font-bold text-rose-400">BiharBhumi</div>
-              <div className="text-[10px] text-slate-400">Bihar (DCLR/Jamabandi)</div>
-            </div>
-            <div className="bg-slate-800/70 p-3 rounded-xl border border-slate-700 text-center space-y-1">
-              <div className="font-bold text-teal-400">Patta Chitta</div>
-              <div className="text-[10px] text-slate-400">Tamil Nadu (e-Services)</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Core Platform Innovation Pillars */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        <div className="text-center space-y-2">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-            {isEn ? "Why BhoomiShield for Pan-India Land Governance?" : "अखिल भारतीय स्तर पर भूमिशील्ड क्यों?"}
-          </h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
-            {isEn ? "Transforming fragmented state record queries into one unified, explainable national land intelligence layer." : "विखंडित राज्य रिकॉर्ड प्रश्नों को एकीकृत राष्ट्रीय भूमि विश्लेषण में बदलना।"}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold">
-              <Layers className="w-5 h-5" />
-            </div>
-            <h3 className="font-bold text-slate-900 dark:text-white text-base">Standardized Land Identity</h3>
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Standard DILRMP canonical ID (`UP-NOI-DAD-BHAN-P340-PL112-1`) cross-linking RORs, 7/12, Mutation timelines, and GIS boundaries.
-            </p>
-          </div>
-
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
-              <Cpu className="w-5 h-5" />
-            </div>
-            <h3 className="font-bold text-slate-900 dark:text-white text-base">Deterministic Risk Engine</h3>
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Rules R001–R008 flag owner mismatches, area variances, overdue mutation SLAs, unmutated deeds, and civil/revenue stay orders.
-            </p>
-          </div>
-
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
-              <CheckCircle2 className="w-5 h-5" />
-            </div>
-            <h3 className="font-bold text-slate-900 dark:text-white text-base">State-Aware AI Legal Advisor</h3>
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Provides statutory guidance grounded in UP Revenue Code, MLRC Maharashtra, Karnataka PTCL, CNT/SPT Acts, RERA, and Central property laws.
-            </p>
-          </div>
-
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
-              <QrCode className="w-5 h-5" />
-            </div>
-            <h3 className="font-bold text-slate-900 dark:text-white text-base">QR Report Verification</h3>
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Generates downloadable Land Verification Reports with cryptographic SHA-256 signatures and QR verification links (`/verify/BS-2026-XXXX`).
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Direct Quick Access to All Key Citizen Services */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center space-x-2">
-              <Sparkles className="w-5 h-5 text-amber-500" />
-              <span>{isEn ? "Core Citizen & Governance Services" : "प्रमुख नागरिक एवं शासन सेवाएँ"}</span>
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              {isEn ? "Select any service below to begin instant verification, calculation, or locker access." : "सत्यापन, गणना, या वॉल्ट शुरू करने के लिए नीचे दी गई सेवा चुनें।"}
-            </p>
-          </div>
-          <Link
-            to="/search"
-            className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-xl shadow transition-all flex items-center space-x-1.5 shrink-0"
-          >
-            <Search className="w-3.5 h-3.5" />
-            <span>{isEn ? "Universal Search" : "सार्वभौमिक खोज"}</span>
-            <ArrowRight className="w-3.5 h-3.5 ml-1" />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Link
-            to="/search"
-            className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-sky-500 shadow-sm hover:shadow-lg transition-all text-left group flex flex-col justify-between"
-          >
-            <div className="space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-500 flex items-center justify-center font-bold">
-                <Search className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-sky-500 transition-colors">
-                Universal Land Search
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Search state land records by State, District, Khata/Khesra, or Ground GPS pin drop.
-              </p>
-            </div>
-            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-sky-600 dark:text-sky-400">
-              <span>Execute Search</span>
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Link>
-
-          <Link
-            to="/check-buy"
-            className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 shadow-sm hover:shadow-lg transition-all text-left group flex flex-col justify-between"
-          >
-            <div className="space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center font-bold">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-emerald-500 transition-colors">
-                Check Before You Buy
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Multi-layer due diligence scanning title defects, mortgages, and court stay orders.
-              </p>
-            </div>
-            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-emerald-600 dark:text-emerald-400">
-              <span>Run Due Diligence</span>
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Link>
-
-          <Link
-            to="/track-mutation"
-            className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-amber-500 shadow-sm hover:shadow-lg transition-all text-left group flex flex-col justify-between"
-          >
-            <div className="space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold">
-                <Sparkles className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-amber-500 transition-colors">
-                Live Mutation Tracker
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Track Dakhil-Kharij application SLA timelines and revenue court hearing dates.
-              </p>
-            </div>
-            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-amber-600 dark:text-amber-400">
-              <span>Track Application</span>
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Link>
-
-          <Link
-            to="/valuation"
-            className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-indigo-500 shadow-sm hover:shadow-lg transition-all text-left group flex flex-col justify-between"
-          >
-            <div className="space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center font-bold">
-                <Globe2 className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-indigo-500 transition-colors">
-                Stamp Duty & Valuation
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Calculate official circle rates, registration fees, and women concessions across India.
-              </p>
-            </div>
-            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-indigo-600 dark:text-indigo-400">
-              <span>Calculate Fees</span>
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Link>
-
-          <Link
-            to="/vault"
-            className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 shadow-sm hover:shadow-lg transition-all text-left group flex flex-col justify-between"
-          >
-            <div className="space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center font-bold">
-                <FolderLock className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-emerald-500 transition-colors">
-                My Bhoomi Vault
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Encrypted digital document locker with DigiLocker sync and property portfolio tracking.
-              </p>
-            </div>
-            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-emerald-600 dark:text-emerald-400">
-              <span>Open Vault</span>
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Link>
-
-          <Link
-            to="/legal-advisor"
-            className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-purple-500 shadow-sm hover:shadow-lg transition-all text-left group flex flex-col justify-between"
-          >
-            <div className="space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center font-bold">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-purple-500 transition-colors">
-                AI Legal Advisor
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Instant legal guidance on UP Revenue Code, MLRC, PTCL, CNT/SPT Acts, and RERA.
-              </p>
-            </div>
-            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-purple-600 dark:text-purple-400">
-              <span>Consult Legal AI</span>
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Link>
-
-          <Link
-            to="/verify"
-            className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-sky-500 shadow-sm hover:shadow-lg transition-all text-left group flex flex-col justify-between"
-          >
-            <div className="space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-500 flex items-center justify-center font-bold">
-                <FileCheck className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-sky-500 transition-colors">
-                Report QR Verification
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Verify cryptographic SHA-256 signatures and QR codes of generated PDF audit reports.
-              </p>
-            </div>
-            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-sky-600 dark:text-sky-400">
-              <span>Verify Report</span>
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Link>
-
-          <Link
-            to="/complaints"
-            className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-rose-500 shadow-sm hover:shadow-lg transition-all text-left group flex flex-col justify-between"
-          >
-            <div className="space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center font-bold">
-                <AlertTriangle className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-rose-500 transition-colors">
-                Grievance Redressal
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Directly lodge grievances to SDM, Tahsildars, LRDC, and District Collectors.
-              </p>
-            </div>
-            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-rose-600 dark:text-rose-400">
-              <span>File Grievance</span>
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Link>
-        </div>
-      </section>
-
-      {/* Target Personas Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        <div className="bg-slate-900 rounded-3xl p-8 text-white border border-slate-800 shadow-xl space-y-6">
-          <div className="text-center space-y-2">
-            <h2 className="text-2xl font-bold">Built for Indian Land Governance Stakeholders</h2>
-            <p className="text-xs text-slate-400">Serving Citizens, Buyers, Banks & NBFCs, Revenue Officers, and Legal Practitioners</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
-            <div className="bg-slate-800/70 p-5 rounded-2xl border border-slate-700 space-y-2">
-              <div className="font-bold text-sky-400 text-sm">Citizens & Land Owners</div>
-              <p className="text-slate-300 leading-relaxed">
-                Lookup digitized land records across any state, track pending Dakhil-Kharij / Mutation SLA deadlines, and detect unmutated transaction discrepancies.
-              </p>
-            </div>
-
-            <div className="bg-slate-800/70 p-5 rounded-2xl border border-slate-700 space-y-2">
-              <div className="font-bold text-amber-400 text-sm">Prospective Buyers & Financial Institutions</div>
-              <p className="text-slate-300 leading-relaxed">
-                Run comprehensive due-diligence before signing agreements to spot active bank mortgage hypothecations, civil court stay orders, or tribal land transfer bans.
-              </p>
-            </div>
-
-            <div className="bg-slate-800/70 p-5 rounded-2xl border border-slate-700 space-y-2">
-              <div className="font-bold text-emerald-400 text-sm">Revenue Authorities (Tahsildars, CO, SDM, DC)</div>
-              <p className="text-slate-300 leading-relaxed">
-                Monitor circle-wide and district-wide risk distribution, inspect side-by-side digitized evidence, record review decisions, and maintain audit logs.
-              </p>
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
+            <Link to="/search?state=Uttar+Pradesh" className="bg-slate-800/80 hover:bg-slate-800 hover:border-sky-500/50 p-4 rounded-xl border border-slate-700 text-center space-y-1.5 transition-all">
+              <div className="font-bold text-sky-400 text-sm">UP Bhulekh</div>
+              <div className="text-[11px] text-slate-400">Uttar Pradesh (Gata/Khatauni)</div>
+              <div className="text-[9px] text-emerald-400 font-mono font-semibold">● Real-Time API</div>
+            </Link>
+            <Link to="/search?state=Maharashtra" className="bg-slate-800/80 hover:bg-slate-800 hover:border-emerald-500/50 p-4 rounded-xl border border-slate-700 text-center space-y-1.5 transition-all">
+              <div className="font-bold text-emerald-400 text-sm">Mahabhulekh 7/12</div>
+              <div className="text-[11px] text-slate-400">Maharashtra (Saat Bara)</div>
+              <div className="text-[9px] text-emerald-400 font-mono font-semibold">● Real-Time API</div>
+            </Link>
+            <Link to="/search?state=Karnataka" className="bg-slate-800/80 hover:bg-slate-800 hover:border-amber-500/50 p-4 rounded-xl border border-slate-700 text-center space-y-1.5 transition-all">
+              <div className="font-bold text-amber-400 text-sm">Bhoomi RTC</div>
+              <div className="text-[11px] text-slate-400">Karnataka (Pahani/Survey)</div>
+              <div className="text-[9px] text-emerald-400 font-mono font-semibold">● Real-Time API</div>
+            </Link>
+            <Link to="/search?state=Jharkhand" className="bg-slate-800/80 hover:bg-slate-800 hover:border-indigo-500/50 p-4 rounded-xl border border-slate-700 text-center space-y-1.5 transition-all">
+              <div className="font-bold text-indigo-400 text-sm">Jharbhoomi</div>
+              <div className="text-[11px] text-slate-400">Jharkhand (Khata/Khesra)</div>
+              <div className="text-[9px] text-emerald-400 font-mono font-semibold">● Real-Time API</div>
+            </Link>
+            <Link to="/search?state=Bihar" className="bg-slate-800/80 hover:bg-slate-800 hover:border-rose-500/50 p-4 rounded-xl border border-slate-700 text-center space-y-1.5 transition-all">
+              <div className="font-bold text-rose-400 text-sm">BiharBhumi</div>
+              <div className="text-[11px] text-slate-400">Bihar (DCLR/Jamabandi)</div>
+              <div className="text-[9px] text-emerald-400 font-mono font-semibold">● Real-Time API</div>
+            </Link>
+            <Link to="/search?state=Tamil+Nadu" className="bg-slate-800/80 hover:bg-slate-800 hover:border-teal-500/50 p-4 rounded-xl border border-slate-700 text-center space-y-1.5 transition-all">
+              <div className="font-bold text-teal-400 text-sm">Patta Chitta</div>
+              <div className="text-[11px] text-slate-400">Tamil Nadu (e-Services)</div>
+              <div className="text-[9px] text-emerald-400 font-mono font-semibold">● Real-Time API</div>
+            </Link>
           </div>
         </div>
       </section>

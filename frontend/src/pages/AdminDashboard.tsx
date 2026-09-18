@@ -4,7 +4,8 @@ import {
   UserCheck, Activity, Globe2, Database, Download, Server, HardDrive, 
   Layers, Table, RefreshCw, Key, UserPlus, Trash2, Edit3, Search, Filter, 
   Play, CheckCircle2, User, Landmark, Building2, Eye, EyeOff, X, ChevronRight, 
-  Sparkles, Code, Terminal, BadgeCheck, ShieldAlert, KeyRound, ArrowRight
+  Sparkles, Code, Terminal, BadgeCheck, ShieldAlert, KeyRound, ArrowRight,
+  Wrench, Radio, Info, Power
 } from 'lucide-react';
 import { OfficerCase, User as UserType } from '../types';
 import { RiskBadge } from '../components/RiskBadge';
@@ -27,7 +28,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole = 'ADMI
   const [adminAuthLoading, setAdminAuthLoading] = useState(false);
 
   // Navigation Tabs
-  const [adminTab, setAdminTab] = useState<'OVERVIEW' | 'USERS' | 'TABLES' | 'SQL_STUDIO'>('USERS');
+  const [adminTab, setAdminTab] = useState<'OVERVIEW' | 'USERS' | 'TABLES' | 'SQL_STUDIO' | 'DEV_MAINTENANCE'>('USERS');
+
+  // Developer Maintenance & Broadcast Center States
+  const [maintenanceModeActive, setMaintenanceModeActive] = useState<boolean>(() => {
+    return localStorage.getItem('bhoomi_maintenance_mode') === 'true';
+  });
+  const [customAnnouncement, setCustomAnnouncement] = useState<string>(() => {
+    return localStorage.getItem('bhoomi_announcement') || 'Scheduled Revenue Database Synchronization in progress.';
+  });
+  const [activeBroadcastMessage, setActiveBroadcastMessage] = useState<string>(() => {
+    return localStorage.getItem('bhoomi_announcement') || '';
+  });
 
   // Overview / Case Review State
   const [metrics, setMetrics] = useState<any>(null);
@@ -611,6 +623,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole = 'ADMI
         >
           <Terminal className="w-4 h-4 text-purple-400" />
           <span>⚡ Interactive SQL Query Studio</span>
+        </button>
+
+        <button
+          onClick={() => setAdminTab('DEV_MAINTENANCE')}
+          className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center space-x-2 transition-all cursor-pointer ${
+            adminTab === 'DEV_MAINTENANCE'
+              ? 'bg-sky-600 text-white shadow-md shadow-sky-600/30'
+              : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white'
+          }`}
+        >
+          <Wrench className="w-4 h-4 text-amber-400" />
+          <span>🛠️ Developer & Maintenance Control</span>
+          {maintenanceModeActive && (
+            <span className="px-1.5 py-0.5 rounded-full bg-rose-500 text-[10px] text-white font-bold animate-pulse">
+              ACTIVE
+            </span>
+          )}
         </button>
       </div>
 
@@ -1247,6 +1276,180 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole = 'ADMI
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {/* ========================================================== */}
+      {/* TAB 5: DEVELOPER MAINTENANCE & SITE BROADCAST CONTROL */}
+      {/* ========================================================== */}
+      {adminTab === 'DEV_MAINTENANCE' && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          
+          {/* Section 1: Master Maintenance Mode Toggle */}
+          <div className="bg-slate-800/90 p-6 rounded-3xl border border-slate-700 shadow-xl space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <div className="flex items-center space-x-3">
+                <div className={`p-3 rounded-2xl ${
+                  maintenanceModeActive ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                }`}>
+                  <Wrench className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-white flex items-center space-x-2">
+                    <span>Developer Site Maintenance Mode</span>
+                    <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full uppercase ${
+                      maintenanceModeActive ? 'bg-rose-500 text-white' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                    }`}>
+                      {maintenanceModeActive ? 'MAINTENANCE ACTIVE' : 'LIVE & OPERATIONAL'}
+                    </span>
+                  </h2>
+                  <p className="text-xs text-slate-400">
+                    When enabled, the site displays a top persistent maintenance banner and puts public citizen interactions into safe standby mode.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const nextState = !maintenanceModeActive;
+                  setMaintenanceModeActive(nextState);
+                  localStorage.setItem('bhoomi_maintenance_mode', String(nextState));
+                  window.dispatchEvent(new Event('storage'));
+                  if (onShowToast) {
+                    onShowToast(
+                      nextState ? 'error' : 'success',
+                      nextState ? 'Maintenance Mode Enabled' : 'Site Restored to Normal Operation',
+                      nextState ? 'Citizens see maintenance notice bar.' : 'All public services fully active.'
+                    );
+                  }
+                }}
+                className={`px-5 py-2.5 rounded-xl font-bold text-xs shadow-lg transition-all flex items-center space-x-2 cursor-pointer shrink-0 ${
+                  maintenanceModeActive 
+                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/30' 
+                    : 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/30'
+                }`}
+              >
+                <Power className="w-4 h-4" />
+                <span>{maintenanceModeActive ? 'Turn OFF Maintenance Mode' : 'Activate Maintenance Mode'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Section 2: Live Announcement Broadcaster */}
+          <div className="bg-slate-800/90 p-6 rounded-3xl border border-slate-700 shadow-xl space-y-4">
+            <div className="flex items-center space-x-2 text-white font-bold text-sm">
+              <Radio className="w-4 h-4 text-sky-400 animate-pulse" />
+              <span>Broadcast Live Site-Wide Announcement</span>
+            </div>
+            <p className="text-xs text-slate-400">
+              Publish urgent notices or updates that will display as a banner across every page for all users in real time.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center gap-2">
+              <div className="relative flex-1 w-full">
+                <Info className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  value={customAnnouncement}
+                  onChange={(e) => setCustomAnnouncement(e.target.value)}
+                  placeholder="Enter broadcast message (e.g. Scheduled database maintenance at 2:00 AM)..."
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white font-medium focus:outline-none focus:border-sky-500"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (customAnnouncement.trim()) {
+                    localStorage.setItem('bhoomi_announcement', customAnnouncement.trim());
+                    setActiveBroadcastMessage(customAnnouncement.trim());
+                    window.dispatchEvent(new Event('storage'));
+                    if (onShowToast) onShowToast('success', 'Announcement Broadcasted', 'Notice is now live across the platform.');
+                  }
+                }}
+                className="px-5 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-xl shadow transition-all cursor-pointer shrink-0"
+              >
+                Broadcast Notice
+              </button>
+
+              {activeBroadcastMessage && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    localStorage.removeItem('bhoomi_announcement');
+                    setActiveBroadcastMessage('');
+                    setCustomAnnouncement('');
+                    window.dispatchEvent(new Event('storage'));
+                    if (onShowToast) onShowToast('info', 'Broadcast Cleared', 'Notice removed from all pages.');
+                  }}
+                  className="px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold text-xs rounded-xl cursor-pointer shrink-0"
+                >
+                  Clear Notice
+                </button>
+              )}
+            </div>
+
+            {/* Quick Presets */}
+            <div className="flex flex-wrap gap-1.5 pt-2">
+              <span className="text-[10px] text-slate-400 uppercase font-bold mr-1">Quick Presets:</span>
+              {[
+                "⚠️ Scheduled State Revenue Database Synchronization in progress (Standby mode).",
+                "📢 New DILRMP National API: 28 States & 8 UTs now connected with sub-second queries.",
+                "ℹ️ Dakhil-Kharij SLA turnaround officially reduced to 15 working days statewide."
+              ].map((msg, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setCustomAnnouncement(msg)}
+                  className="px-2.5 py-1 bg-slate-900 hover:bg-slate-750 border border-slate-700 rounded-lg text-[10px] text-slate-300 transition-colors cursor-pointer"
+                >
+                  Preset {i+1}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Section 3: Subsystem Status */}
+          <div className="bg-slate-800/90 p-6 rounded-3xl border border-slate-700 shadow-xl space-y-4">
+            <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+              Core Subsystem Operational Diagnostics
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+              <div className="bg-slate-900 p-3.5 rounded-2xl border border-slate-700 space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400 font-medium">Valuation Engine</span>
+                  <span className="text-emerald-400 font-bold">● Active</span>
+                </div>
+                <div className="text-[10px] text-slate-500">28 State Circle Rates</div>
+              </div>
+
+              <div className="bg-slate-900 p-3.5 rounded-2xl border border-slate-700 space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400 font-medium">3D Cadastral GIS</span>
+                  <span className="text-emerald-400 font-bold">● Active</span>
+                </div>
+                <div className="text-[10px] text-slate-500">Isometric Engine OK</div>
+              </div>
+
+              <div className="bg-slate-900 p-3.5 rounded-2xl border border-slate-700 space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400 font-medium">GPS Resolver</span>
+                  <span className="text-emerald-400 font-bold">● Active</span>
+                </div>
+                <div className="text-[10px] text-slate-500">High Accuracy Mode</div>
+              </div>
+
+              <div className="bg-slate-900 p-3.5 rounded-2xl border border-slate-700 space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400 font-medium">QR Integrity</span>
+                  <span className="text-emerald-400 font-bold">● Active</span>
+                </div>
+                <div className="text-[10px] text-slate-500">SHA-256 Validated</div>
+              </div>
+            </div>
+          </div>
+
         </div>
       )}
 

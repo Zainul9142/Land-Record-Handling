@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { Navbar } from './components/Navbar';
+import { MaintenanceBanner } from './components/MaintenanceBanner';
 import { Footer } from './components/Footer';
 import { HomePage } from './pages/HomePage';
 import { LandSearchPage } from './pages/LandSearchPage';
@@ -38,6 +39,7 @@ export const App: React.FC = () => {
         <AuthProvider>
           <Router>
             <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+              <MaintenanceBanner />
               <Navbar />
 
               <main className="flex-1">

@@ -6,8 +6,13 @@ from pathlib import Path
 DB_PATH = Path(__file__).parent.parent.parent / "bhoomishield.db"
 
 def get_db_connection():
-    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+    conn = sqlite3.connect(DB_PATH, check_same_thread=False, timeout=10.0)
     conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode = WAL;")
+    conn.execute("PRAGMA synchronous = NORMAL;")
+    conn.execute("PRAGMA cache_size = -64000;")
+    conn.execute("PRAGMA temp_store = MEMORY;")
+    conn.execute("PRAGMA mmap_size = 268435456;")
     return conn
 
 def init_db():
@@ -312,6 +317,24 @@ def init_db():
         FOREIGN KEY (user_id) REFERENCES users(user_id)
     );
     """)
+
+    # Performance Secondary Indexes
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_parcels_identity ON land_parcels(land_identity_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_parcels_state_dist ON land_parcels(state, district);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_parcels_khata ON land_parcels(khata_no);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_parcels_khesra ON land_parcels(khesra_no);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_parcels_anchal_mauza ON land_parcels(anchal, mauza);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_register2_identity ON register2_records(land_identity_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_register2_owner ON register2_records(current_owner_name);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_khatian_identity ON khatian_records(land_identity_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_khatian_owner ON khatian_records(owner_name);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_mutations_identity ON mutations(land_identity_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_transactions_identity ON transactions(land_identity_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_court_cases_identity ON court_cases(land_identity_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_encumbrances_identity ON encumbrances(land_identity_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_reports_id ON verification_reports(report_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_docs_uid ON user_documents(user_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_props_uid ON user_properties(user_id);")
 
     conn.commit()
     seed_auth_and_vault_data(conn)

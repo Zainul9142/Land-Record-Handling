@@ -4,12 +4,13 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme, ThemeMode } from '../context/ThemeContext';
 import { SupportedLanguage } from '../i18n/translations';
+import { UserProfileModal } from './UserProfileModal';
 import { 
   ShieldCheck, Search, Lock, Languages, UserCheck, Scale, 
   ShieldAlert, Menu, X, Globe2, FolderLock, Landmark, 
   LogIn, LogOut, User as UserIcon, ChevronDown, Calculator, Database,
   Sparkles, Compass, FileCheck, Layers, Grid, ArrowRight, ExternalLink, BadgeCheck, FileText,
-  Palette, Sun, Moon
+  Palette, Sun, Moon, Settings, Edit3
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -24,6 +25,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
   const [menuDrawerOpen, setMenuDrawerOpen] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
   const { user, isAuthenticated, isOfficial, isAdmin, logout } = useAuth();
   const { lang, setLang, t, currentLangInfo, languages } = useLanguage();
   const { theme, setTheme, currentThemeInfo, themes } = useTheme();
@@ -137,15 +139,22 @@ export const Navbar: React.FC<NavbarProps> = () => {
               )}
             </div>
 
-            {/* Quick Auth Status */}
+            {/* Quick Auth Status & User Profile Trigger */}
             {isAuthenticated && user ? (
-              <div className="hidden sm:flex items-center space-x-2 bg-slate-900/80 px-2.5 py-0.5 rounded-lg border border-slate-800 text-slate-300">
-                <img
-                  src={user.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=40'}
-                  alt={user.full_name}
-                  className="w-4 h-4 rounded-full object-cover"
-                />
-                <span className="text-[11px] font-bold text-white max-w-[120px] truncate">{user.full_name}</span>
+              <div className="hidden sm:flex items-center space-x-2 bg-slate-900/90 px-2.5 py-1 rounded-lg border border-slate-800 text-slate-300">
+                <button
+                  onClick={() => setProfileModalOpen(true)}
+                  className="flex items-center space-x-2 hover:text-white transition-colors cursor-pointer group"
+                  title="Click to view & edit your profile details"
+                >
+                  <img
+                    src={user.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=40'}
+                    alt={user.full_name}
+                    className="w-4 h-4 rounded-full object-cover ring-1 ring-sky-400 group-hover:scale-110 transition-transform"
+                  />
+                  <span className="text-[11px] font-bold text-white max-w-[120px] truncate">{user.full_name}</span>
+                  <Edit3 className="w-2.5 h-2.5 text-sky-400 opacity-70 group-hover:opacity-100" />
+                </button>
                 <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded uppercase ${
                   isAdmin ? 'bg-purple-950 text-purple-300 border border-purple-800' : isOfficial ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-sky-950 text-sky-400 border border-sky-800'
                 }`}>
@@ -198,17 +207,14 @@ export const Navbar: React.FC<NavbarProps> = () => {
               </span>
             </button>
 
-            {/* Platform Logo & Pan-India Badge (Cleaned - without redundant subtitle) */}
+            {/* Platform Logo & DILRMP National Layer Badge */}
             <Link to="/" onClick={closeMenuDrawer} className="flex items-center space-x-2.5 group">
               <div className="p-2 bg-gradient-to-tr from-sky-600 to-indigo-600 rounded-xl shadow-lg group-hover:scale-105 transition-transform">
                 <ShieldCheck className="w-5 h-5 text-white" />
               </div>
-              <div className="flex items-center space-x-2">
-                <span className="font-extrabold text-xl tracking-tight text-white">BhoomiShield</span>
-                <span className="text-[10px] uppercase font-bold bg-sky-500/20 text-sky-400 px-1.5 py-0.5 rounded border border-sky-500/30 flex items-center space-x-1">
-                  <Globe2 className="w-2.5 h-2.5" />
-                  <span>Pan-India V3.0</span>
-                </span>
+              <div className="flex flex-col">
+                <span className="font-extrabold text-lg sm:text-xl tracking-tight text-white leading-tight">BhoomiShield</span>
+                <span className="text-[9px] font-semibold text-sky-400 tracking-wider uppercase">DILRMP National Layer</span>
               </div>
             </Link>
           </div>
@@ -216,19 +222,6 @@ export const Navbar: React.FC<NavbarProps> = () => {
           {/* Desktop Right Quick Actions */}
           <div className="flex items-center space-x-2 sm:space-x-3">
             
-            {/* Quick Overview Link */}
-            <Link
-              to="/"
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all hidden md:flex items-center space-x-1.5 ${
-                location.pathname === '/' || location.pathname === '/overview'
-                  ? 'bg-sky-600/30 text-sky-300 border border-sky-500/50'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white border border-transparent'
-              }`}
-            >
-              <Globe2 className="w-3.5 h-3.5 text-sky-400" />
-              <span>{isEn ? "Overview" : "अवलोकन"}</span>
-            </Link>
-
             {/* Quick Land Search Link */}
             <Link
               to="/search"
@@ -255,24 +248,38 @@ export const Navbar: React.FC<NavbarProps> = () => {
               <span>{isEn ? "My Vault" : "मेरी वॉल्ट"}</span>
             </Link>
 
-            {/* Account / Login Pill */}
+            {/* Account / User Profile Pill */}
             {!isAuthenticated ? (
               <Link
                 to="/login"
-                className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center space-x-1.5 shadow-md shadow-sky-600/20"
+                className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center space-x-1.5 shadow-md shadow-sky-600/20 cursor-pointer"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>{isEn ? "Sign In" : "लॉग इन"}</span>
               </Link>
             ) : (
-              <Link
-                to="/login"
-                className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center space-x-1.5 border border-slate-700"
-                title="Switch Persona / Accounts"
-              >
-                <UserIcon className="w-3.5 h-3.5 text-sky-400" />
-                <span>Switch</span>
-              </Link>
+              <div className="flex items-center space-x-1.5">
+                <button
+                  onClick={() => setProfileModalOpen(true)}
+                  className="px-3 py-1.5 rounded-xl bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 border border-sky-500/40 text-xs font-bold flex items-center space-x-2 transition-all cursor-pointer shadow-sm"
+                  title="Manage Profile & Security Settings"
+                >
+                  <img
+                    src={user?.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=40'}
+                    alt="Profile"
+                    className="w-4 h-4 rounded-full object-cover"
+                  />
+                  <span>{user?.full_name?.split(' ')[0] || 'Profile'}</span>
+                  <Settings className="w-3 h-3 text-sky-400" />
+                </button>
+                <Link
+                  to="/login"
+                  className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 transition-colors"
+                  title="Switch Persona Account"
+                >
+                  <UserIcon className="w-3.5 h-3.5" />
+                </Link>
+              </div>
             )}
           </div>
         </div>
@@ -525,6 +532,12 @@ export const Navbar: React.FC<NavbarProps> = () => {
           </div>
         </div>
       )}
+
+      {/* User Profile & Account Settings Modal */}
+      <UserProfileModal
+        isOpen={profileModalOpen}
+        onClose={() => setProfileModalOpen(false)}
+      />
     </>
   );
 };

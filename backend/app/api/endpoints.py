@@ -194,11 +194,17 @@ def live_official_portal_search(
     pl_val = plot_no or khesra
     return fetch_live_official_records(state, district, sub_val, vil_val, p_val, pl_val, owner)
 
+_CACHED_LOCATIONS = None
+
 @router.get("/land/locations")
 def get_locations():
     """
-    Returns Pan-India geographic hierarchy, state-specific portals, and localized field terminology.
+    Returns Pan-India geographic hierarchy, state-specific portals, and localized field terminology with in-memory caching.
     """
+    global _CACHED_LOCATIONS
+    if _CACHED_LOCATIONS is not None:
+        return _CACHED_LOCATIONS
+
     # Build complete state map
     states_dict = {}
     for st_name, st_info in PAN_INDIA_DATA.items():
@@ -213,10 +219,10 @@ def get_locations():
         for dist_name, dist_info in st_info["districts"].items():
             states_dict[st_name]["districts"][dist_name] = dist_info["subdistricts"]
             
-    # Also fetch any dynamic districts in database
+    # Also fetch dynamic districts in database
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT DISTINCT state, district, anchal, mauza FROM land_parcels LIMIT 2000")
+    cursor.execute("SELECT DISTINCT state, district, anchal, mauza FROM land_parcels")
     rows = cursor.fetchall()
     conn.close()
     
@@ -229,11 +235,12 @@ def get_locations():
         if a not in db_loc_map[st][d]: db_loc_map[st][d][a] = []
         if m not in db_loc_map[st][d][a]: db_loc_map[st][d][a].append(m)
 
-    return {
+    _CACHED_LOCATIONS = {
         "states": list(states_dict.keys()),
         "state_metadata": states_dict,
         "db_locations": db_loc_map
     }
+    return _CACHED_LOCATIONS
 
 @router.get("/land/search")
 def search_land(
