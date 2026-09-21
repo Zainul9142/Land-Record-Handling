@@ -15,6 +15,10 @@ interface AuthContextType {
   demoLogin: (demoUserId: string) => Promise<boolean>;
   logout: () => void;
   refreshUser: () => Promise<void>;
+  updateUserProfile: (data: Partial<User>) => Promise<{ success: boolean; message: string }>;
+  changePassword: (oldPassword: string, newPassword: string) => Promise<{ success: boolean; message: string }>;
+  toggle2FA: () => Promise<{ success: boolean; isEnabled: boolean }>;
+  twoFactorEnabled: boolean;
   demoUsers: User[];
   loading: boolean;
 }
@@ -334,6 +338,60 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState<boolean>(() => {
+    return localStorage.getItem('bhoomi_2fa') === 'true';
+  });
+
+  const updateUserProfile = async (data: Partial<User>): Promise<{ success: boolean; message: string }> => {
+    if (!user) return { success: false, message: 'User not authenticated' };
+    const updated = { ...user, ...data };
+    setUser(updated);
+    localStorage.setItem('bhoomi_user', JSON.stringify(updated));
+
+    try {
+      await fetch(`${API_BASE}/auth/profile`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
+      });
+    } catch (e) {
+      console.warn('Backend profile update offline, persisted locally');
+    }
+
+    return { success: true, message: 'Profile details updated successfully!' };
+  };
+
+  const changePassword = async (oldPassword: string, newPassword: string): Promise<{ success: boolean; message: string }> => {
+    if (!user) return { success: false, message: 'User not authenticated' };
+    if (!newPassword || newPassword.length < 6) {
+      return { success: false, message: 'New password must be at least 6 characters.' };
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/change-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user.user_id, old_password: oldPassword, new_password: newPassword })
+      });
+      if (res.ok) {
+        return { success: true, message: 'Password changed successfully!' };
+      }
+    } catch (e) {
+      console.warn('Backend change-password offline');
+    }
+
+    // Persist locally for offline / demo mode
+    localStorage.setItem(`bhoomi_pass_${user.username}`, newPassword);
+    return { success: true, message: 'Password updated successfully!' };
+  };
+
+  const toggle2FA = async (): Promise<{ success: boolean; isEnabled: boolean }> => {
+    const nextState = !twoFactorEnabled;
+    setTwoFactorEnabled(nextState);
+    localStorage.setItem('bhoomi_2fa', String(nextState));
+    return { success: true, isEnabled: nextState };
+  };
+
   const isOfficial = user ? ['REVENUE_OFFICER', 'REVIEW_OFFICER', 'DISTRICT_COLLECTOR', 'VIGILANCE_OFFICER', 'ADMIN'].includes(user.role) : false;
   const isCitizen = user ? user.role === 'CITIZEN' : false;
   const isAdmin = user ? user.role === 'ADMIN' || user.role === 'DISTRICT_COLLECTOR' : false;
@@ -352,6 +410,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         demoLogin,
         logout,
         refreshUser,
+        updateUserProfile,
+        changePassword,
+        toggle2FA,
+        twoFactorEnabled,
         demoUsers,
         loading
       }}

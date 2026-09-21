@@ -170,6 +170,8 @@ def add_to_vault(req: VaultAddItemRequest):
     conn.close()
     return {"status": "SUCCESS", "message": f"Document '{req.document_title}' saved to My Bhoomi Vault."}
 
+_CACHED_LOCATIONS = None
+
 @router.get("/land/locations")
 def get_locations():
     conn = get_db_connection()

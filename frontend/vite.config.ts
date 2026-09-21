@@ -25,12 +25,23 @@ export default defineConfig({
       },
     },
   },
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom', 'lucide-react', 'leaflet', 'react-leaflet', 'recharts']
+  },
   server: {
     port: 5173,
+    host: '0.0.0.0',
+    strictPort: true,
+    cors: true,
+    allowedHosts: true,
+    hmr: {
+      overlay: false,
+    },
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://127.0.0.1:8000',
         changeOrigin: true,
+        secure: false,
       },
     },
   },

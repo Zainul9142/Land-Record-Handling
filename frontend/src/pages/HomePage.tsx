@@ -42,6 +42,9 @@ export const HomePage: React.FC<HomePageProps> = ({ lang }) => {
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight animate-slide-up">
             Digital India Land Records Modernization Programme (DILRMP)
           </h1>
+          <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
+            {t('hero_subtitle', 'Instant unified access to 7/12 Extracts, Khatauni RoR, RTC Pahani, Patta Chitta, and AI mutation fraud prevention across all 28 Indian States & 8 UTs.')}
+          </p>
 
           {/* DILRMP Subtitle */}
           <p className="text-base sm:text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">

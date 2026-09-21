@@ -3,6 +3,11 @@
 > **BhoomiShield Pan-India Land Governance & Risk Intelligence Platform**  
 > *Verify Land Records • Detect Cross-Layer Risk • Grounded AI Legal Advice • QR Certified Verification Reports*
 
+[![Deploy to Netlify](https://img.shields.io/badge/Deploy-Netlify-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://app.netlify.com)
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
+
 ---
 
 ## 🌟 Overview
@@ -84,6 +89,19 @@ pip install -r requirements.txt
 python -m app.main
 ```
 *Backend API runs at `http://localhost:8000` (Swagger UI at `http://localhost:8000/docs`)*
+
+---
+
+## 🌐 Deploy to Netlify
+
+BhoomiShield frontend is ready for 1-click Netlify deployment with pre-configured `netlify.toml` and client-side simulation modes for instant demonstration:
+
+1. Import your GitHub repository (`Land-Record-Handling`) into [Netlify](https://app.netlify.com).
+2. Netlify will auto-detect the configuration from `netlify.toml`:
+   - **Base directory:** `frontend`
+   - **Build command:** `npm run build`
+   - **Publish directory:** `frontend/dist`
+3. Click **"Deploy Site"**. The full responsive React + Leaflet 3D GIS platform will build and deploy in seconds!
 
 ---
 

@@ -1,6 +1,7 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.api.endpoints import router
@@ -12,6 +13,9 @@ app = FastAPI(
     description="Unified land identity, record consistency engine, risk scoring, grounded AI assistant, and QR report verification for Jharkhand.",
     version="1.0"
 )
+
+# Enable GZIP compression for high responsiveness
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # CORS middleware for React frontend
 app.add_middleware(
