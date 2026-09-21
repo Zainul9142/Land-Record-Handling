@@ -1,6 +1,6 @@
 # BhoomiShield — Real-Time Land Record & Legal AI Intelligence Platform
 
-> **SIH (Smart India Hackathon) Innovation Layer for Jharkhand Revenue & Land Reforms Department**  
+  
 > *Verify Land Records • Detect Cross-Layer Risk • Grounded AI Legal Advice • QR Certified Verification Reports*
 
 [![Deploy to Netlify](https://img.shields.io/badge/Deploy-Netlify-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://app.netlify.com)
