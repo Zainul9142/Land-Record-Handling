@@ -26,32 +26,25 @@ export const HomePage: React.FC<HomePageProps> = ({ lang }) => {
 
   return (
     <div className="space-y-12 pb-16 transition-colors duration-300">
-      {/* Hero Section — DILRMP Pan-India National Layer (Matches Screenshot 1) */}
+      {/* Hero Section — DILRMP Pan-India National Layer */}
       <section className="relative bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white pt-12 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden rounded-b-3xl shadow-2xl border-b border-slate-800">
         <div className="absolute top-0 right-0 -mt-12 -mr-12 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 -mb-12 -ml-12 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="max-w-5xl mx-auto text-center space-y-6 relative z-10">
-          {/* Top Badge */}
           <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-semibold animate-pulse">
             <Globe className="w-4 h-4 text-sky-400" />
             <span>Digital India Land Records Modernization Programme (DILRMP) • 28 States & 8 UTs National Layer</span>
           </div>
 
-          {/* DILRMP Title */}
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight animate-slide-up">
             Digital India Land Records Modernization Programme (DILRMP)
           </h1>
-          <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            {t('hero_subtitle', 'Instant unified access to 7/12 Extracts, Khatauni RoR, RTC Pahani, Patta Chitta, and AI mutation fraud prevention across all 28 Indian States & 8 UTs.')}
-          </p>
 
-          {/* DILRMP Subtitle */}
           <p className="text-base sm:text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">
             Instant unified access to 7/12 Extracts, Khatauni RoR, RTC Pahani, Patta Chitta, and AI mutation fraud prevention across all 28 Indian States & 8 UTs.
           </p>
 
-          {/* Universal Pan-India Search Box Card */}
           <div className="max-w-3xl mx-auto bg-slate-800/90 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-slate-700 shadow-2xl space-y-4">
             <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row items-center gap-2">
               <div className="relative flex-1 w-full">
@@ -73,7 +66,6 @@ export const HomePage: React.FC<HomePageProps> = ({ lang }) => {
               </button>
             </form>
 
-            {/* Quick State Chips (Matches Screenshot 1) */}
             <div className="pt-2 border-t border-slate-700/60 flex flex-wrap items-center justify-center gap-2 text-xs">
               <span className="text-slate-400 font-semibold text-[11px] flex items-center space-x-1">
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
