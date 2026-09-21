@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { CheckCircle2, XCircle, QrCode, ShieldCheck, MapPin, Download } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, AlertTriangle, FileText, Download, ArrowRight, Lock, Calendar, Layers } from 'lucide-react';
 import { RiskBadge } from '../components/RiskBadge';
 
 export const ReportVerificationPage: React.FC = () => {
@@ -8,152 +8,146 @@ export const ReportVerificationPage: React.FC = () => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const getFallbackReportData = (repId: string) => {
-    return {
-      verified: true,
-      status: "VERIFIED",
-      report_id: repId || "BS-2026-1001",
-      land_identity_id: "UP-GAU-DAD-BHAN-P340-PL112-1",
-      state: "Uttar Pradesh",
-      district: "Gautam Buddha Nagar",
-      anchal: "Dadri",
-      mauza: "Bhangel",
-      khata_no: "340",
-      khesra_no: "112/1",
-      area_acre: 0.50,
-      risk_score: 12,
-      risk_level: "LOW",
-      findings_count: 0,
-      generated_at: new Date().toISOString().slice(0, 10),
-      report_hash: "a4f81c9703d15a9bc8f4204d1efc5357876a3bdc20e5c9b2075591bf0946b5a3"
-    };
-  };
-
   useEffect(() => {
-    if (!reportId) return;
-    setLoading(true);
-
-    fetch(`/api/v1/reports/verify/${encodeURIComponent(reportId)}`)
-      .then(res => res.json())
-      .then(resData => {
-        if (resData && resData.verified) {
-          setData(resData);
-        } else {
-          setData(getFallbackReportData(reportId));
-        }
-        setLoading(false);
-      })
-      .catch(() => {
-        setData(getFallbackReportData(reportId));
-        setLoading(false);
-      });
+    if (reportId) {
+      fetch(`/api/v1/reports/verify/${reportId}`)
+        .then(res => res.json())
+        .then(d => {
+          setData(d);
+          setLoading(false);
+        })
+        .catch(err => {
+          console.error("Report verification failed", err);
+          setLoading(false);
+        });
+    }
   }, [reportId]);
 
   if (loading) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-16 text-center space-y-3">
-        <div className="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-        <p className="text-xs text-slate-500 font-medium">Verifying report cryptographic hash against BhoomiShield ledger...</p>
+      <div className="max-w-3xl mx-auto py-20 text-center space-y-3">
+        <div className="w-8 h-8 border-3 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <p className="text-xs text-slate-500">Verifying SHA-256 report signature ledger...</p>
       </div>
     );
   }
 
   if (!data || !data.verified) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-16 text-center space-y-4">
-        <XCircle className="w-16 h-16 text-rose-500 mx-auto" />
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Report Integrity Failed</h1>
-        <p className="text-xs text-slate-500">
-          Report ID '{reportId}' was not issued by BhoomiShield or has expired/been revoked.
-        </p>
+      <div className="max-w-2xl mx-auto py-16 px-4 text-center space-y-6">
+        <div className="w-16 h-16 bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto border border-rose-500/30">
+          <AlertTriangle className="w-8 h-8" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">Report Verification Failed</h1>
+          <p className="text-xs text-slate-600 dark:text-slate-400">
+            {data?.message || `Report ID '${reportId}' was not issued by BhoomiShield or has been revoked.`}
+          </p>
+        </div>
+        <Link to="/" className="inline-block px-5 py-2.5 bg-sky-600 text-white font-bold text-xs rounded-xl shadow">
+          Return to Portal Home
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-10 space-y-6">
-      {/* Verification Card Header */}
-      <div className="bg-emerald-900 text-white p-8 rounded-3xl shadow-xl space-y-4 text-center border border-emerald-700 relative overflow-hidden">
-        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-emerald-500/20 rounded-full blur-2xl"></div>
-
-        <div className="w-16 h-16 bg-white text-emerald-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
-          <CheckCircle2 className="w-10 h-10" />
+    <div className="max-w-4xl mx-auto px-4 py-10 space-y-8 transition-colors duration-300">
+      {/* Verification Header Banner */}
+      <div className="bg-gradient-to-r from-emerald-600 to-teal-700 text-white p-8 rounded-3xl shadow-xl text-center space-y-3 relative overflow-hidden">
+        <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto shadow-inner">
+          <CheckCircle2 className="w-10 h-10 text-white" />
         </div>
 
-        <div className="space-y-1">
-          <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-emerald-950 text-emerald-300 text-xs font-bold rounded-full border border-emerald-500/40">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>AUTHENTIC REPORT VERIFIED</span>
-          </div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Report ID #{data.report_id}</h1>
-          <p className="text-xs text-emerald-200">
-            Issued on {data.generated_at} • Data Snapshot Verified
-          </p>
+        <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-white/20 rounded-full text-xs font-bold text-emerald-100">
+          <ShieldCheck className="w-4 h-4 text-emerald-200" />
+          <span>AUTHENTIC REPORT VERIFIED</span>
         </div>
+
+        <h1 className="text-3xl font-extrabold tracking-tight">
+          Report ID #{data.report_id}
+        </h1>
+
+        <p className="text-xs text-emerald-100 font-mono">
+          Issued on {data.generated_at} • Data Snapshot Verified
+        </p>
       </div>
 
-      {/* Verified Record Details Table */}
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-md space-y-6">
-        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+      {/* Verified Details Card */}
+      <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl space-y-6 transition-colors">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-200 dark:border-slate-800 pb-4">
           <div>
-            <span className="text-[11px] text-slate-400 block uppercase font-bold">Verified Land Identity ID</span>
-            <Link to={`/land/${data.land_identity_id}`} className="font-mono text-sm font-bold text-sky-600 dark:text-sky-400 hover:underline">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">VERIFIED LAND IDENTITY ID</span>
+            <Link
+              to={`/land/${data.land_identity_id}`}
+              className="text-base font-bold text-sky-600 dark:text-sky-400 font-mono hover:underline"
+            >
               {data.land_identity_id}
             </Link>
           </div>
-          <RiskBadge level={data.risk_level} score={data.risk_score} size="md" />
+
+          <RiskBadge level={data.risk_level} score={data.risk_score} size="lg" />
         </div>
 
+        {/* Parcel Specs Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
-          <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
-            <span className="text-slate-400 block text-[10px]">District</span>
-            <span className="font-bold text-slate-900 dark:text-white">{data.district}</span>
+          <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700/60">
+            <span className="text-slate-500 dark:text-slate-400 block text-[11px]">District</span>
+            <span className="font-bold text-slate-900 dark:text-white text-sm">{data.district}</span>
           </div>
 
-          <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
-            <span className="text-slate-400 block text-[10px]">Anchal</span>
-            <span className="font-bold text-slate-900 dark:text-white">{data.anchal}</span>
+          <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700/60">
+            <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Anchal</span>
+            <span className="font-bold text-slate-900 dark:text-white text-sm">{data.anchal}</span>
           </div>
 
-          <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
-            <span className="text-slate-400 block text-[10px]">Mauza</span>
-            <span className="font-bold text-slate-900 dark:text-white">{data.mauza}</span>
+          <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700/60">
+            <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Mauza</span>
+            <span className="font-bold text-slate-900 dark:text-white text-sm">{data.mauza}</span>
           </div>
 
-          <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
-            <span className="text-slate-400 block text-[10px]">Khata No</span>
-            <span className="font-bold text-slate-900 dark:text-white">#{data.khata_no}</span>
+          <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700/60">
+            <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Khata No</span>
+            <span className="font-bold text-slate-900 dark:text-white text-sm">#{data.khata_no}</span>
           </div>
 
-          <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
-            <span className="text-slate-400 block text-[10px]">Khesra No</span>
-            <span className="font-bold text-slate-900 dark:text-white">#{data.khesra_no}</span>
+          <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700/60">
+            <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Khesra No</span>
+            <span className="font-bold text-slate-900 dark:text-white text-sm">#{data.khesra_no}</span>
           </div>
 
-          <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
-            <span className="text-slate-400 block text-[10px]">Area</span>
-            <span className="font-bold text-sky-600 dark:text-sky-400">{data.area_acre} Acres</span>
+          <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700/60">
+            <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Area</span>
+            <span className="font-bold text-sky-600 dark:text-sky-400 text-sm">{data.area_acre} Acres</span>
           </div>
         </div>
 
-        <div className="bg-slate-900 text-slate-300 p-4 rounded-2xl text-xs space-y-2 font-mono">
-          <div className="text-slate-400 uppercase text-[10px] font-bold">Cryptographic Report Signature:</div>
-          <div className="break-all text-sky-400 bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+        {/* Cryptographic Report Signature Card (Fixed for Light & Dark, Screenshot 2) */}
+        <div className="bg-slate-100 dark:bg-slate-950 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2 text-xs transition-colors">
+          <span className="font-mono text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold block">
+            CRYPTOGRAPHIC REPORT SIGNATURE :
+          </span>
+          <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 font-mono text-[11px] text-sky-600 dark:text-sky-400 break-all select-all">
             SHA-256: {data.report_hash}
           </div>
         </div>
 
-        <div className="flex items-center justify-between text-xs pt-2">
-          <Link to={`/land/${data.land_identity_id}`} className="text-sky-600 dark:text-sky-400 font-semibold hover:underline">
-            View Live Land Profile →
+        {/* Action Buttons */}
+        <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-200 dark:border-slate-800">
+          <Link
+            to={`/land/${data.land_identity_id}`}
+            className="w-full sm:w-auto px-5 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs rounded-xl transition-colors flex items-center justify-center space-x-2"
+          >
+            <span>View Live Land Profile</span>
+            <ArrowRight className="w-4 h-4" />
           </Link>
+
           <a
             href={`/api/v1/reports/download/${data.report_id}`}
-            target="_blank"
-            rel="noreferrer"
-            className="px-4 py-2 bg-sky-600 text-white font-bold rounded-lg shadow hover:bg-sky-500 flex items-center space-x-1.5"
+            download
+            className="w-full sm:w-auto px-6 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-xl shadow transition-colors flex items-center justify-center space-x-2"
           >
-            <Download className="w-3.5 h-3.5" />
+            <Download className="w-4 h-4" />
             <span>Download Certified PDF</span>
           </a>
         </div>

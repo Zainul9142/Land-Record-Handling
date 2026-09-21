@@ -81,7 +81,7 @@ def create_bhoomishield_pptx():
     # Bottom info box
     b_box = slide1.shapes.add_textbox(Inches(1.0), Inches(6.0), Inches(11.333), Inches(0.8))
     p_b = b_box.text_frame.paragraphs[0]
-    p_b.text = "SIH 2026 / Government Pilot Prototype • Version 2.0 • Real-Time Scraper, AI Legal Advisor & 3D Cadastral Mapping"
+    p_b.text = "Government Pilot Prototype • Version 2.0 • Real-Time Scraper, AI Legal Advisor & 3D Cadastral Mapping"
     p_b.font.size = Pt(11)
     p_b.font.color.rgb = COLOR_ACCENT
 
@@ -382,7 +382,7 @@ def create_bhoomishield_pptx():
     # --- SLIDE 11: Demo Case Study (Chas, Bokaro) ---
     slide11 = prs.slides.add_slide(blank_slide_layout)
     set_slide_background(slide11)
-    add_header(slide11, "3-Minute End-to-End Demo Case Study (Chas, Bokaro)", "SIH DEMONSTRATION STORY")
+    add_header(slide11, "3-Minute End-to-End Demo Case Study (Chas, Bokaro)", "DEMONSTRATION STORY")
     
     steps = [
         ("Step 1: Search", "User searches District Bokaro → Anchal Chas → Khata #125 / Khesra #450/2."),
@@ -407,10 +407,10 @@ def create_bhoomishield_pptx():
         p_t.font.bold = True
         p_t.font.color.rgb = COLOR_TEXT_MAIN
 
-    # --- SLIDE 12: Conclusion & SIH Impact ---
+    # --- SLIDE 12: Conclusion & Platform Impact ---
     slide12 = prs.slides.add_slide(blank_slide_layout)
     set_slide_background(slide12)
-    add_header(slide12, "Summary & SIH Prototype Achievements", "CONCLUSION")
+    add_header(slide12, "Summary & Prototype Achievements", "CONCLUSION")
     
     box12 = slide12.shapes.add_textbox(Inches(1.0), Inches(2.0), Inches(11.333), Inches(4.5))
     tf12 = box12.text_frame
@@ -443,7 +443,7 @@ def create_bhoomishield_pptx():
     p_c4.font.bold = True
     p_c4.font.color.rgb = COLOR_TEXT_MAIN
 
-    output_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "BhoomiShield_SIH_Presentation.pptx")
+    output_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "BhoomiShield_Presentation.pptx")
     prs.save(output_path)
     print(f"Presentation saved successfully to: {output_path}")
 

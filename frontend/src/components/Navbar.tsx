@@ -1,532 +1,115 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useLanguage } from '../context/LanguageContext';
-import { useTheme, ThemeMode } from '../context/ThemeContext';
-import { SupportedLanguage } from '../i18n/translations';
-import { 
-  ShieldCheck, Search, Lock, Languages, UserCheck, Scale, 
-  ShieldAlert, Menu, X, Globe2, FolderLock, Landmark, 
-  LogIn, LogOut, User as UserIcon, ChevronDown, Calculator, Database,
-  Sparkles, Compass, FileCheck, Layers, Grid, ArrowRight, ExternalLink, BadgeCheck, FileText,
-  Palette, Sun, Moon
-} from 'lucide-react';
+import { ShieldCheck, Search, Briefcase, Menu, Sun, Moon, Languages, UserCheck, Sparkles, User } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 interface NavbarProps {
-  lang?: string;
-  setLang?: (l: any) => void;
-  userRole?: string;
-  setUserRole?: (role: string) => void;
+  lang: 'en' | 'hi';
+  setLang: (l: 'en' | 'hi') => void;
+  userRole: string;
+  setUserRole: (role: string) => void;
+  onOpenMenuDrawer: () => void;
+  onOpenAuthModal: () => void;
+  onReplayIntro?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = () => {
+export const Navbar: React.FC<NavbarProps> = ({ lang, setLang, userRole, setUserRole, onOpenMenuDrawer, onOpenAuthModal, onReplayIntro }) => {
   const location = useLocation();
-  const [menuDrawerOpen, setMenuDrawerOpen] = useState(false);
-  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
-  const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
-  const { user, isAuthenticated, isOfficial, isAdmin, logout } = useAuth();
-  const { lang, setLang, t, currentLangInfo, languages } = useLanguage();
-  const { theme, setTheme, currentThemeInfo, themes } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const isEn = lang === 'en';
 
-  const toggleMenuDrawer = () => setMenuDrawerOpen(!menuDrawerOpen);
-  const closeMenuDrawer = () => setMenuDrawerOpen(false);
-
   return (
-    <>
-      <header className="sticky top-0 z-40 bg-slate-900 text-white shadow-md border-b border-slate-800">
-        {/* Top Govt Bar */}
-        <div className="bg-slate-950 px-4 py-1 text-xs border-b border-slate-800 text-slate-400 flex justify-end items-center">
-          
-          <div className="flex items-center space-x-2.5 shrink-0">
-            {/* 🎨 Theme Selector Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => {
-                  setThemeDropdownOpen(!themeDropdownOpen);
-                  setLangDropdownOpen(false);
-                }}
-                className="flex items-center space-x-1.5 hover:text-sky-400 transition-colors text-slate-200 font-semibold bg-slate-900/90 border border-slate-700/80 px-2 py-0.5 rounded-lg text-xs cursor-pointer"
-                title="Change Color Theme (Dark, Light, Emerald Bhoomi, Cyber)"
-              >
-                <span>{currentThemeInfo.icon}</span>
-                <span className="hidden sm:inline">{currentThemeInfo.name}</span>
-                <ChevronDown className="w-3 h-3 text-slate-400" />
-              </button>
+    <header className="sticky top-0 z-50 transition-colors duration-300 bg-slate-950 text-white shadow-xl border-b border-slate-800">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        
+        {/* Left Side: Menu 11+ Button & Brand Logo */}
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={onOpenMenuDrawer}
+            className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-white font-extrabold text-xs flex items-center space-x-2 transition-all hover:scale-105 shadow-md"
+          >
+            <Menu className="w-4 h-4 text-sky-400" />
+            <span>Menu</span>
+            <span className="text-[10px] font-bold bg-sky-500/20 text-sky-300 px-1.5 py-0.2 rounded border border-sky-500/30">
+              11+
+            </span>
+          </button>
 
-              {themeDropdownOpen && (
-                <div 
-                  className="absolute right-0 mt-1 w-64 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 py-1.5 divide-y divide-slate-800"
-                  onMouseLeave={() => setThemeDropdownOpen(false)}
-                >
-                  <div className="px-3 py-1 text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center space-x-1.5">
-                    <Palette className="w-3.5 h-3.5 text-sky-400" />
-                    <span>Select Color Theme (4)</span>
-                  </div>
-                  <div className="py-1">
-                    {themes.map((th) => (
-                      <button
-                        key={th.id}
-                        onClick={() => {
-                          setTheme(th.id);
-                          setThemeDropdownOpen(false);
-                        }}
-                        className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-800 transition-colors ${
-                          theme === th.id ? 'bg-sky-950/80 text-sky-400 font-bold' : 'text-slate-300'
-                        }`}
-                      >
-                        <div className="flex items-center space-x-2.5">
-                          <span className="text-base">{th.icon}</span>
-                          <div>
-                            <span className="block font-semibold">{th.name} ({th.nativeName})</span>
-                            <span className="text-[10px] text-slate-400 font-normal">{th.description}</span>
-                          </div>
-                        </div>
-                        {theme === th.id && <span className="text-sky-400 font-bold">✓</span>}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+          <Link to="/" className="flex items-center space-x-2.5 group">
+            <div className="p-2 bg-gradient-to-tr from-sky-600 to-indigo-600 rounded-xl shadow-md group-hover:scale-105 transition-transform">
+              <ShieldCheck className="w-5 h-5 text-white" />
             </div>
-
-            {/* 11 Indian Languages Dropdown Selector */}
-            <div className="relative">
-              <button
-                onClick={() => {
-                  setLangDropdownOpen(!langDropdownOpen);
-                  setThemeDropdownOpen(false);
-                }}
-                className="flex items-center space-x-1.5 hover:text-sky-400 transition-colors text-slate-200 font-semibold bg-slate-900/90 border border-slate-700/80 px-2 py-0.5 rounded-lg text-xs cursor-pointer"
-                title="Change Language across 11 Indian Languages"
-              >
-                <span>{currentLangInfo.flag}</span>
-                <span>{currentLangInfo.nativeName}</span>
-                <ChevronDown className="w-3 h-3 text-slate-400" />
-              </button>
-
-              {langDropdownOpen && (
-                <div 
-                  className="absolute right-0 mt-1 w-56 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 py-1.5 divide-y divide-slate-800 max-h-80 overflow-y-auto"
-                  onMouseLeave={() => setLangDropdownOpen(false)}
-                >
-                  <div className="px-3 py-1 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-                    Select Regional Language (11)
-                  </div>
-                  <div className="py-1">
-                    {languages.map((l) => (
-                      <button
-                        key={l.code}
-                        onClick={() => {
-                          setLang(l.code as SupportedLanguage);
-                          setLangDropdownOpen(false);
-                        }}
-                        className={`w-full text-left px-3 py-1.5 text-xs flex items-center justify-between hover:bg-slate-800 transition-colors ${
-                          lang === l.code ? 'bg-sky-950/80 text-sky-400 font-bold' : 'text-slate-300'
-                        }`}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <span>{l.flag}</span>
-                          <span>{l.nativeName} ({l.name})</span>
-                        </div>
-                        {lang === l.code && <span className="text-sky-400">✓</span>}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Quick Auth Status */}
-            {isAuthenticated && user ? (
-              <div className="hidden sm:flex items-center space-x-2 bg-slate-900/80 px-2.5 py-0.5 rounded-lg border border-slate-800 text-slate-300">
-                <img
-                  src={user.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=40'}
-                  alt={user.full_name}
-                  className="w-4 h-4 rounded-full object-cover"
-                />
-                <span className="text-[11px] font-bold text-white max-w-[120px] truncate">{user.full_name}</span>
-                <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded uppercase ${
-                  isAdmin ? 'bg-purple-950 text-purple-300 border border-purple-800' : isOfficial ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-sky-950 text-sky-400 border border-sky-800'
-                }`}>
-                  {isAdmin ? 'Admin' : isOfficial ? 'Official' : 'Citizen'}
-                </span>
-                <button
-                  onClick={logout}
-                  title="Sign Out"
-                  className="text-slate-400 hover:text-rose-400 ml-1 cursor-pointer"
-                >
-                  <LogOut className="w-3 h-3" />
-                </button>
+            <div>
+              <div className="flex items-center space-x-1.5">
+                <span className="font-extrabold text-lg tracking-tight text-white">BhoomiShield</span>
               </div>
-            ) : (
-              <Link
-                to="/login"
-                className="hidden sm:flex items-center space-x-1 text-sky-400 hover:text-sky-300 font-semibold"
-              >
-                <LogIn className="w-3.5 h-3.5" />
-                <span>{isEn ? "Sign In / Register" : "लॉग इन / रजिस्टर"}</span>
-              </Link>
-            )}
-          </div>
-        </div>
-
-        {/* Main Clean Navbar Bar */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          
-          {/* Top Left: Menu Button & Platform Logo */}
-          <div className="flex items-center space-x-3 sm:space-x-4">
-            
-            {/* 🌟 Dedicated Top-Left Menu Trigger Button */}
-            <button
-              onClick={toggleMenuDrawer}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-2 border cursor-pointer ${
-                menuDrawerOpen
-                  ? 'bg-sky-500/20 text-sky-300 border-sky-500 shadow-lg shadow-sky-500/20'
-                  : 'bg-slate-800/90 text-slate-100 border-slate-700 hover:bg-slate-750 hover:border-sky-500 shadow-sm'
-              }`}
-              title="Open All Features & Services Menu"
-            >
-              {menuDrawerOpen ? (
-                <X className="w-4 h-4 text-rose-400" />
-              ) : (
-                <Menu className="w-4 h-4 text-sky-400" />
-              )}
-              <span className="font-extrabold tracking-wide">{isEn ? "Menu" : "मेनू"}</span>
-              <span className="bg-sky-500/30 text-sky-300 text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold">
-                11+
+              <span className="text-[10px] uppercase font-bold text-sky-400 block -mt-1 tracking-wider">
+                DILRMP NATIONAL LAYER
               </span>
-            </button>
+            </div>
+          </Link>
+        </div>
 
-            {/* Platform Logo & Pan-India Badge (Cleaned - without redundant subtitle) */}
-            <Link to="/" onClick={closeMenuDrawer} className="flex items-center space-x-2.5 group">
-              <div className="p-2 bg-gradient-to-tr from-sky-600 to-indigo-600 rounded-xl shadow-lg group-hover:scale-105 transition-transform">
-                <ShieldCheck className="w-5 h-5 text-white" />
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="font-extrabold text-xl tracking-tight text-white">BhoomiShield</span>
-                <span className="text-[10px] uppercase font-bold bg-sky-500/20 text-sky-400 px-1.5 py-0.5 rounded border border-sky-500/30 flex items-center space-x-1">
-                  <Globe2 className="w-2.5 h-2.5" />
-                  <span>Pan-India V3.0</span>
-                </span>
-              </div>
-            </Link>
-          </div>
+        {/* Right Side: Land Search, My Vault, User Badge, Theme & Lang */}
+        <div className="flex items-center space-x-3 text-xs">
+          <Link
+            to="/search"
+            className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition-all font-semibold"
+          >
+            <Search className="w-4 h-4 text-sky-400" />
+            <span>Land Search</span>
+          </Link>
 
-          {/* Desktop Right Quick Actions */}
-          <div className="flex items-center space-x-2 sm:space-x-3">
-            
-            {/* Quick Overview Link */}
-            <Link
-              to="/"
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all hidden md:flex items-center space-x-1.5 ${
-                location.pathname === '/' || location.pathname === '/overview'
-                  ? 'bg-sky-600/30 text-sky-300 border border-sky-500/50'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white border border-transparent'
-              }`}
-            >
-              <Globe2 className="w-3.5 h-3.5 text-sky-400" />
-              <span>{isEn ? "Overview" : "अवलोकन"}</span>
-            </Link>
+          <Link
+            to="/vault"
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition-all font-semibold"
+          >
+            <Briefcase className="w-4 h-4 text-sky-400" />
+            <span>My Vault</span>
+          </Link>
 
-            {/* Quick Land Search Link */}
-            <Link
-              to="/search"
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all hidden md:flex items-center space-x-1.5 ${
-                location.pathname === '/search' || location.pathname === '/land-search'
-                  ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-500/50'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white border border-transparent'
-              }`}
-            >
-              <Search className="w-3.5 h-3.5 text-indigo-400" />
-              <span>{isEn ? "Land Search" : "भूमि खोज"}</span>
-            </Link>
+          {/* User Role Badge (Click opens AuthModal) */}
+          <button
+            onClick={onOpenAuthModal}
+            className="hidden lg:flex items-center space-x-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700/80 rounded-xl text-slate-200 transition-all hover:scale-105"
+            title="Click to Switch User Role / Sign In"
+          >
+            <User className="w-3.5 h-3.5 text-sky-400" />
+            <span className="font-bold">Ramesh Sharma</span>
+            <span className="text-[9px] font-extrabold bg-emerald-950 text-emerald-400 px-1.5 py-0.2 rounded border border-emerald-800 uppercase">
+              {userRole}
+            </span>
+          </button>
 
-            {/* Quick Vault Link */}
-            <Link
-              to="/vault"
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all hidden md:flex items-center space-x-1.5 ${
-                location.pathname === '/vault'
-                  ? 'bg-emerald-600/30 text-emerald-300 border border-emerald-500/50'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white border border-transparent'
-              }`}
-            >
-              <FolderLock className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{isEn ? "My Vault" : "मेरी वॉल्ट"}</span>
-            </Link>
-
-            {/* Account / Login Pill */}
-            {!isAuthenticated ? (
-              <Link
-                to="/login"
-                className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center space-x-1.5 shadow-md shadow-sky-600/20"
-              >
-                <LogIn className="w-3.5 h-3.5" />
-                <span>{isEn ? "Sign In" : "लॉग इन"}</span>
-              </Link>
+          {/* Theme Dropdown */}
+          <button
+            onClick={toggleTheme}
+            className="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-slate-200 transition-all flex items-center space-x-1 font-semibold text-xs shadow-sm"
+            title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+          >
+            {theme === 'dark' ? (
+              <>
+                <Moon className="w-4 h-4 text-sky-400" />
+                <span className="hidden md:inline">Dark Midnight</span>
+              </>
             ) : (
-              <Link
-                to="/login"
-                className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center space-x-1.5 border border-slate-700"
-                title="Switch Persona / Accounts"
-              >
-                <UserIcon className="w-3.5 h-3.5 text-sky-400" />
-                <span>Switch</span>
-              </Link>
+              <>
+                <Sun className="w-4 h-4 text-amber-400" />
+                <span className="hidden md:inline">Light Mode</span>
+              </>
             )}
-          </div>
+          </button>
+
+          {/* Language Switcher */}
+          <button
+            onClick={() => setLang(isEn ? 'hi' : 'en')}
+            className="flex items-center space-x-1 p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-slate-200 font-semibold"
+          >
+            <Languages className="w-3.5 h-3.5 text-sky-400" />
+            <span className="hidden md:inline">{isEn ? "English" : "हिंदी"}</span>
+          </button>
         </div>
-      </header>
-
-      {/* 🌟 MEGA MENU DRAWER & FEATURE MODAL (SLIDES FROM LEFT) */}
-      {menuDrawerOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex justify-start animate-in fade-in duration-200">
-          
-          {/* Backdrop Click to Close */}
-          <div className="fixed inset-0" onClick={closeMenuDrawer}></div>
-
-          {/* Slide-over Content Panel */}
-          <div className="relative w-full max-w-md bg-slate-900 border-r border-slate-800 shadow-2xl h-full flex flex-col z-10 overflow-y-auto">
-            
-            {/* Drawer Header */}
-            <div className="p-5 border-b border-slate-800 flex items-center justify-between sticky top-0 bg-slate-900/95 backdrop-blur z-20">
-              <div className="flex items-center space-x-2.5">
-                <div className="p-2 rounded-xl bg-sky-500/20 text-sky-400 border border-sky-500/30">
-                  <Grid className="w-4 h-4" />
-                </div>
-                <h2 className="text-sm font-black text-white tracking-tight uppercase">
-                  {isEn ? "Features & Services" : "सेवाएँ एवं मेनू"}
-                </h2>
-              </div>
-
-              <button
-                onClick={closeMenuDrawer}
-                className="p-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors cursor-pointer"
-                title="Close Menu"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Feature Options (Represented by Name Only) */}
-            <div className="p-5 space-y-5 flex-1">
-              
-              {/* Category 1: National Layer & Land Discovery */}
-              <div className="space-y-1.5">
-                <div className="text-[10px] font-bold text-sky-400 uppercase tracking-wider px-1 mb-1">
-                  1. National Layer & Land Discovery
-                </div>
-
-                <Link
-                  to="/"
-                  onClick={closeMenuDrawer}
-                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-sky-600/20 text-slate-200 hover:text-sky-300 border border-slate-800 hover:border-sky-500/40 transition-all font-semibold text-xs group"
-                >
-                  <div className="flex items-center space-x-2.5">
-                    <Globe2 className="w-4 h-4 text-sky-400" />
-                    <span>National Portal Overview</span>
-                  </div>
-                  <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-sky-400 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
-
-                <Link
-                  to="/search"
-                  onClick={closeMenuDrawer}
-                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-indigo-600/20 text-slate-200 hover:text-indigo-300 border border-slate-800 hover:border-indigo-500/40 transition-all font-semibold text-xs group"
-                >
-                  <div className="flex items-center space-x-2.5">
-                    <Search className="w-4 h-4 text-indigo-400" />
-                    <span>Universal Land Search</span>
-                  </div>
-                  <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
-
-                <Link
-                  to="/check-buy"
-                  onClick={closeMenuDrawer}
-                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-emerald-600/20 text-slate-200 hover:text-emerald-300 border border-slate-800 hover:border-emerald-500/40 transition-all font-semibold text-xs group"
-                >
-                  <div className="flex items-center space-x-2.5">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                    <span>Check Before You Buy</span>
-                  </div>
-                  <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
-
-                <Link
-                  to="/track-mutation"
-                  onClick={closeMenuDrawer}
-                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-amber-600/20 text-slate-200 hover:text-amber-300 border border-slate-800 hover:border-amber-500/40 transition-all font-semibold text-xs group"
-                >
-                  <div className="flex items-center space-x-2.5">
-                    <Sparkles className="w-4 h-4 text-amber-400" />
-                    <span>Live Mutation Tracker</span>
-                  </div>
-                  <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
-
-                <Link
-                  to="/valuation"
-                  onClick={closeMenuDrawer}
-                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-amber-600/20 text-slate-200 hover:text-amber-300 border border-slate-800 hover:border-amber-500/40 transition-all font-semibold text-xs group"
-                >
-                  <div className="flex items-center space-x-2.5">
-                    <Calculator className="w-4 h-4 text-amber-400" />
-                    <span>Stamp Duty & Valuation</span>
-                  </div>
-                  <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
-
-                <Link
-                  to="/verify"
-                  onClick={closeMenuDrawer}
-                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-sky-600/20 text-slate-200 hover:text-sky-300 border border-slate-800 hover:border-sky-500/40 transition-all font-semibold text-xs group"
-                >
-                  <div className="flex items-center space-x-2.5">
-                    <FileCheck className="w-4 h-4 text-sky-400" />
-                    <span>Report Verification</span>
-                  </div>
-                  <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-sky-400 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
-              </div>
-
-              {/* Category 2: Citizen Rights & Locker */}
-              <div className="space-y-1.5">
-                <div className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider px-1 mb-1">
-                  2. Citizen Locker & Legal Redressal
-                </div>
-
-                <Link
-                  to="/vault"
-                  onClick={closeMenuDrawer}
-                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-indigo-600/20 text-slate-200 hover:text-indigo-300 border border-slate-800 hover:border-indigo-500/40 transition-all font-semibold text-xs group"
-                >
-                  <div className="flex items-center space-x-2.5">
-                    <FolderLock className="w-4 h-4 text-indigo-400" />
-                    <span>My Bhoomi Vault</span>
-                  </div>
-                  <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
-
-                <Link
-                  to="/legal-advisor"
-                  onClick={closeMenuDrawer}
-                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-emerald-600/20 text-slate-200 hover:text-emerald-300 border border-slate-800 hover:border-emerald-500/40 transition-all font-semibold text-xs group"
-                >
-                  <div className="flex items-center space-x-2.5">
-                    <Scale className="w-4 h-4 text-emerald-400" />
-                    <span>AI Legal Advisor</span>
-                  </div>
-                  <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
-
-                <Link
-                  to="/complaints"
-                  onClick={closeMenuDrawer}
-                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-rose-600/20 text-slate-200 hover:text-rose-300 border border-slate-800 hover:border-rose-500/40 transition-all font-semibold text-xs group"
-                >
-                  <div className="flex items-center space-x-2.5">
-                    <ShieldAlert className="w-4 h-4 text-rose-400" />
-                    <span>Grievance Portal</span>
-                  </div>
-                  <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-rose-400 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
-              </div>
-
-              {/* Category 3: Authorized Portals */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between px-1 mb-1">
-                  <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider">
-                    3. Authorized Portals (Protected)
-                  </span>
-                  <span className="text-[9px] bg-rose-500/20 text-rose-300 border border-rose-500/30 px-1.5 py-0.2 rounded font-mono uppercase font-bold">
-                    Credentials
-                  </span>
-                </div>
-
-                <Link
-                  to="/official"
-                  onClick={closeMenuDrawer}
-                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-emerald-950/40 text-slate-200 hover:text-emerald-300 border border-slate-800 hover:border-emerald-500/40 transition-all font-semibold text-xs group"
-                >
-                  <div className="flex items-center space-x-2.5">
-                    <Landmark className="w-4 h-4 text-emerald-400" />
-                    <span>Revenue Officer Workspace</span>
-                  </div>
-                  <span className="text-[8px] font-bold px-1.5 py-0.2 rounded bg-emerald-900/80 text-emerald-300 border border-emerald-700 uppercase">
-                    Officer Gate
-                  </span>
-                </Link>
-
-                <Link
-                  to="/admin"
-                  onClick={closeMenuDrawer}
-                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-purple-950/40 text-slate-200 hover:text-purple-300 border border-slate-800 hover:border-purple-500/40 transition-all font-semibold text-xs group"
-                >
-                  <div className="flex items-center space-x-2.5">
-                    <Database className="w-4 h-4 text-purple-400" />
-                    <span>Central DB & Admin Panel</span>
-                  </div>
-                  <span className="text-[8px] font-bold px-1.5 py-0.2 rounded bg-purple-900/80 text-purple-300 border border-purple-700 uppercase">
-                    Admin Gate
-                  </span>
-                </Link>
-
-                <Link
-                  to="/login"
-                  onClick={closeMenuDrawer}
-                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-sky-950/40 text-slate-200 hover:text-sky-300 border border-slate-800 hover:border-sky-500/40 transition-all font-semibold text-xs group"
-                >
-                  <div className="flex items-center space-x-2.5">
-                    <UserCheck className="w-4 h-4 text-sky-400" />
-                    <span>Single Sign-On Gateway</span>
-                  </div>
-                  <span className="text-[8px] font-bold px-1.5 py-0.2 rounded bg-sky-900/80 text-sky-300 border border-sky-700 uppercase">
-                    Sign In / Switch
-                  </span>
-                </Link>
-              </div>
-
-              {/* Theme Selector Section in Drawer */}
-              <div className="pt-2 border-t border-slate-800/80 space-y-2">
-                <div className="flex items-center justify-between px-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1.5">
-                    <Palette className="w-3.5 h-3.5 text-sky-400" />
-                    <span>Visual Theme / दृश्य थीम</span>
-                  </span>
-                  <span className="text-[10px] text-sky-400 font-semibold">{currentThemeInfo.name}</span>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                  {themes.map((th) => (
-                    <button
-                      key={th.id}
-                      onClick={() => setTheme(th.id)}
-                      className={`p-2 rounded-xl text-xs font-semibold flex items-center justify-center space-x-1.5 border transition-all cursor-pointer ${
-                        theme === th.id
-                          ? 'bg-sky-500/20 text-sky-300 border-sky-500 shadow-sm'
-                          : 'bg-slate-800/80 hover:bg-slate-750 text-slate-300 border-slate-700'
-                      }`}
-                    >
-                      <span>{th.icon}</span>
-                      <span className="text-[11px] truncate">{th.name.split(' ')[0]}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-            </div>
-
-            {/* Drawer Footer */}
-            <div className="p-3.5 border-t border-slate-800 bg-slate-950 text-center text-[10px] text-slate-500">
-              BhoomiShield National Land Governance Platform • DILRMP Compliant
-            </div>
-
-          </div>
-        </div>
-      )}
-    </>
+      </div>
+    </header>
   );
 };
-
-

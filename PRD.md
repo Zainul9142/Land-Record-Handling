@@ -8,7 +8,7 @@
 | Attribute | Details |
 | :--- | :--- |
 | **Product Name** | **BhoomiShield** (National Land Record Handling & Governance DPI) |
-| **Document Version** | Version 3.0.0 (Production / Hackathon Ready) |
+| **Document Version** | Version 3.0.0 (Production / Deployment Ready) |
 | **Problem Statement** | Integrated GIS-Based Digital Public Infrastructure for Land Governance |
 | **Target Audience** | 1.4 Billion Indian Citizens, Property Buyers, Commercial Banks & NBFCs, Revenue Authorities, Sub-Registrars |
 | **Compliance Standards** | DILRMP (Digital India Land Records Modernization Programme), ULPIN (Bhu-Aadhaar), OGC WMS/WFS, IT Act 2000 |

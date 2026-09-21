@@ -1,6 +1,6 @@
 # BhoomiShield — Real-Time Land Record & Legal AI Intelligence Platform
 
-> **SIH (Smart India Hackathon) Innovation Layer for Jharkhand Revenue & Land Reforms Department**  
+> **BhoomiShield Pan-India Land Governance & Risk Intelligence Platform**  
 > *Verify Land Records • Detect Cross-Layer Risk • Grounded AI Legal Advice • QR Certified Verification Reports*
 
 ---
@@ -100,4 +100,4 @@ python -m app.main
 ---
 
 ## 📄 License
-This project is developed under the MIT License for Smart India Hackathon (SIH) and Jharkhand Land Governance Innovation.
+This project is developed under the MIT License for Land Governance & Revenue Records Modernization.

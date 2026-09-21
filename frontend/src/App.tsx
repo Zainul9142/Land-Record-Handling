@@ -1,77 +1,87 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import { LanguageProvider } from './context/LanguageContext';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
+import { LaunchAnimation } from './components/LaunchAnimation';
 import { Navbar } from './components/Navbar';
+import { MenuDrawer } from './components/MenuDrawer';
+import { AuthModal } from './components/AuthModal';
 import { Footer } from './components/Footer';
 import { HomePage } from './pages/HomePage';
 import { LandSearchPage } from './pages/LandSearchPage';
 import { LandProfilePage } from './pages/LandProfilePage';
 import { CheckBeforeYouBuy } from './pages/CheckBeforeYouBuy';
 import { MutationTrackerPage } from './pages/MutationTrackerPage';
+import { StampDutyCalculatorPage } from './pages/StampDutyCalculatorPage';
+import { MyBhoomiVaultPage } from './pages/MyBhoomiVaultPage';
 import { ReportVerificationPage } from './pages/ReportVerificationPage';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { LegalAdvisorPage } from './pages/LegalAdvisorPage';
 import { GrievancePage } from './pages/GrievancePage';
-import { AuthPage } from './pages/AuthPage';
-import { UserVaultPage } from './pages/UserVaultPage';
-import { OfficialWorkspacePage } from './pages/OfficialWorkspacePage';
-import { ValuationCalculatorPage } from './pages/ValuationCalculatorPage';
-import { ToastContainer, ToastMessage } from './components/Toast';
 
-export const App: React.FC = () => {
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
-
-  const showToast = (type: 'success' | 'error' | 'info', title: string, description?: string) => {
-    const id = Date.now().toString() + Math.random().toString().slice(2, 6);
-    setToasts((prev) => [...prev, { id, type, title, description }]);
-  };
-
-  const handleDismissToast = (id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
+export const AppContent: React.FC = () => {
+  const [lang, setLang] = useState<'en' | 'hi'>('en');
+  const [userRole, setUserRole] = useState<string>('CITIZEN');
+  const [showIntro, setShowIntro] = useState<boolean>(true);
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const [isAuthOpen, setIsAuthOpen] = useState<boolean>(false);
 
   return (
+    <Router>
+      {showIntro && <LaunchAnimation onComplete={() => setShowIntro(false)} />}
+      
+      <MenuDrawer
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        userRole={userRole}
+        setUserRole={setUserRole}
+        onOpenAuthModal={() => setIsAuthOpen(true)}
+      />
+
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        userRole={userRole}
+        setUserRole={setUserRole}
+      />
+
+      <div className="min-h-screen flex flex-col transition-colors duration-300 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+        <Navbar
+          lang={lang}
+          setLang={setLang}
+          userRole={userRole}
+          setUserRole={setUserRole}
+          onOpenMenuDrawer={() => setIsMenuOpen(true)}
+          onOpenAuthModal={() => setIsAuthOpen(true)}
+          onReplayIntro={() => setShowIntro(true)}
+        />
+
+        <main className="flex-1">
+          <Routes>
+            <Route path="/" element={<HomePage lang={lang} />} />
+            <Route path="/search" element={<LandSearchPage lang={lang} />} />
+            <Route path="/land/:landIdentityId" element={<LandProfilePage lang={lang} />} />
+            <Route path="/legal-advisor" element={<LegalAdvisorPage />} />
+            <Route path="/complaints" element={<GrievancePage />} />
+            <Route path="/check-buy" element={<CheckBeforeYouBuy />} />
+            <Route path="/track-mutation" element={<MutationTrackerPage />} />
+            <Route path="/track-mutation/:appNo" element={<MutationTrackerPage />} />
+            <Route path="/stamp-duty" element={<StampDutyCalculatorPage />} />
+            <Route path="/vault" element={<MyBhoomiVaultPage />} />
+            <Route path="/verify/:reportId" element={<ReportVerificationPage />} />
+            <Route path="/admin" element={<AdminDashboard userRole={userRole} />} />
+          </Routes>
+        </main>
+
+        <Footer />
+      </div>
+    </Router>
+  );
+};
+
+export const App: React.FC = () => {
+  return (
     <ThemeProvider>
-      <LanguageProvider>
-        <AuthProvider>
-          <Router>
-            <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
-              <Navbar />
-
-              <main className="flex-1">
-                <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/overview" element={<HomePage />} />
-                  <Route path="/home" element={<HomePage />} />
-                  <Route path="/search" element={<LandSearchPage onShowToast={showToast} />} />
-                  <Route path="/land-search" element={<LandSearchPage onShowToast={showToast} />} />
-                  <Route path="/land/:landIdentityId" element={<LandProfilePage onShowToast={showToast} />} />
-                  <Route path="/login" element={<AuthPage onShowToast={showToast} />} />
-                  <Route path="/register" element={<AuthPage onShowToast={showToast} />} />
-                  <Route path="/auth" element={<AuthPage onShowToast={showToast} />} />
-                  <Route path="/vault" element={<UserVaultPage onShowToast={showToast} />} />
-                  <Route path="/official" element={<OfficialWorkspacePage onShowToast={showToast} />} />
-                  <Route path="/legal-advisor" element={<LegalAdvisorPage onShowToast={showToast} />} />
-                  <Route path="/complaints" element={<GrievancePage onShowToast={showToast} />} />
-                  <Route path="/valuation" element={<ValuationCalculatorPage onShowToast={showToast} />} />
-                  <Route path="/check-buy" element={<CheckBeforeYouBuy />} />
-                  <Route path="/track-mutation" element={<MutationTrackerPage />} />
-                  <Route path="/track-mutation/:appNo" element={<MutationTrackerPage />} />
-                  <Route path="/verify" element={<ReportVerificationPage />} />
-                  <Route path="/verify/:reportId" element={<ReportVerificationPage />} />
-                  <Route path="/admin" element={<AdminDashboard onShowToast={showToast} />} />
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-              </main>
-
-              <Footer />
-              <ToastContainer toasts={toasts} onDismiss={handleDismissToast} />
-            </div>
-          </Router>
-        </AuthProvider>
-      </LanguageProvider>
+      <AppContent />
     </ThemeProvider>
   );
 };
