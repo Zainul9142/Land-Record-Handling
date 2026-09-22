@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
 import { LaunchAnimation } from './components/LaunchAnimation';
 import { Navbar } from './components/Navbar';
-import { MenuDrawer } from './components/MenuDrawer';
-import { AuthModal } from './components/AuthModal';
+
+import { AuthPage } from './pages/AuthPage';
 import { Footer } from './components/Footer';
 import { HomePage } from './pages/HomePage';
 import { LandSearchPage } from './pages/LandSearchPage';
@@ -29,34 +31,12 @@ export const AppContent: React.FC = () => {
     <Router>
       {showIntro && <LaunchAnimation onComplete={() => setShowIntro(false)} />}
       
-      <MenuDrawer
-        isOpen={isMenuOpen}
-        onClose={() => setIsMenuOpen(false)}
-        userRole={userRole}
-        setUserRole={setUserRole}
-        onOpenAuthModal={() => setIsAuthOpen(true)}
-      />
-
-      <AuthModal
-        isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
-        userRole={userRole}
-        setUserRole={setUserRole}
-      />
-
-      <div className="min-h-screen flex flex-col transition-colors duration-300 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
-        <Navbar
-          lang={lang}
-          setLang={setLang}
-          userRole={userRole}
-          setUserRole={setUserRole}
-          onOpenMenuDrawer={() => setIsMenuOpen(true)}
-          onOpenAuthModal={() => setIsAuthOpen(true)}
-          onReplayIntro={() => setShowIntro(true)}
-        />
+        <div className="min-h-screen flex flex-col transition-colors duration-300 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+          <Navbar />
 
         <main className="flex-1">
           <Routes>
+            <Route path="/login" element={<AuthPage />} />
             <Route path="/" element={<HomePage lang={lang} />} />
             <Route path="/search" element={<LandSearchPage lang={lang} />} />
             <Route path="/land/:landIdentityId" element={<LandProfilePage lang={lang} />} />
@@ -80,9 +60,13 @@ export const AppContent: React.FC = () => {
 
 export const App: React.FC = () => {
   return (
-    <ThemeProvider>
-      <AppContent />
-    </ThemeProvider>
+    <AuthProvider>
+      <LanguageProvider>
+        <ThemeProvider>
+          <AppContent />
+        </ThemeProvider>
+      </LanguageProvider>
+    </AuthProvider>
   );
 };
 
