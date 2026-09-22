@@ -37,7 +37,7 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
   en: {
     app_title: "BhoomiShield",
     app_tagline: "All India Real-time Land Records & Legal Risk AI",
-    national_layer: "Digital India Land Records Modernization Programme (DILRMP) • 28 States & 8 UTs National Layer",
+    national_layer: "Digital India Land Records Modernization Programme • 28 States & 8 UTs National Layer",
     search_land: "Search Land",
     my_vault: "My Bhoomi Vault",
     official_desk: "Official Desk",
@@ -47,7 +47,7 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     national_dashboard: "National Dashboard",
     login: "Login / Register",
     switch_persona: "Switch Persona",
-    hero_title: "Digital India Land Records Modernization Programme (DILRMP)",
+    hero_title: "Digital India Land Records",
     hero_subtitle: "Instant unified access to 7/12 Extracts, Khatauni RoR, RTC Pahani, Patta Chitta, and AI mutation fraud prevention across all 28 Indian States & 8 UTs.",
     search_by_gps: "📍 GPS Location & Cadastral Map Search",
     search_by_id: "🔍 Search by Land Identity ID",

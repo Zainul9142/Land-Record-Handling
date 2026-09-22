@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -19,38 +21,50 @@
 
   body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
 
-/* Custom Keyframe Animations */
-@keyframes scanline {
-  0% { top: 0%; }
-  100% { top: 100%; }
+/* Light Govt Pearl Theme Overrides */
+html.theme-light body {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+html.theme-light .dark\:bg-slate-950,
+html.theme-light .dark\:bg-slate-900 {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+html.theme-light .dark\:bg-slate-800,
+html.theme-light .dark\:bg-slate-800\/80,
+html.theme-light .dark\:bg-slate-800\/90 {
+  background-color: #f1f5f9 !important;
+  color: #1e293b !important;
+}
+html.theme-light .dark\:border-slate-800,
+html.theme-light .dark\:border-slate-700 {
+  border-color: #cbd5e1 !important;
+}
+html.theme-light .dark\:text-white,
+html.theme-light .dark\:text-slate-100 {
+  color: #0f172a !important;
+}
+html.theme-light .dark\:text-slate-400 {
+  color: #64748b !important;
 }
 
-@keyframes pulseGlow {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.05); }
+/* Emerald Bhoomi Vedic Forest Theme */
+html.theme-emerald {
+  --primary-glow: #10b981;
 }
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
+html.theme-emerald body {
+  background-color: #022c22;
 }
-
-@keyframes slideUpFade {
-  0% { opacity: 0; transform: translateY(12px); }
-  100% { opacity: 1; transform: translateY(0); }
+html.theme-emerald .bg-slate-950 {
+  background-color: #022c22 !important;
 }
-
-@keyframes typingWave {
-  0%, 60%, 100% { transform: translateY(0); }
-  30% { transform: translateY(-5px); }
-}
-
-.animate-scanline {
-  animation: scanline 2.2s linear infinite;
+html.theme-emerald .bg-slate-900,
+html.theme-emerald .dark\:bg-slate-900 {
+  background-color: #064e3b !important;
 }
 
 .animate-pulse-glow {
